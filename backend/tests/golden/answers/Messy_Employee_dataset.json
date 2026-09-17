@@ -1,0 +1,228 @@
+[
+  {
+    "question": "How many different \"Phone\" values are there?",
+    "before": 1020.0,
+    "after": 928.0,
+    "changed": true,
+    "impact": 0.0361
+  },
+  {
+    "question": "How many rows are there?",
+    "before": 1020.0,
+    "after": 1020.0,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many different \"Employee_ID\" values are there?",
+    "before": 1020.0,
+    "after": 1020.0,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Salary\"?",
+    "before": 85155.0564,
+    "after": 85155.0564,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"Salary\"?",
+    "before": 84814436.17,
+    "after": 84814436.17,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Age\"?",
+    "before": 32.4845,
+    "after": 32.4845,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"Age\"?",
+    "before": 26280.0,
+    "after": 26280.0,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many rows are there for each \"First_Name\"?",
+    "before": {
+      "frank": 142.0,
+      "grace": 140.0,
+      "eva": 136.0,
+      "bob": 133.0,
+      "charlie": 125.0,
+      "alice": 117.0,
+      "david": 116.0,
+      "heidi": 111.0
+    },
+    "after": {
+      "frank": 142.0,
+      "grace": 140.0,
+      "eva": 136.0,
+      "bob": 133.0,
+      "charlie": 125.0,
+      "alice": 117.0,
+      "david": 116.0,
+      "heidi": 111.0
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many rows are there for each \"Last_Name\"?",
+    "before": {
+      "brown": 148.0,
+      "garcia": 136.0,
+      "smith": 136.0,
+      "jones": 131.0,
+      "davis": 120.0,
+      "johnson": 118.0,
+      "miller": 116.0,
+      "williams": 115.0
+    },
+    "after": {
+      "brown": 148.0,
+      "garcia": 136.0,
+      "smith": 136.0,
+      "jones": 131.0,
+      "davis": 120.0,
+      "johnson": 118.0,
+      "miller": 116.0,
+      "williams": 115.0
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many rows are there for each \"Status\"?",
+    "before": {
+      "pending": 356.0,
+      "active": 352.0,
+      "inactive": 312.0
+    },
+    "after": {
+      "pending": 356.0,
+      "active": 352.0,
+      "inactive": 312.0
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"First_Name\"?",
+    "before": {
+      "frank": 86570.1165,
+      "grace": 83841.7028,
+      "eva": 83596.7003,
+      "bob": 88182.8415,
+      "charlie": 85922.7769,
+      "alice": 84366.6544,
+      "david": 84751.6801,
+      "heidi": 83562.9165
+    },
+    "after": {
+      "frank": 86570.1165,
+      "grace": 83841.7028,
+      "eva": 83596.7003,
+      "bob": 88182.8415,
+      "charlie": 85922.7769,
+      "alice": 84366.6544,
+      "david": 84751.6801,
+      "heidi": 83562.9165
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Last_Name\"?",
+    "before": {
+      "brown": 87167.4138,
+      "garcia": 83465.0563,
+      "smith": 84099.7004,
+      "jones": 82532.5416,
+      "davis": 82532.0477,
+      "johnson": 87441.4951,
+      "miller": 88559.386,
+      "williams": 85891.6493
+    },
+    "after": {
+      "brown": 87167.4138,
+      "garcia": 83465.0563,
+      "smith": 84099.7004,
+      "jones": 82532.5416,
+      "davis": 82532.0477,
+      "johnson": 87441.4951,
+      "miller": 88559.386,
+      "williams": 85891.6493
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many rows are there for each \"Performance_Score\"?",
+    "before": {
+      "good": 270.0,
+      "average": 267.0,
+      "excellent": 267.0,
+      "poor": 216.0
+    },
+    "after": {
+      "good": 270.0,
+      "average": 267.0,
+      "excellent": 267.0,
+      "poor": 216.0
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many rows are there each year, by \"Join_Date\"?",
+    "before": {
+      "2020": 203.0,
+      "2021": 189.0,
+      "2022": 183.0,
+      "2023": 228.0,
+      "2024": 217.0
+    },
+    "after": {
+      "2020": 203.0,
+      "2021": 189.0,
+      "2022": 183.0,
+      "2023": 228.0,
+      "2024": 217.0
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Salary\" each year, by \"Join_Date\"?",
+    "before": {
+      "2020": 85702.9702,
+      "2021": 85580.8192,
+      "2022": 85288.7189,
+      "2023": 83245.1305,
+      "2024": 86088.1453
+    },
+    "after": {
+      "2020": 85702.9702,
+      "2021": 85580.8192,
+      "2022": 85288.7189,
+      "2023": 83245.1305,
+      "2024": 86088.1453
+    },
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many different \"Email\" values are there?",
+    "before": 64.0,
+    "after": 64.0,
+    "changed": false,
+    "impact": 0.0
+  }
+]

@@ -10,3 +10,6 @@ Out-of-scope ideas for "if I had more time". Not planned work.
 - **Smarter default for unusual values.** Out-of-range issues currently recommend "Keep them"; revisit using context (how extreme, how many, whether the column has a natural range).
 - **Date range checks.** Flag dates before 1900 or in the future; needs a date-aware range condition for set aside / clear.
 - **Out-of-range for percentages below 0** and other domain-free bounds (e.g. ages over 120 are only detectable as "far from the rest" today).
+- **Revisit the question cap** (16 today): check on wider files whether more questions help or clutter.
+- **Currency in "before".** Excel turns "$85,000" into a number when opening a CSV; "before" currently follows CLAUDE.md and leaves it out. Reconsider matching Excel.
+- **Drop meaningless totals** (e.g. total Age) — likely via AI wording in M8 or a rule for low-variety whole numbers.
