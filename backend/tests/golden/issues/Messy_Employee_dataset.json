@@ -1,0 +1,83 @@
+[
+  {
+    "detector": "identifier_repeats",
+    "columns": [
+      "Email"
+    ],
+    "tier": "ask",
+    "affected_rows": 1020,
+    "recommended": "No, sharing is fine"
+  },
+  {
+    "detector": "combined_columns",
+    "columns": [
+      "Department_Region"
+    ],
+    "tier": "likely",
+    "affected_rows": 1020,
+    "recommended": null
+  },
+  {
+    "detector": "contact_formats",
+    "columns": [
+      "Phone"
+    ],
+    "tier": "likely",
+    "affected_rows": 1020,
+    "recommended": null
+  },
+  {
+    "detector": "dates",
+    "columns": [
+      "Join_Date"
+    ],
+    "tier": "safe",
+    "affected_rows": 1020,
+    "recommended": null
+  },
+  {
+    "detector": "missing_values",
+    "columns": [
+      "Age"
+    ],
+    "tier": "ask",
+    "affected_rows": 211,
+    "recommended": "Leave them blank"
+  },
+  {
+    "detector": "contact_formats",
+    "columns": [
+      "Phone"
+    ],
+    "tier": "ask",
+    "affected_rows": 92,
+    "recommended": "Clear them"
+  },
+  {
+    "detector": "placeholders",
+    "columns": [
+      "Salary"
+    ],
+    "tier": "ask",
+    "affected_rows": 24,
+    "recommended": "Missing"
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Age"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Salary"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  }
+]

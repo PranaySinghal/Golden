@@ -18,7 +18,7 @@ from app.profile.models import ColumnFlag, DatasetProfile
 from app.profile.profiler import profile_table
 from tests.conftest import GOLDEN_DIR, SAMPLES_DIR, load
 
-SAMPLES = ["Messy_Employee_dataset", "store_orders"]
+SAMPLES = ["Messy_Employee_dataset", "store_orders", "Messy_Employee_dataset_messier"]
 JARGON = re.compile(
     r"\b(null|nan|varchar|string|dtype|regex|cardinality|semantic|schema|parse|boolean"
     r"|column type|data type|duplicate rows)\b",

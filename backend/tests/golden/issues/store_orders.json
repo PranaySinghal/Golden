@@ -1,0 +1,92 @@
+[
+  {
+    "detector": "dates",
+    "columns": [
+      "Order Date"
+    ],
+    "tier": "safe",
+    "affected_rows": 64,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Discount"
+    ],
+    "tier": "safe",
+    "affected_rows": 64,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Unit Price"
+    ],
+    "tier": "safe",
+    "affected_rows": 60,
+    "recommended": null
+  },
+  {
+    "detector": "identifier_repeats",
+    "columns": [
+      "Contact Phone"
+    ],
+    "tier": "ask",
+    "affected_rows": 43,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Paid"
+    ],
+    "tier": "safe",
+    "affected_rows": 15,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Product Category"
+    ],
+    "tier": "safe",
+    "affected_rows": 9,
+    "recommended": null
+  },
+  {
+    "detector": "missing_values",
+    "columns": [
+      "Unit Price"
+    ],
+    "tier": "ask",
+    "affected_rows": 4,
+    "recommended": "Leave them blank"
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Product Category"
+    ],
+    "tier": "likely",
+    "affected_rows": 4,
+    "recommended": null
+  },
+  {
+    "detector": "extra_spaces",
+    "columns": [
+      "Product Category"
+    ],
+    "tier": "safe",
+    "affected_rows": 3,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Qty"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  }
+]

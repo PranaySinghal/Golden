@@ -146,12 +146,15 @@ def test_dedupe_keep_last(make_dataset: MakeDataset) -> None:
     assert "a later row" in str(ds.set_aside()[0][2])
 
 
-def test_dedupe_treats_blanks_as_equal(make_dataset: MakeDataset) -> None:
-    ds = make_dataset("k,v\n,1\n,2\nz,3\n")
+def test_dedupe_never_treats_blank_keys_as_repeats(make_dataset: MakeDataset) -> None:
+    ds = make_dataset("k,j,v\n,,1\n  ,,2\nz,,3\nz,,4\n,x,5\n,x,6\n")
 
     ds.apply(DedupeStep(columns=["k"]))
+    assert ds.row_ids() == [1, 2, 3, 5, 6]
 
-    assert ds.row_ids() == [1, 3]
+    # With several columns, a row only escapes when every compared value is blank.
+    ds.apply(DedupeStep(columns=["k", "j"]))
+    assert ds.row_ids() == [1, 2, 3, 5]
 
 
 def test_dedupe_keeps_rows_the_user_chose_to_keep(make_dataset: MakeDataset) -> None:

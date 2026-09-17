@@ -1,6 +1,7 @@
 import hashlib
 import io
 from collections.abc import Callable, Iterator, Sequence
+from datetime import date
 from pathlib import Path
 
 import duckdb
@@ -18,6 +19,8 @@ from app.db import (
     raw_db_path,
     remove_workspace,
 )
+from app.detectors.models import Issue
+from app.detectors.registry import detect_issues
 from app.ingest.loader import ingest_to_file
 from app.ingest.models import IngestOptions, IngestResult
 from app.profile.models import ColumnProfile
@@ -30,6 +33,8 @@ from app.steps.schema import base_schema
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SAMPLES_DIR = REPO_ROOT / "data" / "samples"
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
+# Detection takes "today" as input so date checks don't drift as time passes.
+TODAY = date(2026, 9, 16)
 
 _workspaces: list[Path] = []
 
@@ -155,6 +160,10 @@ class Dataset:
             "SELECT row_id, column_name, step_id, before, after, kind FROM work.changes "
             "ORDER BY step_index, row_id, column_name"
         ).fetchall()
+
+    def issues(self, detector: str | None = None) -> list[Issue]:
+        found = detect_issues(self.conn, self.profile, TODAY)
+        return [i for i in found if detector is None or i.detector.value == detector]
 
     def raw_fingerprint(self) -> str:
         rows = self.conn.execute(f"SELECT * FROM {RAW_REF} ORDER BY _row_id").fetchall()
