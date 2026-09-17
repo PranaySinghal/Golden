@@ -1,0 +1,17 @@
+{
+  "row_count": 64,
+  "columns": {
+    "Order No": {"role": "identifier", "physical_type": "integer", "flags": []},
+    "Order Date": {"role": "date", "physical_type": "date", "flags": [], "min": "2024-01-10", "max": "2025-12-11"},
+    "Customer": {"role": "text", "physical_type": "text", "flags": []},
+    "Contact Phone": {"role": "contact", "physical_type": "text", "flags": ["low_uniqueness"]},
+    "Postcode": {"role": "category", "physical_type": "integer", "flags": []},
+    "Product Category": {"role": "category", "physical_type": "text", "flags": []},
+    "Qty": {"role": "measure", "physical_type": "integer", "flags": []},
+    "Unit Price": {"role": "measure", "physical_type": "decimal", "flags": [], "patterns": {"currency": null}},
+    "Discount": {"role": "measure", "physical_type": "integer", "flags": [], "patterns": {"percent": null}},
+    "Paid": {"role": "category", "physical_type": "boolean", "flags": []},
+    "Notes": {"role": "text", "physical_type": "text", "flags": ["mostly_blank"]}
+  },
+  "anonymized_overrides": {}
+}

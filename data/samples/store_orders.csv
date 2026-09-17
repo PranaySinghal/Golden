@@ -1,0 +1,65 @@
+Order No,Order Date,Customer,Contact Phone,Postcode,Product Category,Qty,Unit Price,Discount,Paid,Notes
+100001,28/09/2024,Priya Nair,(879) 243-6266,02139,books,1,$44.56,0%,Yes,
+100002,08/02/2024,Liam O'Brien,(878) 786-9881,94103,Books,1,$6.83,0%,yes,"Paid by bank transfer (Mon, ref 446)"
+100003,10/01/2024,Sofia Alvarez,717-447-9665,60614,Toys,1,$79.36,10%,No,
+100004,16/04/2024,Liam O'Brien,(878) 786-9881,94103,Sports,4,$817.15,0%,yes,
+100005,23/03/2024,Amara Okafor,+44 20 7752 9201,94103,Electronics,3,"$1,112.07",0%,No,
+100006,16/07/2025,Liam O'Brien,(878) 786-9881,94103,Books,1,$57.85,0%,Yes,
+100007,22/03/2025,Hana Suzuki,(647) 475-8856,07302,books,3,$42.85,20%,yes,
+100008,23/05/2025,Chloe Martin,627-743-6636,02139,Home and Garden,3,$232.72,15%,Yes,
+100009,21/06/2025,Chloe Martin,627-743-6636,02139,electronics ,5,$449.92,0%,Yes,
+100010,20/06/2025,Marcus Chen,+44 20 7891 1778,10001,Sports,10,$541.17,0%,Yes,
+100011,15/08/2025,Grace Kim,+44 20 7808 2985,30301,Sports,5,$443.86,0%,Yes,"Gift wrap requested (Wed, ref 930)"
+100012,18/02/2024,Ethan Walker,688-811-4918,07302,Books,10,$30.59,0%,Yes,
+100013,22/04/2025,Noah Fischer,748-448-4072,02139,electronics ,2,,0%,Yes,
+100014,13/09/2025,Lucas Silva,+44 20 7031 1238,02134,Sports,1,$573.95,15%,No,
+100015,18/09/2025,Maya Patel,574-225-5314,60614,Electronics,1,$119.92,5%,Yes,"Customer called about delivery time (Thu, ref 413)"
+100016,08/10/2025,Jonas Berg,(466) 616-9959,02134,Electronics,2,$498.54,0%,Yes,
+100017,08/07/2025,Ivy Thompson,+44 20 7457 8747,94103,Electronics,2,"$1,381.21",0%,Yes,
+100018,27/08/2024,Omar Haddad,+44 20 7464 6747,07302,electronics ,5,$933.14,0%,Yes,
+100019,23/01/2025,Elena Petrova,(320) 254-9443,94103,Electronics,1,"$1,564.92",5%,Yes,
+100020,27/12/2024,Sam Carter,+44 20 7220 4593,94103,Books,3,$14.83,5%,yes,
+100021,28/06/2024,Omar Haddad,+44 20 7464 6747,07302,Books,1,$23.34,20%,Yes,
+100022,17/06/2025,Theo Laurent,(297) 277-5582,30301,Home & Garden,2,$376.61,5%,Yes,
+100023,02/11/2025,Aisha Bello,+44 20 7227 1927,07302,Home & Garden,1,$323.36,15%,Yes,
+100024,17/02/2024,Ben Foster,371-691-2717,30301,Sports,4,$842.02,0%,No,
+100025,27/04/2024,Lena Wagner,(209) 258-5794,60614,ELECTRONICS,3,$792.85,0%,Yes,
+100026,03/07/2024,Omar Haddad,+44 20 7464 6747,07302,Electronics,2,$768.83,0%,No,"Customer called about delivery time (Thu, ref 204)"
+100027,23/11/2025,Mei Lin,758-954-7334,60614,Electronics,2,"$1,262.74",0%,yes,
+100028,01/01/2025,Oscar Diaz,(403) 649-6302,02139,Home & Garden,1,,15%,No,"Replacement for a damaged item (Fri, ref 510)"
+100029,24/02/2024,Ruby Evans,+44 20 7668 7545,60614,Home & Garden,1,$75.54,15%,No,
+100030,04/05/2024,Omar Haddad,+44 20 7464 6747,07302,Toys,10,$103.27,0%,Yes,"Customer called about delivery time (Mon, ref 983)"
+100031,17/10/2024,Clara Jensen,(921) 383-0415,02134,Books,2,$26.65,0%,No,
+100032,21/06/2025,Arjun Mehta,+44 20 7560 7952,02139,Toys,2,$85.01,0%,Yes,
+100033,06/05/2025,Freya Scott,472-960-3261,10001,Home and Garden,2,$313.41,20%,Yes,
+100034,15/09/2025,Hugo Moreau,(837) 878-2916,02134,Toys,10,$14.14,0%,No,
+100035,18/12/2024,Isla Murray,+44 20 7119 6473,94103,Home and Garden,2,$342.83,0%,yes,
+100036,08/12/2025,Jack Turner,339-487-7407,02134,Toys,2,$92.63,20%,yes,
+100037,12/10/2024,Kira Novak,(728) 961-5067,07302,Home & Garden,1,$248.41,10%,No,"Customer called about delivery time (Thu, ref 968)"
+100038,18/03/2025,Leo Ricci,+44 20 7870 6499,60614,Home and Garden,1,$182.98,10%,Yes,
+100039,27/03/2024,Priya Nair,(879) 243-6266,02139,Electronics,4,$654.32,20%,yes,
+100040,21/10/2025,Marcus Chen,+44 20 7891 1778,10001,Electronics,2,$504.01,20%,No,
+100041,24/06/2024,Sofia Alvarez,717-447-9665,60614,Home & Garden,10,$340.01,10%,Yes,
+100042,28/03/2025,Liam O'Brien,(878) 786-9881,94103,Books,5,$44.58,5%,Yes,
+100043,22/05/2025,Amara Okafor,+44 20 7752 9201,94103,Electronics,1,,0%,Yes,
+100044,28/11/2025,Chloe Martin,627-743-6636,02139,Sports,4,$428.15,0%,Yes,
+100045,11/12/2025,Ethan Walker,688-811-4918,07302,Books,4,$13.87,20%,yes,
+100046,28/08/2024,Hana Suzuki,(647) 475-8856,07302,Sports,2,$104.22,10%,yes,
+100047,18/12/2024,Amara Okafor,+44 20 7752 9201,94103,Books,10,$39.25,15%,yes,
+100048,26/06/2024,Diego Rossi,(967) 696-0757,30301,Electronics,2,"$1,829.78",10%,Yes,
+100049,24/08/2024,Grace Kim,+44 20 7808 2985,30301,Electronics,1,,0%,No,
+100050,21/10/2025,Ethan Walker,688-811-4918,07302,Books,4,$8.68,0%,Yes,"Customer called about delivery time (Mon, ref 380)"
+100051,23/09/2024,Zara Ahmed,(743) 930-7850,02139,Home & Garden,2,$140.65,20%,yes,
+100052,15/07/2025,Liam O'Brien,(878) 786-9881,94103,Books,1,$47.39,0%,Yes,
+100053,17/05/2024,Maya Patel,574-225-5314,60614,Toys,5,$95.22,10%,yes,
+100054,18/05/2025,Marcus Chen,+44 20 7891 1778,10001,Home & Garden,5,$223.30,0%,Yes,"Customer called about delivery time (Wed, ref 537)"
+100055,13/06/2025,Ivy Thompson,+44 20 7457 8747,94103,Books,3,$36.69,10%,Yes,"Leave at the side door (Tue, ref 108)"
+100056,10/02/2024,Ravi Iyer,511-919-2000,94103,Home & Garden,2,$378.25,0%,Yes,
+100057,19/11/2025,Elena Petrova,(320) 254-9443,94103,books,1,$18.72,0%,Yes,"Replacement for a damaged item (Wed, ref 731)"
+100058,09/02/2024,Ethan Walker,688-811-4918,07302,books,2,$46.40,0%,yes,
+100059,09/11/2025,Nina Kowalski,706-332-0290,94103,Books,10,$10.34,0%,Yes,"Replacement for a damaged item (Mon, ref 409)"
+100060,25/07/2024,Chloe Martin,627-743-6636,02139,books,10,$35.61,10%,Yes,
+100061,12/10/2025,Sofia Alvarez,717-447-9665,60614,Toys,10,$115.05,0%,No,
+100062,13/04/2024,Ben Foster,371-691-2717,30301,Sports,5,$226.75,10%,Yes,
+100063,19/08/2024,Lena Wagner,(209) 258-5794,60614,Electronics,5,$505.96,20%,No,
+100064,20/11/2025,Liam O'Brien,(878) 786-9881,94103,Books,1,$19.03,0%,yes,
