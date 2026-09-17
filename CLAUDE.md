@@ -1,5 +1,5 @@
 # CLAUDE.md
-
+The build roadmap is in docs/PLAN.md. Read it before any task.
 Project instructions for Claude Code. Read this fully before any task.
 The human owner makes the product decisions. Your job is to implement them well,
 not to redirect the product. If you disagree with a decision, say so and wait.
