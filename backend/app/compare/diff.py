@@ -28,7 +28,19 @@ def diff_answers(question: Question, before: Answer, after: Answer) -> AnswerDif
         return _scalar_diff(question, before, after)
     groups = diff_groups(question, before.groups, after.groups)
     changed = before.answerable != after.answerable or any(g.status != "same" for g in groups)
-    return AnswerDiff(question=question, before=before, after=after, changed=changed, groups=groups)
+    return AnswerDiff(
+        question=question,
+        before=before,
+        after=after,
+        changed=changed,
+        groups=groups,
+        unlocked=unlocked(before, after),
+    )
+
+
+def unlocked(before: Answer, after: Answer) -> bool:
+    """The raw file couldn't answer this at all, and the cleaned one can."""
+    return not before.answerable and after.answerable
 
 
 def _scalar_diff(question: Question, before: Answer, after: Answer) -> AnswerDiff:
@@ -46,6 +58,7 @@ def _scalar_diff(question: Question, before: Answer, after: Answer) -> AnswerDif
         changed=changed,
         change=change,
         relative_change=relative(before.value, after.value) if both else None,
+        unlocked=unlocked(before, after),
     )
 
 

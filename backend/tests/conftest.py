@@ -8,6 +8,7 @@ import duckdb
 import pytest
 from openpyxl import Workbook
 
+from app.compare.engine import ComparisonEngine
 from app.config import Settings
 from app.db import (
     RAW_REF,
@@ -26,6 +27,7 @@ from app.ingest.models import IngestOptions, IngestResult
 from app.profile.models import ColumnProfile
 from app.profile.profiler import profile_column, profile_table
 from app.profile.stats import ColumnStats, compute_column_stats, count_rows
+from app.questions.models import Question
 from app.steps.apply import ApplyResult, apply_recipe
 from app.steps.models import Recipe, Step
 from app.steps.schema import base_schema
@@ -128,6 +130,11 @@ class Dataset:
         self.profile = profile_table(conn)
         self.base = base_schema(self.profile)
         self.result: ApplyResult | None = None
+
+    def engine(
+        self, questions: list[Question] | None = None, settings: Settings | None = None
+    ) -> ComparisonEngine:
+        return ComparisonEngine(self.conn, self.profile, settings=settings, questions=questions)
 
     def apply(self, *steps: Step, lineage: bool = True) -> ApplyResult:
         return self.apply_recipe(Recipe(steps=list(steps)), lineage=lineage)

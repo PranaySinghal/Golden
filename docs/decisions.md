@@ -294,3 +294,80 @@ touches the user's cleaned table. Worked example: "N/A" in Salary scores 0.0188
 Python. Answers are cached by (reading key, question id): "before" once per
 dataset, "after" per recipe fingerprint. A 300k-row file answers all questions
 well within the test's limit.
+
+---
+
+## 2026-09-17 · M5 · Attribution, unlocked questions, fast recompute
+
+**Attribution is measured, not guessed.** For each answer that moved, the
+recipe is re-run with one step turned off at a time; a step is credited when
+the answer moves without it, and its contribution is how far the answer goes
+back (the M4 magnitude, so it's comparable across questions). Turning a step
+off also blocks the steps that depended on it, so a step is credited for what
+its dependents did. Unchanged answers get no attribution at all
+(`attribution_method: "none"`, owner decision): nothing moved, so there's
+nothing to explain, and no queries are spent.
+
+**Influence pass** (pure, no queries). A forward pass over the plan records
+which columns each step had a hand in: the columns it writes, creates or drops,
+plus everything the steps it reads from touched. A step that removes rows, or
+feeds one that does, is marked as reaching every question, because row counts
+move totals and averages everywhere. Only these steps are ever re-run for a
+question. It errs towards including a step: a needless check costs one query,
+while a missing one would credit the wrong step.
+
+**Steps that only matter together.** When no single step explains a change, all
+the relevant steps are turned off at once; if that moves the answer, and there
+are 6 or fewer of them, each pair is checked and the pairs that move it are
+reported with `together: true`. Example: trimming spaces and merging spellings
+both fold "Active " into "Active", so neither matters alone. Beyond 6 steps the
+whole set is reported as one group (see ideas.md — naming the smallest set
+would read better).
+
+**Cost.** Attribution is capped at 300 questions per comparison
+(`MAX_ATTRIBUTION_QUERIES`). Questions are explained from the highest impact
+down; a question that doesn't fit the cap falls back to `"estimated"`, listing
+the steps that could have moved it (always a superset of the exact answer). The
+cap is charged whether or not an answer is cached, so a comparison explains the
+same things no matter what ran before it.
+
+**Variant rows are built once.** Running a recipe's chain of steps costs far
+more than an aggregate over its result (94 ms vs 1 ms on the messier sample), so
+attribution works one variant at a time: build that variant's rows, ask every
+question that needs them, move on. This took the messier file from 33 s to
+1.9 s. These are the engine's own scratch tables, dropped at the end; the
+cleaned table a user exports is still built from the recipe they kept.
+
+**Answer key.** Answers are cached by (what the rows look like, question id).
+The key hashes the base column names and the content of the applied steps in
+order, excluding step ids and enabled flags, so a disabled step, a step that was
+never added, and a re-added identical step all share answers. The apply
+fingerprint still includes ids, because the change log records them.
+
+**Unlocked questions.** A question is unlocked when the raw file can't answer it
+at all and the cleaned one can. Columns the recipe created or retyped are
+profiled from the cleaned rows (stored as text, so file rules apply), the
+ordinary generator runs over them, and candidates are kept only if "before"
+really can't answer them — so a question that merely moved is never dressed up
+as a new one. Capped at 6, shown separately from changed answers. Examples:
+splitting Department_Region unlocks headcount by Department and by Region;
+"$1,299.00" read as a number unlocks the total Unit Price; store orders' Order
+Date trend stays a changed answer, because some of those dates already read.
+
+**Recompute.** Changing an ask-tier choice carries over every answer and
+attribution the changed steps can't reach — matched by what steps do, not by
+their ids, since each choice carries its own step objects — and only the
+affected questions are asked again. The unlocked list is rebuilt only when a
+changed step has a hand in a created or retyped column or removes rows.
+Switching back to a previous choice costs nothing. A recomputed comparison
+gives what a fresh one would, to the precision the app treats as real: adding
+the same doubles in a different order can move the last bit.
+
+**Contract additions** (owner approved): `StepContribution`,
+`AnswerDiff.attribution_detail` and `.attribution_method`, `Question.origin`,
+and `Comparison` (recipe, key, diffs, queries run, questions recomputed).
+`AnswerDiff.unlocked` is now filled in.
+
+**Small changes elsewhere.** Column stats and question generation take the table
+to read, defaulting to the raw table, so the cleaned rows can be profiled the
+same way. No new dependencies.

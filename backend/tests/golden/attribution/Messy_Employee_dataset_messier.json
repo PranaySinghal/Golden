@@ -1,0 +1,392 @@
+[
+  {
+    "question": "How many rows are there for each \"Department\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Region\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Department\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      },
+      {
+        "steps": [
+          "cast_number(Salary)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Region\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      },
+      {
+        "steps": [
+          "cast_number(Salary)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the total \"Salary\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Salary)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"First_Name\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Salary)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many different \"Phone\" values are there?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "clear_values(Phone)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"First_Name\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Status\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Last_Name\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Salary)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Performance_Score\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Last_Name\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "What's the total \"Age\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Age)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there each year, by \"Join_Date\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "parse_date(Join_Date)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\"?",
+    "unlocked": false,
+    "method": "estimated",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" each year, by \"Join_Date\"?",
+    "unlocked": false,
+    "method": "estimated",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Age\"?",
+    "unlocked": false,
+    "method": "estimated",
+    "caused_by": [
+      {
+        "steps": [
+          "remove_characters(Phone)",
+          "trim(First_Name, Last_Name, Department_Region, Status, Performance_Score, Remote_Work)",
+          "null_placeholders(Age)",
+          "null_placeholders(Salary)",
+          "map_values(First_Name)",
+          "map_values(Department_Region)",
+          "map_values(Status)",
+          "map_values(Performance_Score)",
+          "map_values(Last_Name)",
+          "map_values(Remote_Work)",
+          "split_column(Department_Region)",
+          "parse_date(Join_Date)",
+          "cast_number(Salary)",
+          "cast_number(Age)",
+          "clear_values(Phone)",
+          "dedupe(Employee_ID)",
+          "dedupe(Phone)",
+          "dedupe()",
+          "dedupe()"
+        ],
+        "together": true
+      }
+    ]
+  }
+]

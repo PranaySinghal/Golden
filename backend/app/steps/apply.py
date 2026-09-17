@@ -129,6 +129,26 @@ def fingerprint(plan: RecipePlan, recipe: Recipe) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+def answer_key(plan: RecipePlan, recipe: Recipe) -> str:
+    """What the rows will look like, ignoring which step objects produced them.
+
+    Unlike `fingerprint`, this leaves out step ids and enabled flags, so recipes
+    that apply the same changes in the same order share cached answers: turning
+    off a step that was blocked anyway, re-adding an identical step, or a
+    leave-one-out variant that matches another variant.
+    """
+    applied = {stage.compiled.step_id for stage in plan.stages}
+    payload = {
+        "base": plan.base.names(),
+        "steps": [
+            step.model_dump(mode="json", exclude={"id", "enabled"})
+            for step in recipe.steps
+            if step.id in applied
+        ],
+    }
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
 def apply_recipe(
     conn: duckdb.DuckDBPyConnection,
     recipe: Recipe,

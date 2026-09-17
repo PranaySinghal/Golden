@@ -34,6 +34,9 @@ class Question(BaseModel):
     label: str
     # How headline the question is, from 0 to 1; weights impact.
     prominence: float = Field(ge=0, le=1)
+    # "unlocked": the question only became askable once cleaning created or
+    # retyped a column, so it isn't in the list generated from the raw file.
+    origin: Literal["profile", "unlocked"] = "profile"
 
     @model_validator(mode="after")
     def _valid_spec(self) -> Self:
@@ -88,6 +91,15 @@ class GroupDiff(BaseModel):
     relative_change: float | None = None
 
 
+class StepContribution(BaseModel):
+    """Steps that moved one answer, and how far the answer goes back without them."""
+
+    step_ids: list[str]
+    # True when no single one of these steps moves the answer on its own.
+    together: bool = False
+    contribution: float = 0.0
+
+
 class AnswerDiff(BaseModel):
     question: Question
     before: Answer
@@ -98,5 +110,10 @@ class AnswerDiff(BaseModel):
     groups: list[GroupDiff] = Field(default_factory=list)
     magnitude: float = 0.0
     impact: float = 0.0
+    # Every step involved, most important first; the union of attribution_detail.
     attribution: list[str] = Field(default_factory=list)
+    attribution_detail: list[StepContribution] = Field(default_factory=list)
+    # "exact": measured by re-running. "estimated": from which steps could
+    # matter, when the query budget ran out. "none": the answer didn't change.
+    attribution_method: Literal["exact", "estimated", "none"] = "none"
     unlocked: bool = False

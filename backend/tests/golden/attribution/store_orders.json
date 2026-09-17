@@ -1,0 +1,106 @@
+[
+  {
+    "question": "What's the average \"Discount\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Discount)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Unit Price\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Unit Price)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the total \"Unit Price\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Unit Price)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the total \"Discount\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "cast_number(Discount)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Qty\" each month, by \"Order Date\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "parse_date(Order Date)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there each month, by \"Order Date\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "parse_date(Order Date)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Qty\" for each \"Product Category\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "map_values(Product Category)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Product Category\"?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "map_values(Product Category)"
+        ],
+        "together": false
+      }
+    ]
+  }
+]

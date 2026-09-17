@@ -67,16 +67,24 @@ class ColumnStats:
         return self.date_year_first + self.date_numeric + self.date_text
 
 
-def count_rows(conn: duckdb.DuckDBPyConnection) -> int:
-    row = conn.execute(f"SELECT count(*) FROM {RAW_REF}").fetchone()
+def count_rows(conn: duckdb.DuckDBPyConnection, table: str = RAW_REF) -> int:
+    row = conn.execute(f"SELECT count(*) FROM {table}").fetchone()
     return int(row[0]) if row else 0
 
 
 def compute_column_stats(
-    conn: duckdb.DuckDBPyConnection, name: str, position: int, row_count: int
+    conn: duckdb.DuckDBPyConnection,
+    name: str,
+    position: int,
+    row_count: int,
+    table: str = RAW_REF,
 ) -> ColumnStats:
-    """`name` must be a column of the attached raw table; callers take it from its schema."""
-    source = _filled_values_cte(name)
+    """`name` must be a column of `table`; callers take it from that table's schema.
+
+    `table` is the raw table unless a caller is profiling columns a recipe
+    produced, which it stores as text so the same rules apply.
+    """
+    source = _filled_values_cte(name, table)
     params = _pattern_params()
 
     main = conn.execute(
@@ -179,13 +187,13 @@ def compute_column_stats(
     )
 
 
-def _filled_values_cte(name: str) -> str:
+def _filled_values_cte(name: str, table: str = RAW_REF) -> str:
     col = quote_ident(name)
     # `raw` keeps the value exactly as stored; `t` is trimmed for pattern checks.
     return (
         "WITH vals AS ("
         f"  SELECT {col} AS raw, regexp_replace({col}, '^\\s+|\\s+$', '', 'g') AS t"
-        f"  FROM {RAW_REF}"
+        f"  FROM {table}"
         "), nb AS (SELECT raw, t FROM vals WHERE t IS NOT NULL AND t <> '') "
     )
 
