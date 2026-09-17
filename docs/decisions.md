@@ -81,3 +81,80 @@ template ships `oxlint` instead of ESLint; kept as is. `npm run gen:api` exports
 OpenAPI from the FastAPI app directly (no running server needed) into
 `src/api/openapi.json` and `src/api/schema.d.ts`; both are committed so type
 changes show up in diffs.
+
+---
+
+## 2026-09-16 · M2 · Step engine, recipe, lineage, export, upload screen
+
+**Name.** The product is called TidyLab ("Tidy your data. See what it was
+hiding."). The GitHub repo and local folder keep their old names (owner
+decision). "Golden-file tests" is a testing term and stays.
+
+**Raw table is read-only at the database level** (owner decision). Ingest
+writes `raw` into `raw.duckdb` in a per-dataset temp workspace; the session's
+in-memory DuckDB attaches it `READ_ONLY` as `source`. Any write to
+`source.raw` fails inside DuckDB. Derived tables live in the in-memory `work`
+schema. The workspace is deleted on delete, eviction, re-read, and shutdown.
+This supersedes the M1 note that `raw` lived in the session's memory.
+
+**One CTE chain per recipe.** Stage `s0` is the raw table; each applied step
+compiles to a `SELECT` over the previous stage. Three statements run over the
+chain: `work.cleaned`, `work.set_aside` (row id, step, reason), and
+`work.changes`. Disabled steps never enter the chain, so disabled equals never
+added (tested for every step in a 10-step recipe). Results are cached by a
+fingerprint of the applied steps.
+
+**SQL safety.** Identifiers come only from the stage schema (derived from the
+profile) and are quoted. Every step value is a named bound parameter prefixed
+with the step's position. DuckDB rejects unused parameters, so each statement
+binds exactly the parameters of the fragments it includes. The only inlined
+strings are fixed regex constants and server-generated paths (ATTACH, COPY).
+
+**Blocked steps** (owner decision). An enabled step that can't run is skipped
+with a plain-language reason. If it would run with every earlier step on, the
+reason says it depends on a step that's turned off or can't run. Adding,
+updating, or enabling a step that would be blocked is rejected; turning a step
+off is always allowed.
+
+**Lineage stores only changed cells** in `work.changes (row_id, column_name,
+step_id, step_index, before, after, kind)`, where kind is changed / cleared /
+filled / created. Change rules: text steps compare text; `cast_number` counts
+a cell only if the original wasn't already that plain number ("85000" → 85000
+is not a change); `parse_date` counts every filled cell; `split_column` records
+created cells with the source value as "before". Intermediate stages may be
+held in memory while the statement runs; nothing but changed cells is kept.
+
+**Numbers are DOUBLE, dates are DATE/TIMESTAMP** in the cleaned table. Whole
+numbers render without ".0" in lineage and exports.
+
+**Row removal** only happens through `dedupe` and `set_aside_rows`; both take
+`keep_row_ids` so a single row can be restored with an undoable edit. Blanks
+count as equal when deduping. A condition that can't be evaluated keeps the row.
+
+**Undo** is a history of earlier recipes (capped at 100); no redo (owner decision).
+
+**Re-reading a file resets its recipe**, because the columns can change.
+
+**Replay.** A recipe file records the source columns and `requires_columns`
+(columns enabled steps read without creating them). Missing columns are
+problems (with a near-match suggestion); steps that fail only because an
+earlier step failed are folded into that problem; a `cast_number` or
+`parse_date` column that doesn't look like numbers or dates is a warning.
+An incompatible recipe raises before anything is built.
+
+**CSV export** (owner decision) prefixes `'` to text cells and headers that
+start with `= + - @`, tab, or CR unless they're plain numbers, and starts with
+a UTF-8 byte order mark so Excel shows accented text correctly.
+
+**Upload screen pulled forward from M6** (owner decision): `POST /api/datasets`,
+`GET /api/datasets/{id}`, `POST /api/datasets/{id}/reingest`,
+`GET /api/upload-limits`. Oversized uploads that declare their size are turned
+away by middleware before the body is read (Starlette parses multipart bodies
+before the route runs); the route also enforces the limit while reading.
+Settings and the store live on `app.state`, created in the app lifespan.
+
+**Hover notes** are rendered in a portal with fixed positioning so the
+scrolling column table can't clip them. They open on hover or focus and close
+on leave, blur, Escape, or scroll.
+
+**New dependency:** `python-multipart`, which FastAPI requires to receive file uploads.

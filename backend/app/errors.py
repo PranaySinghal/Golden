@@ -12,6 +12,7 @@ class AppError(Exception):
 
 class EmptyFileError(AppError):
     code = "empty_file"
+    http_status = 422
 
     def __init__(self) -> None:
         super().__init__("This file is empty. Please choose a file that has some data in it.")

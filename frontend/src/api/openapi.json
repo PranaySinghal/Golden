@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Golden Analytics",
+    "title": "TidyLab",
     "version": "0.1.0"
   },
   "paths": {
@@ -35,10 +35,442 @@
           }
         }
       }
+    },
+    "/api/upload-limits": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Upload Limits",
+        "operationId": "getUploadLimits",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadLimits"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets": {
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Upload Dataset",
+        "operationId": "uploadDataset",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadDataset"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSummary"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Dataset",
+        "operationId": "getDataset",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSummary"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/reingest": {
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Reingest Dataset",
+        "operationId": "reingestDataset",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReingestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetSummary"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Body_uploadDataset": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "A CSV or Excel (.xlsx) file."
+          },
+          "sheet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet"
+          },
+          "header": {
+            "$ref": "#/components/schemas/HeaderMode",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_uploadDataset"
+      },
+      "ColumnFlag": {
+        "type": "string",
+        "enum": [
+          "low_uniqueness",
+          "all_blank",
+          "mostly_blank",
+          "constant",
+          "name_hint_used"
+        ],
+        "title": "ColumnFlag"
+      },
+      "ColumnProfile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position",
+            "description": "Zero-based position among the file's columns."
+          },
+          "physical_type": {
+            "$ref": "#/components/schemas/PhysicalType"
+          },
+          "semantic_role": {
+            "$ref": "#/components/schemas/SemanticRole"
+          },
+          "role_confidence": {
+            "type": "number",
+            "title": "Role Confidence",
+            "description": "How sure the role guess is, from 0 to 1."
+          },
+          "role_note": {
+            "type": "string",
+            "title": "Role Note",
+            "description": "Plain-language reason for the role, suitable for a hover note."
+          },
+          "flags": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnFlag"
+            },
+            "type": "array",
+            "title": "Flags"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "non_blank_count": {
+            "type": "integer",
+            "title": "Non Blank Count"
+          },
+          "fill_rate": {
+            "type": "number",
+            "title": "Fill Rate"
+          },
+          "distinct_count": {
+            "type": "integer",
+            "title": "Distinct Count"
+          },
+          "uniqueness": {
+            "type": "number",
+            "title": "Uniqueness",
+            "description": "Distinct values divided by filled values."
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedPattern"
+            },
+            "type": "array",
+            "title": "Patterns"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value",
+            "description": "Smallest number or earliest date, when typed."
+          },
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value",
+            "description": "Largest number or latest date, when typed."
+          },
+          "sample_values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sample Values",
+            "description": "Up to 5 of the most frequent values."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "position",
+          "physical_type",
+          "semantic_role",
+          "role_confidence",
+          "role_note",
+          "flags",
+          "row_count",
+          "non_blank_count",
+          "fill_rate",
+          "distinct_count",
+          "uniqueness",
+          "patterns",
+          "min_value",
+          "max_value",
+          "sample_values"
+        ],
+        "title": "ColumnProfile"
+      },
+      "DatasetSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "format": {
+            "$ref": "#/components/schemas/SourceFormat"
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          },
+          "available_sheets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Available Sheets"
+          },
+          "header_mode": {
+            "$ref": "#/components/schemas/HeaderMode"
+          },
+          "header_detected": {
+            "type": "boolean",
+            "title": "Header Detected"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "column_count": {
+            "type": "integer",
+            "title": "Column Count"
+          },
+          "empty_rows_skipped": {
+            "type": "integer",
+            "title": "Empty Rows Skipped"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnProfile"
+            },
+            "type": "array",
+            "title": "Columns"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "format",
+          "sheet_name",
+          "available_sheets",
+          "header_mode",
+          "header_detected",
+          "row_count",
+          "column_count",
+          "empty_rows_skipped",
+          "columns"
+        ],
+        "title": "DatasetSummary"
+      },
+      "DetectedPattern": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/PatternKind"
+          },
+          "match_count": {
+            "type": "integer",
+            "title": "Match Count"
+          },
+          "match_rate": {
+            "type": "number",
+            "title": "Match Rate",
+            "description": "Share of filled values that match, from 0 to 1."
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "Extra context, e.g. the placeholder text \"N/A\", a code shape \"AAA9999\", or the separator \"-\"."
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "match_count",
+          "match_rate"
+        ],
+        "title": "DetectedPattern"
+      },
       "ErrorResponse": {
         "properties": {
           "code": {
@@ -57,6 +489,16 @@
         ],
         "title": "ErrorResponse"
       },
+      "HeaderMode": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "header",
+          "data"
+        ],
+        "title": "HeaderMode",
+        "description": "Whether the first row holds column names.\n\nAUTO guesses from the values; the other two let the user override the guess\n(the \"first row is data\" toggle)."
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -70,6 +512,98 @@
           "status"
         ],
         "title": "HealthResponse"
+      },
+      "PatternKind": {
+        "type": "string",
+        "enum": [
+          "email",
+          "phone",
+          "url",
+          "date_year_first",
+          "date_numeric",
+          "date_text",
+          "datetime",
+          "integer",
+          "decimal",
+          "currency",
+          "percent",
+          "thousands_separator",
+          "boolean",
+          "leading_zeros",
+          "placeholder",
+          "code_shape",
+          "delimited"
+        ],
+        "title": "PatternKind"
+      },
+      "PhysicalType": {
+        "type": "string",
+        "enum": [
+          "empty",
+          "boolean",
+          "integer",
+          "decimal",
+          "date",
+          "datetime",
+          "text"
+        ],
+        "title": "PhysicalType",
+        "description": "The dominant shape of the values. Storage is always text."
+      },
+      "ReingestRequest": {
+        "properties": {
+          "sheet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet",
+            "description": "Excel sheet; None means the first one."
+          },
+          "header": {
+            "$ref": "#/components/schemas/HeaderMode",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "title": "ReingestRequest"
+      },
+      "SemanticRole": {
+        "type": "string",
+        "enum": [
+          "identifier",
+          "category",
+          "measure",
+          "date",
+          "contact",
+          "text"
+        ],
+        "title": "SemanticRole"
+      },
+      "SourceFormat": {
+        "type": "string",
+        "enum": [
+          "csv",
+          "xlsx"
+        ],
+        "title": "SourceFormat"
+      },
+      "UploadLimits": {
+        "properties": {
+          "max_upload_bytes": {
+            "type": "integer",
+            "title": "Max Upload Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "max_upload_bytes"
+        ],
+        "title": "UploadLimits"
       }
     }
   }

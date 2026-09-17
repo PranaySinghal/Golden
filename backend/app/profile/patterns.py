@@ -6,6 +6,7 @@ to a particular dataset: these are general shapes of numbers, dates, and contact
 """
 
 import re
+from typing import Literal, get_args
 
 _MONTH = r"(0?[1-9]|1[0-2])"
 _DAY = r"(0?[1-9]|[12][0-9]|3[01])"
@@ -80,6 +81,37 @@ DELIMITERS: dict[str, str] = {
     ":": r"[^:]+:[^:]+",
     "_": r"[^_]+_[^_]+",
 }
+
+# Date formats the app understands, in strptime syntax. Shared by profiling (to
+# find date ranges) and by the parse_date step, which only accepts these.
+DateFormat = Literal[
+    "%Y-%m-%d",
+    "%Y/%m/%d",
+    "%Y.%m.%d",
+    "%m/%d/%Y",
+    "%d/%m/%Y",
+    "%m-%d-%Y",
+    "%d-%m-%Y",
+    "%d.%m.%Y",
+    "%m/%d/%y",
+    "%d/%m/%y",
+    "%d %b %Y",
+    "%d-%b-%Y",
+    "%d-%b-%y",
+    "%d %B %Y",
+    "%b %d, %Y",
+    "%B %d, %Y",
+    "%b %d %Y",
+    "%B %d %Y",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d %H:%M",
+    "%m/%d/%Y %H:%M",
+    "%d/%m/%Y %H:%M",
+    "%m/%d/%Y %H:%M:%S",
+    "%d/%m/%Y %H:%M:%S",
+]
+DATE_FORMATS: tuple[str, ...] = get_args(DateFormat)
 
 LETTER_RUN = r"[A-Za-z]+"
 DIGIT_RUN = r"[0-9]+"

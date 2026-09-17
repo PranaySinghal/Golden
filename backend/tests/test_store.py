@@ -1,7 +1,9 @@
 """The dataset flow the upload endpoint (M6) will wrap: file bytes in, a stored,
 profiled dataset out, plus re-reading with different options."""
 
+import tempfile
 import threading
+from pathlib import Path
 
 import pytest
 
@@ -15,6 +17,7 @@ from app.errors import (
 )
 from app.ingest.models import HeaderMode, IngestOptions, SourceFormat
 from app.profile.models import SemanticRole
+from app.steps.models import Recipe, TrimStep
 from app.store import DatasetStore
 from tests.conftest import SAMPLES_DIR, make_xlsx
 
@@ -28,7 +31,7 @@ def store() -> DatasetStore:
 
 
 def raw_count(store: DatasetStore, dataset_id: str) -> int:
-    row = store.get(dataset_id).conn.execute("SELECT count(*) FROM raw").fetchone()
+    row = store.get(dataset_id).conn.execute("SELECT count(*) FROM source.raw").fetchone()
     assert row is not None
     return int(row[0])
 
@@ -185,3 +188,52 @@ def test_concurrent_creates(store: DatasetStore) -> None:
 
     assert errors == []
     assert len(big_store) == 8
+
+
+def test_raw_data_is_attached_read_only(store: DatasetStore) -> None:
+    session = store.create("a.csv", b"x\n1\n")
+
+    with pytest.raises(Exception, match="read-only"):
+        session.conn.execute("UPDATE source.raw SET x = '2'")
+
+
+def test_workspace_is_removed_on_delete_eviction_and_reingest(store: DatasetStore) -> None:
+    deleted = store.create("a.csv", b"x\n1\n")
+    assert deleted.workspace.exists()
+    store.delete(deleted.id)
+    assert not deleted.workspace.exists()
+
+    replaced = store.create("b.csv", b"north,east\nsouth,west\n")
+    old_workspace = replaced.workspace
+    updated = store.reingest(replaced.id, IngestOptions(header=HeaderMode.FIRST_ROW_IS_DATA))
+    assert not old_workspace.exists()
+    assert updated.workspace.exists()
+
+    evicted = [store.create(f"f{i}.csv", b"x\n1\n") for i in range(4)]
+    assert not updated.workspace.exists()
+    assert not evicted[0].workspace.exists()
+
+    store.close_all()
+    assert all(not session.workspace.exists() for session in evicted)
+    assert len(store) == 0
+
+
+def test_failed_upload_leaves_no_workspace() -> None:
+    before = set(Path(tempfile.gettempdir()).glob("tidylab-*"))
+    store = DatasetStore(Settings())
+
+    with pytest.raises(EmptyFileError):
+        store.create("empty.csv", b"")
+
+    assert set(Path(tempfile.gettempdir()).glob("tidylab-*")) == before
+
+
+def test_reingest_starts_a_fresh_recipe(store: DatasetStore) -> None:
+    session = store.create("a.csv", b"name\nAnn\n")
+    session.recipe = Recipe(steps=[TrimStep(columns=["name"])])
+
+    updated = store.reingest(session.id, IngestOptions(header=HeaderMode.FIRST_ROW_IS_DATA))
+
+    assert updated.recipe == Recipe()
+    assert updated.history.past == ()
+    assert updated.applied is None
