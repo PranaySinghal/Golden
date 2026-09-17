@@ -1,0 +1,192 @@
+[
+  {
+    "detector": "combined_columns",
+    "columns": [
+      "Department_Region"
+    ],
+    "tier": "likely",
+    "affected_rows": 1071,
+    "recommended": null
+  },
+  {
+    "detector": "dates",
+    "columns": [
+      "Join_Date"
+    ],
+    "tier": "likely",
+    "affected_rows": 1071,
+    "recommended": null
+  },
+  {
+    "detector": "contact_formats",
+    "columns": [
+      "Phone"
+    ],
+    "tier": "likely",
+    "affected_rows": 1071,
+    "recommended": null
+  },
+  {
+    "detector": "identifier_repeats",
+    "columns": [
+      "Email"
+    ],
+    "tier": "ask",
+    "affected_rows": 1040,
+    "recommended": "No, sharing is fine"
+  },
+  {
+    "detector": "extra_spaces",
+    "columns": [
+      "First_Name",
+      "Last_Name",
+      "Department_Region",
+      "Status",
+      "Performance_Score",
+      "Remote_Work"
+    ],
+    "tier": "safe",
+    "affected_rows": 297,
+    "recommended": null
+  },
+  {
+    "detector": "missing_values",
+    "columns": [
+      "Age"
+    ],
+    "tier": "ask",
+    "affected_rows": 224,
+    "recommended": "Leave them blank"
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "First_Name"
+    ],
+    "tier": "safe",
+    "affected_rows": 121,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Department_Region"
+    ],
+    "tier": "safe",
+    "affected_rows": 113,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Status"
+    ],
+    "tier": "safe",
+    "affected_rows": 112,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Performance_Score"
+    ],
+    "tier": "safe",
+    "affected_rows": 111,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Salary"
+    ],
+    "tier": "likely",
+    "affected_rows": 110,
+    "recommended": null
+  },
+  {
+    "detector": "contact_formats",
+    "columns": [
+      "Phone"
+    ],
+    "tier": "ask",
+    "affected_rows": 94,
+    "recommended": "Clear them"
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Last_Name"
+    ],
+    "tier": "safe",
+    "affected_rows": 85,
+    "recommended": null
+  },
+  {
+    "detector": "category_variants",
+    "columns": [
+      "Remote_Work"
+    ],
+    "tier": "safe",
+    "affected_rows": 84,
+    "recommended": null
+  },
+  {
+    "detector": "placeholders",
+    "columns": [
+      "Age"
+    ],
+    "tier": "ask",
+    "affected_rows": 61,
+    "recommended": "Missing"
+  },
+  {
+    "detector": "placeholders",
+    "columns": [
+      "Salary"
+    ],
+    "tier": "ask",
+    "affected_rows": 43,
+    "recommended": "Missing"
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Age"
+    ],
+    "tier": "safe",
+    "affected_rows": 43,
+    "recommended": null
+  },
+  {
+    "detector": "identifier_repeats",
+    "columns": [
+      "Employee_ID"
+    ],
+    "tier": "ask",
+    "affected_rows": 40,
+    "recommended": "Yes, keep the first row for each"
+  },
+  {
+    "detector": "identifier_repeats",
+    "columns": [
+      "Phone"
+    ],
+    "tier": "ask",
+    "affected_rows": 40,
+    "recommended": "Yes, keep the first row for each"
+  },
+  {
+    "detector": "duplicates",
+    "columns": [],
+    "tier": "safe",
+    "affected_rows": 31,
+    "recommended": null
+  },
+  {
+    "detector": "duplicates",
+    "columns": [],
+    "tier": "likely",
+    "affected_rows": 20,
+    "recommended": null
+  }
+]

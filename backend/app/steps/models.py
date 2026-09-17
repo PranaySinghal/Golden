@@ -87,13 +87,22 @@ class NotMatchingCondition(_Model):
     pattern: Literal["email", "phone", "number", "date"]
 
 
+class DigitsFewerThanCondition(_Model):
+    """Filled values with fewer digits than `count`, e.g. phone numbers that are too short."""
+
+    kind: Literal["digits_fewer_than"] = "digits_fewer_than"
+    column: ColumnName
+    count: Annotated[int, Field(ge=1, le=30)]
+
+
 RowCondition = Annotated[
     BlankCondition
     | EqualsCondition
     | OneOfCondition
     | RowIdsCondition
     | OutsideRangeCondition
-    | NotMatchingCondition,
+    | NotMatchingCondition
+    | DigitsFewerThanCondition,
     Field(discriminator="kind"),
 ]
 
@@ -105,6 +114,14 @@ class TrimStep(_StepBase):
     type: Literal["trim"] = "trim"
     columns: Columns
     collapse_inner_spaces: bool = False
+
+
+class RemoveCharactersStep(_StepBase):
+    type: Literal["remove_characters"] = "remove_characters"
+    columns: Columns
+    # Each character listed is removed; they aren't treated as a sequence.
+    characters: Annotated[str, StringConstraints(min_length=1, max_length=10)]
+    where: Literal["leading", "trailing", "anywhere"] = "leading"
 
 
 class NormalizeCaseStep(_StepBase):
@@ -175,6 +192,14 @@ class SetAsideRowsStep(_StepBase):
     keep_row_ids: KeepRowIds = Field(default_factory=list)
 
 
+class ClearValuesStep(_StepBase):
+    """Blank out values that match a condition, keeping the rest of the row."""
+
+    type: Literal["clear_values"] = "clear_values"
+    column: ColumnName
+    condition: RowCondition
+
+
 class FillMissingStep(_StepBase):
     type: Literal["fill_missing"] = "fill_missing"
     column: ColumnName
@@ -193,6 +218,7 @@ class FillMissingStep(_StepBase):
 # How each step type is named to users, e.g. in replay messages.
 STEP_LABELS: dict[str, str] = {
     "trim": "Trim spaces",
+    "remove_characters": "Remove characters",
     "normalize_case": "Change letter case",
     "map_values": "Replace values",
     "null_placeholders": "Clear placeholder text",
@@ -201,11 +227,13 @@ STEP_LABELS: dict[str, str] = {
     "split_column": "Split a column",
     "dedupe": "Set aside repeated rows",
     "set_aside_rows": "Set aside rows",
+    "clear_values": "Clear values",
     "fill_missing": "Fill in blanks",
 }
 
 Step = Annotated[
     TrimStep
+    | RemoveCharactersStep
     | NormalizeCaseStep
     | MapValuesStep
     | NullPlaceholdersStep
@@ -214,6 +242,7 @@ Step = Annotated[
     | SplitColumnStep
     | DedupeStep
     | SetAsideRowsStep
+    | ClearValuesStep
     | FillMissingStep,
     Field(discriminator="type"),
 ]

@@ -1,0 +1,76 @@
+{
+  "row_count": 1071,
+  "columns": {
+    "Employee_ID": {
+      "role": "identifier",
+      "physical_type": "text",
+      "flags": []
+    },
+    "First_Name": {
+      "role": "category",
+      "physical_type": "text",
+      "flags": []
+    },
+    "Last_Name": {
+      "role": "category",
+      "physical_type": "text",
+      "flags": []
+    },
+    "Age": {
+      "role": "measure",
+      "physical_type": "decimal",
+      "flags": []
+    },
+    "Department_Region": {
+      "role": "category",
+      "physical_type": "text",
+      "flags": []
+    },
+    "Status": {
+      "role": "category",
+      "physical_type": "text",
+      "flags": []
+    },
+    "Join_Date": {
+      "role": "date",
+      "physical_type": "date",
+      "flags": []
+    },
+    "Salary": {
+      "role": "measure",
+      "physical_type": "decimal",
+      "flags": []
+    },
+    "Email": {
+      "role": "contact",
+      "physical_type": "text",
+      "flags": [
+        "low_uniqueness"
+      ]
+    },
+    "Phone": {
+      "role": "contact",
+      "physical_type": "integer",
+      "flags": [
+        "name_hint_used"
+      ]
+    },
+    "Performance_Score": {
+      "role": "category",
+      "physical_type": "text",
+      "flags": []
+    },
+    "Remote_Work": {
+      "role": "category",
+      "physical_type": "boolean",
+      "flags": []
+    }
+  },
+  "anonymized_overrides": {
+    "Phone": {
+      "role": "identifier",
+      "physical_type": "integer",
+      "flags": []
+    }
+  }
+}

@@ -5,7 +5,9 @@ from app.steps.models import (
     STEP_LABELS,
     BlankCondition,
     CastNumberStep,
+    ClearValuesStep,
     DedupeStep,
+    DigitsFewerThanCondition,
     EqualsCondition,
     FillMissingStep,
     MapValuesStep,
@@ -16,6 +18,7 @@ from app.steps.models import (
     OutsideRangeCondition,
     ParseDateStep,
     Recipe,
+    RemoveCharactersStep,
     RowIdsCondition,
     SetAsideRowsStep,
     SplitColumnStep,
@@ -28,6 +31,8 @@ STEP: TypeAdapter[Step] = TypeAdapter(Step)
 
 EVERY_STEP: list[Step] = [
     TrimStep(columns=["a"], collapse_inner_spaces=True),
+    RemoveCharactersStep(columns=["a"], characters="-", where="leading"),
+    ClearValuesStep(column="a", condition=DigitsFewerThanCondition(column="a", count=10)),
     NormalizeCaseStep(columns=["a"], case="title"),
     MapValuesStep(column="a", mappings=[ValueMapping(from_value="x", to_value=None)]),
     NullPlaceholdersStep(columns=["a"], placeholders=["N/A"]),
@@ -88,6 +93,14 @@ def test_step_ids_are_generated_and_unique() -> None:
         {
             "type": "set_aside_rows",
             "condition": {"kind": "row_ids", "row_ids": list(range(10_001))},
+        },
+        {"type": "remove_characters", "columns": ["a"], "characters": ""},
+        {"type": "remove_characters", "columns": ["a"], "characters": "-", "where": "middle"},
+        {"type": "clear_values", "column": "a"},
+        {
+            "type": "clear_values",
+            "column": "a",
+            "condition": {"kind": "digits_fewer_than", "column": "a", "count": 0},
         },
         {"type": "fill_missing", "column": "a", "strategy": "value"},
         {"type": "fill_missing", "column": "a", "strategy": "mean", "value": 3},

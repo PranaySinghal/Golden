@@ -158,3 +158,67 @@ scrolling column table can't clip them. They open on hover or focus and close
 on leave, blur, Escape, or scroll.
 
 **New dependency:** `python-multipart`, which FastAPI requires to receive file uploads.
+
+---
+
+## 2026-09-16 · M3 · Issue detectors and tiers
+
+**Two new step types and one condition** (owner approved): `remove_characters
+{columns, characters, where: leading|trailing|anywhere}` (uses `ltrim`/`rtrim` or
+one `replace` per character, all bound) and `clear_values {column, condition}`
+(blanks matching values, keeps the row; the condition must check the same
+column). New row condition `digits_fewer_than {column, count}`.
+
+**Issue contract additions** (owner approved): `examples` (up to 5 values),
+`requires` (issue ids whose steps must run first, e.g. "read Age as numbers"
+before "fill Age with the middle value"), and ask-tier questions as
+`AskQuestion {prompt, choices[Choice]}` so they don't clash with M4's `Question`.
+
+**Detector shape.** Each detector has `gather` (SQL against the read-only raw
+table, returns evidence) and `decide` (pure). Detectors choose columns only by
+profile role and patterns; column names are used only in copy and to name split
+columns. Tests run detection with anonymized headers: only the name-recognized
+Phone checks drop out. Issue, choice, and step ids are hashes, so re-running
+detection gives identical ids. `today` is an input for determinism.
+
+**Tiers.** safe = can't change meaning (case/space variants, extra spaces,
+reading numbers/dates with clear evidence, exact repeats when an ID column
+exists). likely = almost certain (combined columns, similar spellings, stray
+"-" on phones, "k"/"M" amounts, near repeats, exact repeats without an ID
+column, several date styles). ask = the choice changes answers (placeholders
+in numbers, missing values, ambiguous date order, short phones, shared IDs or
+contacts, out-of-range values, invalid emails).
+
+**Owner decisions on defaults.** "N/A" in a number column is asked with
+"Missing" recommended (left out of both the sum and the count), "Zero" as the
+alternative. Out-of-range values recommend "Keep them". Every number column
+gets a safe "Read as numbers" issue even when values are already plain, so
+later answers use real numbers.
+
+**Recommendations follow evidence.** Repeated IDs/contacts recommend keeping
+one row when uniqueness ≥ 0.9 and "sharing is fine" when < 0.5 (the employee
+file's 64 emails over 1,020 rows). Conflicting date evidence recommends a side
+only with a 10× majority.
+
+**Numbers with decimal commas.** The profiler's number pattern doesn't read
+"3,50", so such columns look like labels. `numbers_as_text` also checks label
+and ID columns and proposes reading them as numbers when ≥80% of values read
+with either decimal mark and decimal-comma evidence exists.
+
+**Dedupe fix (changes M2 behavior).** Rows whose compared values are all blank
+are never repeats. Found when "keep one row per phone" set aside every row
+whose short phone had been cleared. Replaces the M2 rule that blanks match.
+
+**Standard step order** (`detectors/step_order.py`): remove characters/trim →
+placeholders → map spellings → split → read numbers/dates → clear values →
+dedupe → set aside → fill. `recipe_for(issues, accepted, answers)` pulls in
+required issues and drops identical steps. Tests accept every issue and try
+every ask choice on all three samples: nothing is blocked.
+
+**Out of range covers numbers only.** Date ranges (years before 1900 or in the
+future) need a date condition kind; deferred to `docs/ideas.md`.
+
+**Messier sample.** `data/scripts/make_messy_variant.py` picks columns by profile
+role and writes `data/samples/Messy_Employee_dataset_messier.csv` (seed 7):
+case and space changes, restyled dates, `$85,000` / `$85k` / placeholder
+numbers, 3% exact and 2% near repeat rows. A test re-runs it and compares bytes.

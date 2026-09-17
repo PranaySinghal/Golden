@@ -17,7 +17,9 @@ from app.steps.errors import StepValidationError
 from app.steps.models import (
     BlankCondition,
     CastNumberStep,
+    ClearValuesStep,
     DedupeStep,
+    DigitsFewerThanCondition,
     EqualsCondition,
     FillMissingStep,
     MapValuesStep,
@@ -27,6 +29,7 @@ from app.steps.models import (
     OneOfCondition,
     OutsideRangeCondition,
     ParseDateStep,
+    RemoveCharactersStep,
     RowCondition,
     RowIdsCondition,
     SetAsideRowsStep,
@@ -106,6 +109,8 @@ def compile_step(step: Step, schema: StageSchema, *, index: int, source: str) ->
     match step:
         case TrimStep():
             return _trim(step, schema, b, source)
+        case RemoveCharactersStep():
+            return _remove_characters(step, schema, b, source)
         case NormalizeCaseStep():
             return _normalize_case(step, schema, b, source)
         case MapValuesStep():
@@ -122,6 +127,8 @@ def compile_step(step: Step, schema: StageSchema, *, index: int, source: str) ->
             return _dedupe(step, schema, b, source)
         case SetAsideRowsStep():
             return _set_aside_rows(step, schema, b, source)
+        case ClearValuesStep():
+            return _clear_values(step, schema, b, source)
         case FillMissingStep():
             return _fill_missing(step, schema, b, source)
 
@@ -185,7 +192,7 @@ def _same_kind_changes(schema: StageSchema, names: list[str]) -> tuple[ChangeSpe
 
 
 def _replace_text_columns(
-    step: TrimStep | NormalizeCaseStep | NullPlaceholdersStep,
+    step: TrimStep | RemoveCharactersStep | NormalizeCaseStep | NullPlaceholdersStep,
     schema: StageSchema,
     source: str,
     template: str,
@@ -214,6 +221,23 @@ def _trim(step: TrimStep, schema: StageSchema, b: _Builder, source: str) -> Comp
     if step.collapse_inner_spaces:
         expr = f"NULLIF(regexp_replace({trimmed('{col}')}, '\\s+', ' ', 'g'), '')"
     return _replace_text_columns(step, schema, source, expr, "trimmed", b.params)
+
+
+def _remove_characters(
+    step: RemoveCharactersStep, schema: StageSchema, b: _Builder, source: str
+) -> CompiledStep:
+    match step.where:
+        case "leading":
+            expr = f"ltrim({{col}}, {b.bind('characters', step.characters)})"
+        case "trailing":
+            expr = f"rtrim({{col}}, {b.bind('characters', step.characters)})"
+        case "anywhere":
+            expr = "{col}"
+            for position, character in enumerate(dict.fromkeys(step.characters)):
+                expr = f"replace({expr}, {b.bind(f'char{position}', character)}, '')"
+    return _replace_text_columns(
+        step, schema, source, f"NULLIF({expr}, '')", "cleaned of characters", b.params
+    )
 
 
 def _normalize_case(
@@ -431,18 +455,22 @@ def _keep_list(b: _Builder, row_ids: list[int]) -> str:
 
 def _dedupe(step: DedupeStep, schema: StageSchema, b: _Builder, source: str) -> CompiledStep:
     names = schema.names() if step.columns is None else _unique(step.columns)
-    keys = []
+    keys, blanks = [], []
     for name in names:
         column = _require(schema, name, step)
         ident = quote_ident(name)
         use_key = step.match == "ignore_case_and_spaces" and column.kind is ValueKind.TEXT
         keys.append(match_key(ident) if use_key else ident)
+        blanks.append(blank_predicate(ident, column.kind))
     if not keys:
         raise StepValidationError("There are no columns to compare for repeats.", step.id)
 
     order = "ASC" if step.keep == "first" else "DESC"
     rank = f"row_number() OVER (PARTITION BY {', '.join(keys)} ORDER BY {ROW_ID} {order})"
     keep = _keep_list(b, step.keep_row_ids)
+    # A row with nothing in the compared columns has nothing to repeat: blank IDs
+    # aren't the same ID.
+    nothing_to_compare = f"({' AND '.join(blanks)})"
 
     earlier = "an earlier" if step.keep == "first" else "a later"
     if step.columns is None:
@@ -454,12 +482,14 @@ def _dedupe(step: DedupeStep, schema: StageSchema, b: _Builder, source: str) -> 
     return CompiledStep(
         step_id=step.id,
         kept=Fragment(
-            f"SELECT {_select_list(schema)} FROM {source} QUALIFY {rank} = 1 OR {keep}",
+            f"SELECT {_select_list(schema)} FROM {source} "
+            f"QUALIFY {rank} = 1 OR {nothing_to_compare} OR {keep}",
             dict(b.params),
         ),
         output=schema,
         removed=Fragment(
-            f"SELECT {ROW_ID} FROM {source} QUALIFY {rank} > 1 AND NOT {keep}",
+            f"SELECT {ROW_ID} FROM {source} "
+            f"QUALIFY {rank} > 1 AND NOT {nothing_to_compare} AND NOT {keep}",
             dict(b.params),
         ),
         removal_reason=reason,
@@ -485,6 +515,31 @@ def _set_aside_rows(
         ),
         removal_reason=reason,
         reads=reads,
+    )
+
+
+def _clear_values(
+    step: ClearValuesStep, schema: StageSchema, b: _Builder, source: str
+) -> CompiledStep:
+    column = _require(schema, step.column, step)
+    condition_column = getattr(step.condition, "column", None)
+    if condition_column is not None and condition_column != step.column:
+        raise StepValidationError(
+            f'This step clears values in "{step.column}", so its rule must check '
+            f'"{step.column}" too.',
+            step.id,
+        )
+    predicate, _, _ = _condition(step.condition, step, schema, b)
+    ident = quote_ident(column.name)
+    expr = f"CASE WHEN coalesce({predicate}, false) THEN NULL ELSE {ident} END"
+    return CompiledStep(
+        step_id=step.id,
+        kept=Fragment(
+            f"SELECT {_select_list(schema, {column.name: expr})} FROM {source}", b.params
+        ),
+        output=schema,
+        changes=_same_kind_changes(schema, [column.name]),
+        reads=(column.name,),
     )
 
 
@@ -557,6 +612,19 @@ def _condition(
                 assert condition.max is not None
                 reason = f'"{column.name}" is above {_format_number(condition.max)}.'
             return f"({' OR '.join(checks)})", reason, (column.name,)
+
+        case DigitsFewerThanCondition():
+            column = _require(
+                schema, condition.column, step, {ValueKind.TEXT}, "checked for missing digits"
+            )
+            ident = quote_ident(column.name)
+            count = b.bind("digits", condition.count)
+            predicate = (
+                f"(NOT {blank_predicate(ident, ValueKind.TEXT)} "
+                f"AND length(regexp_replace({ident}, '[^0-9]', '', 'g')) < {count})"
+            )
+            reason = f'"{column.name}" has fewer than {condition.count} digits.'
+            return predicate, reason, (column.name,)
 
         case NotMatchingCondition():
             column = _require(
