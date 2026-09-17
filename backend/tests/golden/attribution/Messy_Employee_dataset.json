@@ -1,0 +1,67 @@
+[
+  {
+    "question": "How many rows are there for each \"Department\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many rows are there for each \"Region\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Department\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "What's the average \"Salary\" for each \"Region\"?",
+    "unlocked": true,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "split_column(Department_Region)"
+        ],
+        "together": false
+      }
+    ]
+  },
+  {
+    "question": "How many different \"Phone\" values are there?",
+    "unlocked": false,
+    "method": "exact",
+    "caused_by": [
+      {
+        "steps": [
+          "clear_values(Phone)"
+        ],
+        "together": false
+      }
+    ]
+  }
+]

@@ -13,3 +13,6 @@ Out-of-scope ideas for "if I had more time". Not planned work.
 - **Revisit the question cap** (16 today): check on wider files whether more questions help or clutter.
 - **Currency in "before".** Excel turns "$85,000" into a number when opening a CSV; "before" currently follows CLAUDE.md and leaves it out. Reconsider matching Excel.
 - **Drop meaningless totals** (e.g. total Age) — likely via AI wording in M8 or a rule for low-variety whole numbers.
+- **Name the smallest group of steps** when more than 6 could be responsible together. Today the whole relevant set is reported, which is accurate but long ("caused by these 19 steps"); shrinking the set one step at a time would name the 2–3 that actually matter, for about one query per step.
+- **Attribution for large files.** The query cap bounds how many questions are asked, not how long each takes; on a very large file, re-running the recipe per step is the slow part. Could sample rows, or skip attribution above a row count.
+- **Say what was checked but didn't change** on answers that stayed put, e.g. "read Salary as numbers, no change" — free from the influence pass, but it adds noise, so it needs a UI decision.

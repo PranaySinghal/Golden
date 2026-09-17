@@ -33,8 +33,16 @@ MONTHLY_UP_TO_MONTHS = 24
 
 
 def generate_questions(
-    conn: duckdb.DuckDBPyConnection, profile: DatasetProfile, limit: int = MAX_QUESTIONS
+    conn: duckdb.DuckDBPyConnection,
+    profile: DatasetProfile,
+    limit: int = MAX_QUESTIONS,
+    table: str = RAW_REF,
 ) -> list[Question]:
+    """Questions for `profile`, whose columns must be columns of `table` (text values).
+
+    `table` is the raw table unless a caller is looking for questions that only
+    become askable after cleaning.
+    """
     columns = [c for c in profile.columns if c.non_blank_count > 0]
 
     def by_role(role: SemanticRole) -> list[ColumnProfile]:
@@ -44,7 +52,7 @@ def generate_questions(
 
     measures = by_role(SemanticRole.MEASURE)
     top_measure = measures[0].name if measures else None
-    categories = [c for c in by_role(SemanticRole.CATEGORY) if _groups_fit(conn, c)]
+    categories = [c for c in by_role(SemanticRole.CATEGORY) if _groups_fit(conn, c, table)]
     dates = by_role(SemanticRole.DATE)
 
     core: list[Question] = [Question(measure=Measure.COUNT, label=copy.rows(), prominence=HEADLINE)]
@@ -95,7 +103,7 @@ def generate_questions(
             )
 
     for c in dates:
-        grain = _grain(conn, c)
+        grain = _grain(conn, c, table)
         core.append(
             Question(
                 measure=Measure.COUNT,
@@ -134,23 +142,27 @@ def _is_percent(column: ColumnProfile) -> bool:
     return any(p.kind is PatternKind.PERCENT and p.match_rate >= 0.5 for p in column.patterns)
 
 
-def _groups_fit(conn: duckdb.DuckDBPyConnection, column: ColumnProfile) -> bool:
+def _groups_fit(
+    conn: duckdb.DuckDBPyConnection, column: ColumnProfile, table: str = RAW_REF
+) -> bool:
     if column.distinct_count < MIN_GROUPS:
         return False
     key = match_key(quote_ident(column.name))
-    row = conn.execute(f"SELECT count(DISTINCT {key}) FROM {RAW_REF}").fetchone()
+    row = conn.execute(f"SELECT count(DISTINCT {key}) FROM {table}").fetchone()
     groups = int(row[0]) if row else 0
     return MIN_GROUPS <= groups <= MAX_GROUPS
 
 
-def _grain(conn: duckdb.DuckDBPyConnection, column: ColumnProfile) -> DateGrain:
+def _grain(
+    conn: duckdb.DuckDBPyConnection, column: ColumnProfile, table: str = RAW_REF
+) -> DateGrain:
     earliest, latest = column.min_value, column.max_value
     if earliest is None or latest is None:
         formats = ", ".join(f"'{fmt}'" for fmt in DATE_FORMATS)
         ident = quote_ident(column.name)
         row = conn.execute(
             f"SELECT CAST(min(d) AS VARCHAR), CAST(max(d) AS VARCHAR) FROM "
-            f"(SELECT try_strptime(trim({ident}), [{formats}]) AS d FROM {RAW_REF})"
+            f"(SELECT try_strptime(trim({ident}), [{formats}]) AS d FROM {table})"
         ).fetchone()
         earliest, latest = (row[0], row[1]) if row else (None, None)
     if earliest is None or latest is None:
