@@ -222,3 +222,75 @@ future) need a date condition kind; deferred to `docs/ideas.md`.
 role and writes `data/samples/Messy_Employee_dataset_messier.csv` (seed 7):
 case and space changes, restyled dates, `$85,000` / `$85k` / placeholder
 numbers, 3% exact and 2% near repeat rows. A test re-runs it and compares bytes.
+
+---
+
+## 2026-09-16 · M4 · Questions and before/after comparison
+
+**"Before" ignores case but not spaces** (owner decision, differs from the
+CLAUDE.md example). Distinct counts, groups, and filters treat "Sales" and
+"sales" as one value and "Sales " as another, the way Excel does. Why: tools
+disagree (Excel pivots ignore case; Google Sheets, SQL, and pandas don't), and
+"before" shouldn't look worse than the spreadsheet a user already has. The
+cleaned answer ("after") merges all three.
+
+| Tool | Sales vs sales | Sales vs "Sales " |
+|---|---|---|
+| Excel | same | different |
+| Google Sheets | different | different |
+| SQL, pandas, Power BI | different | different |
+| TidyLab after cleaning | same | same |
+
+**Other "before" rules** (all in `app/compare/before.py`, one test each, shown
+to users via `RULES`): every uploaded row counts; blanks are skipped; only plain
+numbers count (CLAUDE.md, owner-confirmed, so `$85,000` is left out); averages
+divide by values read as numbers, so "N/A" is out of both total and count;
+dates count only as `yyyy-mm-dd` or US `m/d/yyyy` (owner decision, like Excel
+with US settings), which is how day-first dates get misread.
+
+**One evaluator, two readings.** `evaluate(question, reading)` builds one
+aggregate SQL query. `BeforeReading` reads the raw table; `AfterReading` reads
+the cleaned table, or a recipe's step chain without building a table. Columns a
+recipe left as text use the same spreadsheet rules after, so skipping a fix
+never quietly improves an answer.
+
+**Question generation** (cap 16, owner decision): row count; distinct IDs;
+average and total for each number column (no total for percentages; totals of
+columns like Age are kept for now); counts per category for the first 3
+categories with 2–25 groups once spelling is ignored; the fullest number column
+averaged by the first 2; count and average per month (≤ 24 months) or year for
+each date column; distinct contact values; then remaining breakdowns.
+Prominence: headline 1.0, averages/totals 0.8, breakdowns 0.6, trends 0.5,
+other distinct counts 0.4.
+
+**Contract additions** (owner approved): `Question.id` (hash of the spec),
+`grain`, `prominence`; `Answer`, `GroupValue`, `GroupDiff`; `AnswerDiff.magnitude`;
+`Issue.moves_answers`.
+
+**Magnitude and impact.** Single values: relative change capped at 1; only one
+side answerable is 1. Counts per group: half the sum of absolute changes in each
+group's share of rows. Averages per group: row-weighted relative change, with
+appearing/disappearing groups counting fully. Impact = prominence × magnitude;
+ranked by impact, then prominence, then question order. Changes within 1e-9
+relative are rounding noise.
+
+**Groups that appear or disappear.** Groups are matched on the case-insensitive
+key. A disappeared group whose key equals a surviving one once spacing is
+ignored gets `merged_into` ("Active " → "Active"). Missing groups count as 0 for
+counts and have no value for averages. Breakdowns show 20 groups plus "All other
+groups"; queries return at most 1,000 groups and roll the rest up in SQL.
+Within equal sizes, the blank group sorts last; equally common spellings are
+labeled alphabetically.
+
+**Issue impact from answers** (owner decision on ask tiers). Each issue compares
+a recipe of only the issues it requires against one that adds its fix, over the
+questions it could move (all questions when the fix removes rows). Ask-tier
+issues take the choice that moves answers most. Issues that move nothing score
+0.01 × share of rows affected. Scoring reads recipe chains directly and never
+touches the user's cleaned table. Worked example: "N/A" in Salary scores 0.0188
+(average moves 85,155.06 → 83,151.41 only when N/A means zero).
+
+**Performance.** Every answer is one aggregate query; no table comes into
+Python. Answers are cached by (reading key, question id): "before" once per
+dataset, "after" per recipe fingerprint. A 300k-row file answers all questions
+well within the test's limit.

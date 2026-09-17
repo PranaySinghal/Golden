@@ -44,7 +44,10 @@ def detect_issues(
     conn: duckdb.DuckDBPyConnection, profile: DatasetProfile, today: date | None = None
 ) -> list[Issue]:
     ctx = DetectorContext(conn=conn, profile=profile, today=today or date.today())
-    issues = [issue for detector in DETECTORS for issue in detector(ctx)]
+    return rank_issues([issue for detector in DETECTORS for issue in detector(ctx)], profile)
+
+
+def rank_issues(issues: list[Issue], profile: DatasetProfile) -> list[Issue]:
     positions = {c.name: c.position for c in profile.columns}
 
     def rank(issue: Issue) -> tuple[float, int, int, str]:

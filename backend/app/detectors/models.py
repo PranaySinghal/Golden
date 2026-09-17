@@ -67,6 +67,8 @@ class Issue(BaseModel):
     examples: Annotated[list[str], Field(max_length=5)] = Field(default_factory=list)
     # Issues whose steps must run before this one's (e.g. reading a column as numbers).
     requires: list[str] = Field(default_factory=list)
+    # Ids of the questions whose answers this fix changes, once scored.
+    moves_answers: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _steps_match_tier(self) -> Self:

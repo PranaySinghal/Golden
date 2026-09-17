@@ -171,6 +171,13 @@ def _chain(plan: RecipePlan, stage_count: int, materialized: bool) -> tuple[str,
     return "WITH " + ", ".join(parts), params
 
 
+def chain_sql(plan: RecipePlan) -> tuple[str, dict[str, object]]:
+    """A query for the recipe's final rows, for reading them without building a table."""
+    chain, params = _chain(plan, len(plan.stages), materialized=False)
+    last = plan.stages[-1].target if plan.stages else "s0"
+    return f"{chain} SELECT * FROM {last}", params
+
+
 def _build_cleaned(conn: duckdb.DuckDBPyConnection, plan: RecipePlan) -> None:
     chain, params = _chain(plan, len(plan.stages), materialized=False)
     last = plan.stages[-1].target if plan.stages else "s0"
