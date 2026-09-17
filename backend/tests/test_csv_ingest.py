@@ -2,7 +2,7 @@ import duckdb
 import pytest
 
 from app.config import Settings
-from app.db import RAW_TABLE, ROW_ID_COLUMN, table_columns
+from app.db import RAW_REF, RAW_TABLE, ROW_ID_COLUMN, SOURCE_CATALOG, raw_columns
 from app.errors import EmptyFileError, FileTooLargeError, UnreadableFileError
 from app.ingest.csv_adapter import sniff_delimiter
 from app.ingest.models import HeaderMode, IngestOptions
@@ -12,8 +12,9 @@ from tests.conftest import load, raw_rows
 
 def column_types(conn: duckdb.DuckDBPyConnection) -> dict[str, str]:
     rows = conn.execute(
-        "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $t",
-        {"t": RAW_TABLE},
+        "SELECT column_name, data_type FROM information_schema.columns "
+        "WHERE table_catalog = $c AND table_name = $t",
+        {"c": SOURCE_CATALOG, "t": RAW_TABLE},
     ).fetchall()
     return {str(name): str(kind) for name, kind in rows}
 
@@ -218,7 +219,7 @@ def test_blank_and_duplicate_headers_are_made_unique(conn: duckdb.DuckDBPyConnec
 
     assert result.original_headers == ["Name", "", "name", "NAME", " _row_id "]
     assert result.columns == ["Name", "column_2", "name_2", "NAME_3", "_row_id_2"]
-    assert table_columns(conn, RAW_TABLE) == [ROW_ID_COLUMN, *result.columns]
+    assert raw_columns(conn) == [ROW_ID_COLUMN, *result.columns]
 
 
 def test_hostile_column_names_are_safe(conn: duckdb.DuckDBPyConnection) -> None:
@@ -260,7 +261,7 @@ def test_loading_again_replaces_the_raw_table(conn: duckdb.DuckDBPyConnection) -
     load(conn, "a,b\n1,2\n")
     load(conn, "x\n9\n8\n")
 
-    assert table_columns(conn, RAW_TABLE) == [ROW_ID_COLUMN, "x"]
+    assert raw_columns(conn) == [ROW_ID_COLUMN, "x"]
     assert raw_rows(conn) == [(1, "9"), (2, "8")]
 
 
@@ -270,5 +271,5 @@ def test_large_file_loads_all_rows(conn: duckdb.DuckDBPyConnection) -> None:
     result = load(conn, "id,value,group\n" + body)
 
     assert result.row_count == 50_000
-    last = conn.execute(f"SELECT * FROM {RAW_TABLE} ORDER BY {ROW_ID_COLUMN} DESC LIMIT 1")
+    last = conn.execute(f"SELECT * FROM {RAW_REF} ORDER BY {ROW_ID_COLUMN} DESC LIMIT 1")
     assert last.fetchone() == (50_000, "R49999", "74998.5", "cat5")

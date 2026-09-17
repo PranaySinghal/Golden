@@ -8,38 +8,10 @@ from dataclasses import dataclass, field
 
 import duckdb
 
-from app.db import RAW_TABLE, quote_ident
+from app.db import RAW_REF, quote_ident
 from app.profile import patterns as p
+from app.profile.patterns import DATE_FORMATS
 
-# Candidate formats for finding the earliest and latest date. Only used for
-# min/max; they don't decide the role.
-_DATE_FORMATS = [
-    "%Y-%m-%d",
-    "%Y/%m/%d",
-    "%Y.%m.%d",
-    "%m/%d/%Y",
-    "%d/%m/%Y",
-    "%m-%d-%Y",
-    "%d-%m-%Y",
-    "%d.%m.%Y",
-    "%m/%d/%y",
-    "%d/%m/%y",
-    "%d %b %Y",
-    "%d-%b-%Y",
-    "%d-%b-%y",
-    "%d %B %Y",
-    "%b %d, %Y",
-    "%B %d, %Y",
-    "%b %d %Y",
-    "%B %d %Y",
-    "%Y-%m-%d %H:%M:%S",
-    "%Y-%m-%dT%H:%M:%S",
-    "%Y-%m-%d %H:%M",
-    "%m/%d/%Y %H:%M",
-    "%d/%m/%Y %H:%M",
-    "%m/%d/%Y %H:%M:%S",
-    "%d/%m/%Y %H:%M:%S",
-]
 # Share of filled values that must look like dates before min/max is worth computing.
 _DATE_RANGE_MIN_SHARE = 0.5
 
@@ -96,14 +68,14 @@ class ColumnStats:
 
 
 def count_rows(conn: duckdb.DuckDBPyConnection) -> int:
-    row = conn.execute(f"SELECT count(*) FROM {quote_ident(RAW_TABLE)}").fetchone()
+    row = conn.execute(f"SELECT count(*) FROM {RAW_REF}").fetchone()
     return int(row[0]) if row else 0
 
 
 def compute_column_stats(
     conn: duckdb.DuckDBPyConnection, name: str, position: int, row_count: int
 ) -> ColumnStats:
-    """`name` must be a column of the raw table; callers take it from the table schema."""
+    """`name` must be a column of the attached raw table; callers take it from its schema."""
     source = _filled_values_cte(name)
     params = _pattern_params()
 
@@ -213,7 +185,7 @@ def _filled_values_cte(name: str) -> str:
     return (
         "WITH vals AS ("
         f"  SELECT {col} AS raw, regexp_replace({col}, '^\\s+|\\s+$', '', 'g') AS t"
-        f"  FROM {quote_ident(RAW_TABLE)}"
+        f"  FROM {RAW_REF}"
         "), nb AS (SELECT raw, t FROM vals WHERE t IS NOT NULL AND t <> '') "
     )
 
@@ -341,15 +313,15 @@ def _date_range(conn: duckdb.DuckDBPyConnection, source: str) -> tuple[str | Non
     or less, so month/day and day/month both work) and they disagree about the
     range, the order is ambiguous and no range is reported rather than guessing.
     """
-    params = {f"f{index}": fmt for index, fmt in enumerate(_DATE_FORMATS)}
+    params = {f"f{index}": fmt for index, fmt in enumerate(DATE_FORMATS)}
     counts_sql = ", ".join(
-        f"count(try_strptime(t, $f{index}))" for index in range(len(_DATE_FORMATS))
+        f"count(try_strptime(t, $f{index}))" for index in range(len(DATE_FORMATS))
     )
     counts = conn.execute(source + f"SELECT {counts_sql} FROM nb", params).fetchone()
     if counts is None or max(counts) == 0:
         return None, None
     best = max(counts)
-    tied = [fmt for count, fmt in zip(counts, _DATE_FORMATS, strict=True) if count == best]
+    tied = [fmt for count, fmt in zip(counts, DATE_FORMATS, strict=True) if count == best]
     ranges = {_range_for_format(conn, source, fmt) for fmt in tied}
     if len(ranges) != 1:
         return None, None

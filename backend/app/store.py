@@ -1,23 +1,30 @@
 """In-memory dataset sessions. Nothing outlives the server process (a stated non-goal).
 
-Each dataset gets its own in-memory DuckDB database, so datasets can't see each
-other's tables and removing one frees its memory by closing the connection.
+Each dataset gets a workspace folder holding its raw table as a DuckDB file,
+attached read-only to the session's own in-memory database. Datasets can't see
+each other's tables, and closing a session deletes its workspace.
 """
 
 import threading
 import uuid
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 
 import duckdb
 
 from app.config import Settings
+from app.db import create_workspace, open_dataset_connection, raw_db_path, remove_workspace
 from app.errors import DatasetNotFoundError
-from app.ingest.loader import ingest
+from app.ingest.loader import ingest_to_file
 from app.ingest.models import IngestOptions, IngestResult
 from app.profile.models import DatasetProfile
 from app.profile.profiler import profile_table
+from app.steps.apply import ApplyResult
+from app.steps.models import Recipe
+from app.steps.recipe_ops import RecipeHistory
+from app.steps.schema import StageSchema, base_schema
 
 
 @dataclass
@@ -29,6 +36,29 @@ class DatasetSession:
     # "first row is data") without asking the user to upload it again.
     source_bytes: bytes
     options: IngestOptions
+    workspace: Path
+    conn: duckdb.DuckDBPyConnection
+    ingest: IngestResult
+    profile: DatasetProfile
+    recipe: Recipe = field(default_factory=Recipe)
+    history: RecipeHistory = field(default_factory=RecipeHistory)
+    applied: ApplyResult | None = None
+    # One DuckDB connection isn't safe to use from two threads at once.
+    lock: threading.RLock = field(default_factory=threading.RLock)
+
+    @property
+    def base_schema(self) -> StageSchema:
+        return base_schema(self.profile)
+
+    def close(self) -> None:
+        with self.lock:
+            self.conn.close()
+        remove_workspace(self.workspace)
+
+
+@dataclass(frozen=True)
+class _Loaded:
+    workspace: Path
     conn: duckdb.DuckDBPyConnection
     ingest: IngestResult
     profile: DatasetProfile
@@ -45,22 +75,23 @@ class DatasetStore:
     ) -> DatasetSession:
         options = options or IngestOptions()
         # Loading happens outside the lock: it's the slow part and touches no shared state.
-        conn, result, profile = self._load(filename, data, options)
+        loaded = self._load(filename, data, options)
         session = DatasetSession(
             id=uuid.uuid4().hex,
             created_at=datetime.now(UTC),
             filename=filename,
             source_bytes=data,
             options=options,
-            conn=conn,
-            ingest=result,
-            profile=profile,
+            workspace=loaded.workspace,
+            conn=loaded.conn,
+            ingest=loaded.ingest,
+            profile=loaded.profile,
         )
         with self._lock:
             self._sessions[session.id] = session
             evicted = self._evict_over_limit()
         for old in evicted:
-            old.conn.close()
+            old.close()
         return session
 
     def get(self, dataset_id: str) -> DatasetSession:
@@ -73,26 +104,29 @@ class DatasetStore:
     def reingest(self, dataset_id: str, options: IngestOptions) -> DatasetSession:
         """Read the same file again with new options, keeping the dataset id.
 
-        If reading fails, the existing session is left untouched.
+        The columns can change (for example when the first row becomes data), so
+        the recipe starts empty. If reading fails, the existing session is left
+        untouched.
         """
         current = self.get(dataset_id)
-        conn, result, profile = self._load(current.filename, current.source_bytes, options)
+        loaded = self._load(current.filename, current.source_bytes, options)
         replacement = DatasetSession(
             id=current.id,
             created_at=current.created_at,
             filename=current.filename,
             source_bytes=current.source_bytes,
             options=options,
-            conn=conn,
-            ingest=result,
-            profile=profile,
+            workspace=loaded.workspace,
+            conn=loaded.conn,
+            ingest=loaded.ingest,
+            profile=loaded.profile,
         )
         with self._lock:
             if dataset_id not in self._sessions:
-                conn.close()
+                replacement.close()
                 raise DatasetNotFoundError(dataset_id)
             self._sessions[dataset_id] = replacement
-        current.conn.close()
+        current.close()
         return replacement
 
     def delete(self, dataset_id: str) -> None:
@@ -100,23 +134,32 @@ class DatasetStore:
             session = self._sessions.pop(dataset_id, None)
         if session is None:
             raise DatasetNotFoundError(dataset_id)
-        session.conn.close()
+        session.close()
+
+    def close_all(self) -> None:
+        with self._lock:
+            sessions = list(self._sessions.values())
+            self._sessions.clear()
+        for session in sessions:
+            session.close()
 
     def __len__(self) -> int:
         with self._lock:
             return len(self._sessions)
 
-    def _load(
-        self, filename: str, data: bytes, options: IngestOptions
-    ) -> tuple[duckdb.DuckDBPyConnection, IngestResult, DatasetProfile]:
-        conn = duckdb.connect(":memory:")
+    def _load(self, filename: str, data: bytes, options: IngestOptions) -> _Loaded:
+        workspace = create_workspace()
+        conn: duckdb.DuckDBPyConnection | None = None
         try:
-            result = ingest(conn, filename, data, options, self._settings)
+            result = ingest_to_file(raw_db_path(workspace), filename, data, options, self._settings)
+            conn = open_dataset_connection(raw_db_path(workspace))
             profile = profile_table(conn)
         except BaseException:
-            conn.close()
+            if conn is not None:
+                conn.close()
+            remove_workspace(workspace)
             raise
-        return conn, result, profile
+        return _Loaded(workspace=workspace, conn=conn, ingest=result, profile=profile)
 
     def _evict_over_limit(self) -> list[DatasetSession]:
         evicted: list[DatasetSession] = []

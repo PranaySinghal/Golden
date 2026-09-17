@@ -78,6 +78,10 @@ semantic role inference, an in-memory dataset store, and a second small sample d
 
 **Out of scope:** detectors, steps, UI screens beyond a placeholder, AI.
 
+**Status:** done. Owner-approved additions made during M1: `IngestOptions.header`
+(the "first row is data" override) and a `_row_id` column on the raw table.
+The frontend placeholder was replaced by the upload screen in M2.
+
 **Acceptance criteria:**
 - `uv run pytest`, `ruff`, and `mypy` pass. The frontend builds and runs.
 - Profiling the employee file gives sensible roles: ID → identifier, Email →
@@ -114,15 +118,26 @@ compiling each step to parameterized DuckDB SQL, the `Recipe` model
 undo/disable, set-aside rows, row-level lineage (which step changed which cell),
 and exporting the cleaned CSV and the recipe as JSON.
 
-**Out of scope:** deciding which steps to propose (that's M3), the UI, AI.
+*Pulled forward from M6 (owner decision):* a basic upload screen: the upload,
+dataset, and re-read endpoints, a file summary, a column table (kind, how full,
+different values, range, examples, and a hover note explaining each kind), a
+sheet picker for Excel, and a "First row has column names" toggle. Also the
+product name, TidyLab.
+
+**Out of scope:** deciding which steps to propose (that's M3), recipe and issue UI, AI.
 
 **Acceptance criteria:**
 - Each step type has unit tests, including no-op cases and invalid parameters.
 - Raw data is never changed. Disabling a step produces the same result as never adding it.
+- A step that depends on a disabled step is marked blocked with a reason, and the rest
+  of the recipe still applies.
 - Identifiers are validated against the profile. No SQL is built from raw strings.
 - A recipe replays on a different file with a compatible schema. On an incompatible one,
   it fails with a clear message.
 - Lineage answers "what was this cell before, and which step changed it?"
+- The exported CSV neutralizes spreadsheet formulas with a leading `'`.
+- A user can upload a CSV or Excel file in the browser, see what each column holds,
+  and switch sheets or the header setting.
 
 **Prompt:**
 ```
@@ -251,15 +266,16 @@ and tests. Don't write code until I approve.
 **Goal:** the user can upload a file and review issues in the browser.
 
 **In scope:** REST endpoints (proposed shape below; confirm in the plan),
-generated TypeScript API types, the upload screen, the data summary,
 issue cards grouped by tier and sorted by impact, accept/reject/answer
 actions, the recipe panel with undo, before/after previews on each card,
-and loading, empty, and error states.
+and loading, empty, and error states. Builds on the upload screen, data
+summary, and generated API types that already exist from M2.
 
-Proposed endpoints:
+Proposed endpoints (the first three exist since M2):
 ```
-POST   /api/datasets                      upload → dataset id + summary
-GET    /api/datasets/{id}/profile
+POST   /api/datasets                      upload → dataset id + summary   (done in M2)
+GET    /api/datasets/{id}                 summary + column profile        (done in M2)
+POST   /api/datasets/{id}/reingest        re-read with sheet/header       (done in M2)
 GET    /api/datasets/{id}/issues
 GET    /api/datasets/{id}/recipe
 POST   /api/datasets/{id}/recipe/steps    add/accept a step (or answer a question)
@@ -280,8 +296,8 @@ GET    /api/datasets/{id}/export?format=csv|recipe
 ```
 Read CLAUDE.md and docs/PLAN.md. M1–M5 are done. We are on M6.
 Propose a plan for M6 only: the REST API (start from the endpoints in PLAN.md
-and suggest changes if needed), OpenAPI type generation, and the review UI:
-upload, data summary, issue cards grouped by tier and sorted by impact,
+and suggest changes if needed) and the review UI, building on the existing
+upload screen: issue cards grouped by tier and sorted by impact,
 accept/reject/answer actions, the recipe panel with undo, before/after previews,
 and loading/empty/error states.
 Include: the endpoint list with request/response models, the component tree,

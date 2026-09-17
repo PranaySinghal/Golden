@@ -1,6 +1,12 @@
 import type { components } from './schema'
 
 export type HealthResponse = components['schemas']['HealthResponse']
+export type DatasetSummary = components['schemas']['DatasetSummary']
+export type ColumnProfile = components['schemas']['ColumnProfile']
+export type SemanticRole = components['schemas']['SemanticRole']
+export type HeaderMode = components['schemas']['HeaderMode']
+export type ReingestRequest = components['schemas']['ReingestRequest']
+export type UploadLimits = components['schemas']['UploadLimits']
 type ErrorResponse = components['schemas']['ErrorResponse']
 
 export class ApiError extends Error {
@@ -57,6 +63,32 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T
 }
 
+export interface UploadOptions {
+  sheet?: string | null
+  header?: HeaderMode
+}
+
+function uploadDataset(file: File, options: UploadOptions = {}): Promise<DatasetSummary> {
+  const form = new FormData()
+  form.append('file', file)
+  if (options.sheet) form.append('sheet', options.sheet)
+  if (options.header) form.append('header', options.header)
+  // No Content-Type header: the browser sets the multipart boundary itself.
+  return request<DatasetSummary>('/api/datasets', { method: 'POST', body: form })
+}
+
+function reingestDataset(id: string, body: ReingestRequest): Promise<DatasetSummary> {
+  return request<DatasetSummary>(`/api/datasets/${encodeURIComponent(id)}/reingest`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
 export const api = {
   getHealth: () => request<HealthResponse>('/api/health'),
+  getUploadLimits: () => request<UploadLimits>('/api/upload-limits'),
+  getDataset: (id: string) => request<DatasetSummary>(`/api/datasets/${encodeURIComponent(id)}`),
+  uploadDataset,
+  reingestDataset,
 }

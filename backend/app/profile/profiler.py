@@ -1,6 +1,6 @@
 import duckdb
 
-from app.db import RAW_TABLE, ROW_ID_COLUMN, table_columns
+from app.db import ROW_ID_COLUMN, raw_columns
 from app.profile.models import (
     ColumnProfile,
     DatasetProfile,
@@ -23,7 +23,7 @@ _MAX_EXACT_WHOLE = 2**53
 
 def profile_table(conn: duckdb.DuckDBPyConnection) -> DatasetProfile:
     row_count = count_rows(conn)
-    names = [name for name in table_columns(conn, RAW_TABLE) if name != ROW_ID_COLUMN]
+    names = [name for name in raw_columns(conn) if name != ROW_ID_COLUMN]
     columns = [
         profile_column(compute_column_stats(conn, name, position, row_count))
         for position, name in enumerate(names)

@@ -1,5 +1,8 @@
 """Load any supported file into a DuckDB table named `raw`.
 
+The connection passed in is a writable database file in the dataset's
+workspace; sessions later attach that file read-only (see app/db.py).
+
 Every value is stored as text exactly as it appeared (blank cells become NULL),
 plus a `_row_id` column holding each row's position in the file. Nothing is
 parsed or cleaned here; that happens later and never touches this table.
@@ -92,6 +95,21 @@ def ingest(
         row_count=row_count,
         empty_rows_skipped=skip_empty.skipped,
     )
+
+
+def ingest_to_file(
+    raw_path: Path,
+    filename: str,
+    data: bytes,
+    options: IngestOptions,
+    settings: Settings,
+) -> IngestResult:
+    """Ingest into a new database file, closing it so it can be attached read-only."""
+    conn = duckdb.connect(str(raw_path))
+    try:
+        return ingest(conn, filename, data, options, settings)
+    finally:
+        conn.close()
 
 
 def _write_normalized_csv(path: Path, rows: Iterable[list[str | None]]) -> tuple[int, int]:

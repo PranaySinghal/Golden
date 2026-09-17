@@ -1,5 +1,5 @@
 [project]
-name = "golden-analytics-backend"
+name = "tidylab-backend"
 version = "0.1.0"
 description = "Backend for the data cleaning and answer comparison app"
 requires-python = ">=3.12,<3.13"
@@ -7,6 +7,7 @@ dependencies = [
     "duckdb>=1.5.5",
     "fastapi>=0.141.1",
     "openpyxl>=3.1.5",
+    "python-multipart>=0.0.32",
     "uvicorn>=0.53.0",
 ]
 

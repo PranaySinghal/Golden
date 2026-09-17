@@ -1,14 +1,15 @@
-import { BackendStatus } from './components/BackendStatus'
+import { UploadPage } from './features/upload/UploadPage'
 
 export default function App() {
   return (
-    <main className="page">
-      <h1>Golden Analytics</h1>
-      <p className="lede">
-        Clean up a spreadsheet and see how the cleanup changes the answers it gives you.
-      </p>
-      <BackendStatus />
-      <p className="placeholder">File upload is coming next.</p>
-    </main>
+    <div className="app">
+      <header className="masthead">
+        <h1 className="masthead__title">TidyLab</h1>
+        <p className="masthead__tagline">Tidy your data. See what it was hiding.</p>
+      </header>
+      <main className="page">
+        <UploadPage />
+      </main>
+    </div>
   )
 }

@@ -21,10 +21,188 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/upload-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Upload Limits */
+        get: operations["getUploadLimits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Dataset */
+        post: operations["uploadDataset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dataset */
+        get: operations["getDataset"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/reingest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reingest Dataset */
+        post: operations["reingestDataset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Body_uploadDataset */
+        Body_uploadDataset: {
+            /**
+             * File
+             * @description A CSV or Excel (.xlsx) file.
+             */
+            file: string;
+            /** Sheet */
+            sheet?: string | null;
+            /** @default auto */
+            header: components["schemas"]["HeaderMode"];
+        };
+        /**
+         * ColumnFlag
+         * @enum {string}
+         */
+        ColumnFlag: "low_uniqueness" | "all_blank" | "mostly_blank" | "constant" | "name_hint_used";
+        /** ColumnProfile */
+        ColumnProfile: {
+            /** Name */
+            name: string;
+            /**
+             * Position
+             * @description Zero-based position among the file's columns.
+             */
+            position: number;
+            physical_type: components["schemas"]["PhysicalType"];
+            semantic_role: components["schemas"]["SemanticRole"];
+            /**
+             * Role Confidence
+             * @description How sure the role guess is, from 0 to 1.
+             */
+            role_confidence: number;
+            /**
+             * Role Note
+             * @description Plain-language reason for the role, suitable for a hover note.
+             */
+            role_note: string;
+            /** Flags */
+            flags: components["schemas"]["ColumnFlag"][];
+            /** Row Count */
+            row_count: number;
+            /** Non Blank Count */
+            non_blank_count: number;
+            /** Fill Rate */
+            fill_rate: number;
+            /** Distinct Count */
+            distinct_count: number;
+            /**
+             * Uniqueness
+             * @description Distinct values divided by filled values.
+             */
+            uniqueness: number;
+            /** Patterns */
+            patterns: components["schemas"]["DetectedPattern"][];
+            /**
+             * Min Value
+             * @description Smallest number or earliest date, when typed.
+             */
+            min_value: string | null;
+            /**
+             * Max Value
+             * @description Largest number or latest date, when typed.
+             */
+            max_value: string | null;
+            /**
+             * Sample Values
+             * @description Up to 5 of the most frequent values.
+             */
+            sample_values: string[];
+        };
+        /** DatasetSummary */
+        DatasetSummary: {
+            /** Id */
+            id: string;
+            /** Filename */
+            filename: string;
+            format: components["schemas"]["SourceFormat"];
+            /** Sheet Name */
+            sheet_name: string | null;
+            /** Available Sheets */
+            available_sheets: string[];
+            header_mode: components["schemas"]["HeaderMode"];
+            /** Header Detected */
+            header_detected: boolean;
+            /** Row Count */
+            row_count: number;
+            /** Column Count */
+            column_count: number;
+            /** Empty Rows Skipped */
+            empty_rows_skipped: number;
+            /** Columns */
+            columns: components["schemas"]["ColumnProfile"][];
+        };
+        /** DetectedPattern */
+        DetectedPattern: {
+            kind: components["schemas"]["PatternKind"];
+            /** Match Count */
+            match_count: number;
+            /**
+             * Match Rate
+             * @description Share of filled values that match, from 0 to 1.
+             */
+            match_rate: number;
+            /**
+             * Detail
+             * @description Extra context, e.g. the placeholder text "N/A", a code shape "AAA9999", or the separator "-".
+             */
+            detail?: string | null;
+        };
         /** ErrorResponse */
         ErrorResponse: {
             /** Code */
@@ -32,6 +210,15 @@ export interface components {
             /** Message */
             message: string;
         };
+        /**
+         * HeaderMode
+         * @description Whether the first row holds column names.
+         *
+         *     AUTO guesses from the values; the other two let the user override the guess
+         *     (the "first row is data" toggle).
+         * @enum {string}
+         */
+        HeaderMode: "auto" | "header" | "data";
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -39,6 +226,42 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /**
+         * PatternKind
+         * @enum {string}
+         */
+        PatternKind: "email" | "phone" | "url" | "date_year_first" | "date_numeric" | "date_text" | "datetime" | "integer" | "decimal" | "currency" | "percent" | "thousands_separator" | "boolean" | "leading_zeros" | "placeholder" | "code_shape" | "delimited";
+        /**
+         * PhysicalType
+         * @description The dominant shape of the values. Storage is always text.
+         * @enum {string}
+         */
+        PhysicalType: "empty" | "boolean" | "integer" | "decimal" | "date" | "datetime" | "text";
+        /** ReingestRequest */
+        ReingestRequest: {
+            /**
+             * Sheet
+             * @description Excel sheet; None means the first one.
+             */
+            sheet?: string | null;
+            /** @default auto */
+            header: components["schemas"]["HeaderMode"];
+        };
+        /**
+         * SemanticRole
+         * @enum {string}
+         */
+        SemanticRole: "identifier" | "category" | "measure" | "date" | "contact" | "text";
+        /**
+         * SourceFormat
+         * @enum {string}
+         */
+        SourceFormat: "csv" | "xlsx";
+        /** UploadLimits */
+        UploadLimits: {
+            /** Max Upload Bytes */
+            max_upload_bytes: number;
         };
     };
     responses: never;
@@ -65,6 +288,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getUploadLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadLimits"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    uploadDataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_uploadDataset"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetSummary"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetSummary"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reingestDataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReingestRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetSummary"];
                 };
             };
             /** @description A problem the user can fix */
