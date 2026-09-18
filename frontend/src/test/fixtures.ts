@@ -1,4 +1,12 @@
-import type { ColumnProfile, DatasetSummary } from '../api/client'
+import type {
+  ColumnProfile,
+  DatasetSummary,
+  IssueListResponse,
+  IssueView,
+  Preview,
+  RecipeResponse,
+  StepView,
+} from '../api/client'
 
 export function column(overrides: Partial<ColumnProfile> = {}): ColumnProfile {
   return {
@@ -48,6 +56,111 @@ export function dataset(overrides: Partial<DatasetSummary> = {}): DatasetSummary
         sample_values: ['N/A', '52031.74'],
       }),
     ],
+    ...overrides,
+  }
+}
+
+export function step(overrides: Partial<StepView> = {}): StepView {
+  return {
+    id: 'step-1',
+    type: 'cast_number',
+    label: 'Read as numbers',
+    description: 'Read "Salary" as numbers',
+    columns: ['Salary'],
+    enabled: true,
+    status: 'applied',
+    reason: null,
+    rows_set_aside: 0,
+    cells_changed: 24,
+    issue_id: 'issue-safe',
+    ...overrides,
+  }
+}
+
+export function recipe(overrides: Partial<RecipeResponse> = {}): RecipeResponse {
+  return {
+    steps: [step()],
+    can_undo: false,
+    row_count: 1020,
+    set_aside_count: 0,
+    columns: [{ name: 'Salary', kind: 'number' }],
+    ...overrides,
+  }
+}
+
+export function issue(overrides: Partial<IssueView> = {}): IssueView {
+  return {
+    id: 'issue-likely',
+    detector: 'extra_spaces',
+    columns: ['First_Name'],
+    title: '38 names have extra spaces around them',
+    explanation: 'Extra spaces split one name into two groups when you count them.',
+    examples: [' Ann ', 'Bo  '],
+    affected_rows: 38,
+    tier: 'likely',
+    impact: 0.4,
+    ask: null,
+    state: 'available',
+    chosen_choice_id: null,
+    step_ids: [],
+    ...overrides,
+  }
+}
+
+export function askIssue(overrides: Partial<IssueView> = {}): IssueView {
+  return issue({
+    id: 'issue-ask',
+    detector: 'placeholders',
+    columns: ['Salary'],
+    title: '24 "Salary" values say "N/A" instead of a number',
+    tier: 'ask',
+    impact: 0.8,
+    ask: {
+      prompt: 'What should "N/A" mean in "Salary"?',
+      choices: [
+        {
+          id: 'missing',
+          label: 'Treat them as missing',
+          description: 'Leave them out of totals and averages.',
+          steps: [],
+          recommended: true,
+        },
+        {
+          id: 'zero',
+          label: 'Treat them as zero',
+          description: 'Count them as 0, which pulls the average down.',
+          steps: [],
+          recommended: false,
+        },
+      ],
+    },
+    ...overrides,
+  })
+}
+
+export function issueList(overrides: Partial<IssueListResponse> = {}): IssueListResponse {
+  return {
+    issues: [askIssue(), issue()],
+    counts: { safe: 1, likely: 1, ask: 1 },
+    needs_decision: 1,
+    recipe: recipe(),
+    ...overrides,
+  }
+}
+
+export function preview(overrides: Partial<Preview> = {}): Preview {
+  return {
+    columns: ['First_Name'],
+    rows: [
+      {
+        row_id: 3,
+        cells: { First_Name: { before: ' Ann ', after: 'Ann', changed: true } },
+        set_aside: false,
+      },
+    ],
+    changed_rows: 38,
+    set_aside_rows: 0,
+    note: null,
     ...overrides,
   }
 }

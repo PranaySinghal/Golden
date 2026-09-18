@@ -2,32 +2,18 @@
 
 from typing import Annotated, BinaryIO
 
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
+from fastapi import APIRouter, File, Form, UploadFile, status
 from pydantic import BaseModel, Field
 
-from app.config import Settings
+from app.api.deps import SettingsDep, StoreDep
 from app.errors import FileTooLargeError
 from app.ingest.models import HeaderMode, IngestOptions, SourceFormat
 from app.profile.models import ColumnProfile
-from app.store import DatasetSession, DatasetStore
+from app.store import DatasetSession
 
 router = APIRouter(prefix="/api", tags=["datasets"])
 
 _CHUNK_BYTES = 1024 * 1024
-
-
-def get_store(request: Request) -> DatasetStore:
-    store: DatasetStore = request.app.state.store
-    return store
-
-
-def get_app_settings(request: Request) -> Settings:
-    settings: Settings = request.app.state.settings
-    return settings
-
-
-StoreDep = Annotated[DatasetStore, Depends(get_store)]
-SettingsDep = Annotated[Settings, Depends(get_app_settings)]
 
 
 class UploadLimits(BaseModel):

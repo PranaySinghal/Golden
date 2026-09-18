@@ -201,10 +201,522 @@
           }
         }
       }
+    },
+    "/api/datasets/{dataset_id}/issues": {
+      "get": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Get Issues",
+        "operationId": "getIssues",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueListResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/issues/{issue_id}/accept": {
+      "post": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Accept Issue",
+        "operationId": "acceptIssue",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "issue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Issue Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/issues/{issue_id}/reject": {
+      "post": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Reject Issue",
+        "operationId": "rejectIssue",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "issue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Issue Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/recipe": {
+      "get": {
+        "tags": [
+          "recipe"
+        ],
+        "summary": "Get Recipe",
+        "operationId": "getRecipe",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/recipe/steps/{step_id}": {
+      "patch": {
+        "tags": [
+          "recipe"
+        ],
+        "summary": "Update Step",
+        "operationId": "updateStep",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "step_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Step Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipe"
+        ],
+        "summary": "Remove Step",
+        "operationId": "removeStep",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "step_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Step Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/recipe/undo": {
+      "post": {
+        "tags": [
+          "recipe"
+        ],
+        "summary": "Undo Recipe",
+        "operationId": "undoRecipe",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/preview": {
+      "get": {
+        "tags": [
+          "preview"
+        ],
+        "summary": "Get Preview",
+        "operationId": "getPreview",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "issue_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Issue Id"
+            }
+          },
+          {
+            "name": "choice_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Choice Id"
+            }
+          },
+          {
+            "name": "step_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Step Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 5,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AcceptRequest": {
+        "properties": {
+          "choice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Choice Id"
+          }
+        },
+        "type": "object",
+        "title": "AcceptRequest"
+      },
+      "AskQuestion": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/Choice"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "Choices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "choices"
+        ],
+        "title": "AskQuestion"
+      },
+      "BlankCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "blank",
+            "title": "Kind",
+            "default": "blank"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column"
+        ],
+        "title": "BlankCondition"
+      },
       "Body_uploadDataset": {
         "properties": {
           "file": {
@@ -234,6 +746,223 @@
           "file"
         ],
         "title": "Body_uploadDataset"
+      },
+      "CastNumberStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "cast_number",
+            "title": "Type",
+            "default": "cast_number"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "decimal_separator": {
+            "type": "string",
+            "enum": [
+              ".",
+              ","
+            ],
+            "title": "Decimal Separator",
+            "default": "."
+          },
+          "percent": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "fraction"
+            ],
+            "title": "Percent",
+            "default": "keep"
+          },
+          "allow_k_m_suffix": {
+            "type": "boolean",
+            "title": "Allow K M Suffix",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column"
+        ],
+        "title": "CastNumberStep"
+      },
+      "Choice": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "steps": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrimStep"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveCharactersStep"
+                },
+                {
+                  "$ref": "#/components/schemas/NormalizeCaseStep"
+                },
+                {
+                  "$ref": "#/components/schemas/MapValuesStep"
+                },
+                {
+                  "$ref": "#/components/schemas/NullPlaceholdersStep"
+                },
+                {
+                  "$ref": "#/components/schemas/CastNumberStep"
+                },
+                {
+                  "$ref": "#/components/schemas/ParseDateStep"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitColumnStep"
+                },
+                {
+                  "$ref": "#/components/schemas/DedupeStep"
+                },
+                {
+                  "$ref": "#/components/schemas/SetAsideRowsStep"
+                },
+                {
+                  "$ref": "#/components/schemas/ClearValuesStep"
+                },
+                {
+                  "$ref": "#/components/schemas/FillMissingStep"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "cast_number": "#/components/schemas/CastNumberStep",
+                  "clear_values": "#/components/schemas/ClearValuesStep",
+                  "dedupe": "#/components/schemas/DedupeStep",
+                  "fill_missing": "#/components/schemas/FillMissingStep",
+                  "map_values": "#/components/schemas/MapValuesStep",
+                  "normalize_case": "#/components/schemas/NormalizeCaseStep",
+                  "null_placeholders": "#/components/schemas/NullPlaceholdersStep",
+                  "parse_date": "#/components/schemas/ParseDateStep",
+                  "remove_characters": "#/components/schemas/RemoveCharactersStep",
+                  "set_aside_rows": "#/components/schemas/SetAsideRowsStep",
+                  "split_column": "#/components/schemas/SplitColumnStep",
+                  "trim": "#/components/schemas/TrimStep"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "recommended": {
+            "type": "boolean",
+            "title": "Recommended",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "description"
+        ],
+        "title": "Choice",
+        "description": "One answer to an ask-tier question."
+      },
+      "ClearValuesStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "clear_values",
+            "title": "Type",
+            "default": "clear_values"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "condition": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BlankCondition"
+              },
+              {
+                "$ref": "#/components/schemas/EqualsCondition"
+              },
+              {
+                "$ref": "#/components/schemas/OneOfCondition"
+              },
+              {
+                "$ref": "#/components/schemas/RowIdsCondition"
+              },
+              {
+                "$ref": "#/components/schemas/OutsideRangeCondition"
+              },
+              {
+                "$ref": "#/components/schemas/NotMatchingCondition"
+              },
+              {
+                "$ref": "#/components/schemas/DigitsFewerThanCondition"
+              }
+            ],
+            "title": "Condition",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "blank": "#/components/schemas/BlankCondition",
+                "digits_fewer_than": "#/components/schemas/DigitsFewerThanCondition",
+                "equals": "#/components/schemas/EqualsCondition",
+                "not_matching": "#/components/schemas/NotMatchingCondition",
+                "one_of": "#/components/schemas/OneOfCondition",
+                "outside_range": "#/components/schemas/OutsideRangeCondition",
+                "row_ids": "#/components/schemas/RowIdsCondition"
+              }
+            }
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "condition"
+        ],
+        "title": "ClearValuesStep",
+        "description": "Blank out values that match a condition, keeping the rest of the row."
       },
       "ColumnFlag": {
         "type": "string",
@@ -436,6 +1165,73 @@
         ],
         "title": "DatasetSummary"
       },
+      "DedupeStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "dedupe",
+            "title": "Type",
+            "default": "dedupe"
+          },
+          "columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 500,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columns"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "ignore_case_and_spaces"
+            ],
+            "title": "Match",
+            "default": "exact"
+          },
+          "keep": {
+            "type": "string",
+            "enum": [
+              "first",
+              "last"
+            ],
+            "title": "Keep",
+            "default": "first"
+          },
+          "keep_row_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "title": "Keep Row Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DedupeStep"
+      },
       "DetectedPattern": {
         "properties": {
           "kind": {
@@ -471,6 +1267,96 @@
         ],
         "title": "DetectedPattern"
       },
+      "DetectorName": {
+        "type": "string",
+        "enum": [
+          "placeholders",
+          "numbers_as_text",
+          "dates",
+          "category_variants",
+          "extra_spaces",
+          "combined_columns",
+          "duplicates",
+          "identifier_repeats",
+          "out_of_range",
+          "contact_formats",
+          "missing_values"
+        ],
+        "title": "DetectorName"
+      },
+      "DigitsFewerThanCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "digits_fewer_than",
+            "title": "Kind",
+            "default": "digits_fewer_than"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "count": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "count"
+        ],
+        "title": "DigitsFewerThanCondition",
+        "description": "Filled values with fewer digits than `count`, e.g. phone numbers that are too short."
+      },
+      "EqualsCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "equals",
+            "title": "Kind",
+            "default": "equals"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Value"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "ignore_case_and_spaces"
+            ],
+            "title": "Match",
+            "default": "exact"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "value"
+        ],
+        "title": "EqualsCondition"
+      },
       "ErrorResponse": {
         "properties": {
           "code": {
@@ -488,6 +1374,64 @@
           "message"
         ],
         "title": "ErrorResponse"
+      },
+      "FillMissingStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "fill_missing",
+            "title": "Type",
+            "default": "fill_missing"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "value",
+              "mean",
+              "median",
+              "most_common",
+              "previous"
+            ],
+            "title": "Strategy"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "strategy"
+        ],
+        "title": "FillMissingStep"
       },
       "HeaderMode": {
         "type": "string",
@@ -512,6 +1456,501 @@
           "status"
         ],
         "title": "HealthResponse"
+      },
+      "IssueListResponse": {
+        "properties": {
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueView"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/Tier"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "needs_decision": {
+            "type": "integer",
+            "title": "Needs Decision",
+            "default": 0
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe"
+        ],
+        "title": "IssueListResponse"
+      },
+      "IssueView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "detector": {
+            "$ref": "#/components/schemas/DetectorName"
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "examples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Examples"
+          },
+          "affected_rows": {
+            "type": "integer",
+            "title": "Affected Rows"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/Tier"
+          },
+          "impact": {
+            "type": "number",
+            "title": "Impact"
+          },
+          "ask": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AskQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "applied",
+              "available",
+              "rejected"
+            ],
+            "title": "State"
+          },
+          "chosen_choice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chosen Choice Id"
+          },
+          "step_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Step Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "detector",
+          "columns",
+          "title",
+          "explanation",
+          "affected_rows",
+          "tier",
+          "impact",
+          "state"
+        ],
+        "title": "IssueView"
+      },
+      "MapValuesStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "map_values",
+            "title": "Type",
+            "default": "map_values"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "mappings": {
+            "items": {
+              "$ref": "#/components/schemas/ValueMapping"
+            },
+            "type": "array",
+            "maxItems": 1000,
+            "minItems": 1,
+            "title": "Mappings"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "ignore_case_and_spaces"
+            ],
+            "title": "Match",
+            "default": "exact"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "mappings"
+        ],
+        "title": "MapValuesStep"
+      },
+      "NormalizeCaseStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "normalize_case",
+            "title": "Type",
+            "default": "normalize_case"
+          },
+          "columns": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Columns"
+          },
+          "case": {
+            "type": "string",
+            "enum": [
+              "lower",
+              "upper",
+              "title"
+            ],
+            "title": "Case"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "columns",
+          "case"
+        ],
+        "title": "NormalizeCaseStep"
+      },
+      "NotMatchingCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "not_matching",
+            "title": "Kind",
+            "default": "not_matching"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "pattern": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "number",
+              "date"
+            ],
+            "title": "Pattern"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "pattern"
+        ],
+        "title": "NotMatchingCondition"
+      },
+      "NullPlaceholdersStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "null_placeholders",
+            "title": "Type",
+            "default": "null_placeholders"
+          },
+          "columns": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Columns"
+          },
+          "placeholders": {
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Placeholders"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "columns",
+          "placeholders"
+        ],
+        "title": "NullPlaceholdersStep"
+      },
+      "OneOfCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "one_of",
+            "title": "Kind",
+            "default": "one_of"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "values": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Values"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "ignore_case_and_spaces"
+            ],
+            "title": "Match",
+            "default": "exact"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "values"
+        ],
+        "title": "OneOfCondition"
+      },
+      "OutputColumn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ValueKind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "OutputColumn"
+      },
+      "OutsideRangeCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "outside_range",
+            "title": "Kind",
+            "default": "outside_range"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min"
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column"
+        ],
+        "title": "OutsideRangeCondition"
+      },
+      "ParseDateStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "parse_date",
+            "title": "Type",
+            "default": "parse_date"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "formats": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "%Y-%m-%d",
+                "%Y/%m/%d",
+                "%Y.%m.%d",
+                "%m/%d/%Y",
+                "%d/%m/%Y",
+                "%m-%d-%Y",
+                "%d-%m-%Y",
+                "%d.%m.%Y",
+                "%m/%d/%y",
+                "%d/%m/%y",
+                "%d %b %Y",
+                "%d-%b-%Y",
+                "%d-%b-%y",
+                "%d %B %Y",
+                "%b %d, %Y",
+                "%B %d, %Y",
+                "%b %d %Y",
+                "%B %d %Y",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%d %H:%M",
+                "%m/%d/%Y %H:%M",
+                "%d/%m/%Y %H:%M",
+                "%m/%d/%Y %H:%M:%S",
+                "%d/%m/%Y %H:%M:%S"
+              ]
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Formats"
+          },
+          "output": {
+            "type": "string",
+            "enum": [
+              "date",
+              "datetime"
+            ],
+            "title": "Output",
+            "default": "date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "formats"
+        ],
+        "title": "ParseDateStep"
       },
       "PatternKind": {
         "type": "string",
@@ -550,6 +1989,148 @@
         "title": "PhysicalType",
         "description": "The dominant shape of the values. Storage is always text."
       },
+      "Preview": {
+        "properties": {
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "changed_rows": {
+            "type": "integer",
+            "title": "Changed Rows",
+            "default": 0
+          },
+          "set_aside_rows": {
+            "type": "integer",
+            "title": "Set Aside Rows",
+            "default": 0
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "columns"
+        ],
+        "title": "Preview"
+      },
+      "PreviewCell": {
+        "properties": {
+          "before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After"
+          },
+          "changed": {
+            "type": "boolean",
+            "title": "Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "before",
+          "after",
+          "changed"
+        ],
+        "title": "PreviewCell"
+      },
+      "PreviewRow": {
+        "properties": {
+          "row_id": {
+            "type": "integer",
+            "title": "Row Id"
+          },
+          "cells": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PreviewCell"
+            },
+            "type": "object",
+            "title": "Cells"
+          },
+          "set_aside": {
+            "type": "boolean",
+            "title": "Set Aside",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "row_id",
+          "cells"
+        ],
+        "title": "PreviewRow"
+      },
+      "RecipeResponse": {
+        "properties": {
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepView"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "can_undo": {
+            "type": "boolean",
+            "title": "Can Undo",
+            "default": false
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count",
+            "default": 0
+          },
+          "set_aside_count": {
+            "type": "integer",
+            "title": "Set Aside Count",
+            "default": 0
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/OutputColumn"
+            },
+            "type": "array",
+            "title": "Columns"
+          }
+        },
+        "type": "object",
+        "title": "RecipeResponse"
+      },
       "ReingestRequest": {
         "properties": {
           "sheet": {
@@ -572,6 +2153,85 @@
         "type": "object",
         "title": "ReingestRequest"
       },
+      "RemoveCharactersStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "remove_characters",
+            "title": "Type",
+            "default": "remove_characters"
+          },
+          "columns": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Columns"
+          },
+          "characters": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Characters"
+          },
+          "where": {
+            "type": "string",
+            "enum": [
+              "leading",
+              "trailing",
+              "anywhere"
+            ],
+            "title": "Where",
+            "default": "leading"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "columns",
+          "characters"
+        ],
+        "title": "RemoveCharactersStep"
+      },
+      "RowIdsCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "row_ids",
+            "title": "Kind",
+            "default": "row_ids"
+          },
+          "row_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Row Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "row_ids"
+        ],
+        "title": "RowIdsCondition"
+      },
       "SemanticRole": {
         "type": "string",
         "enum": [
@@ -584,6 +2244,78 @@
         ],
         "title": "SemanticRole"
       },
+      "SetAsideRowsStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "set_aside_rows",
+            "title": "Type",
+            "default": "set_aside_rows"
+          },
+          "condition": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BlankCondition"
+              },
+              {
+                "$ref": "#/components/schemas/EqualsCondition"
+              },
+              {
+                "$ref": "#/components/schemas/OneOfCondition"
+              },
+              {
+                "$ref": "#/components/schemas/RowIdsCondition"
+              },
+              {
+                "$ref": "#/components/schemas/OutsideRangeCondition"
+              },
+              {
+                "$ref": "#/components/schemas/NotMatchingCondition"
+              },
+              {
+                "$ref": "#/components/schemas/DigitsFewerThanCondition"
+              }
+            ],
+            "title": "Condition",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "blank": "#/components/schemas/BlankCondition",
+                "digits_fewer_than": "#/components/schemas/DigitsFewerThanCondition",
+                "equals": "#/components/schemas/EqualsCondition",
+                "not_matching": "#/components/schemas/NotMatchingCondition",
+                "one_of": "#/components/schemas/OneOfCondition",
+                "outside_range": "#/components/schemas/OutsideRangeCondition",
+                "row_ids": "#/components/schemas/RowIdsCondition"
+              }
+            }
+          },
+          "keep_row_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "title": "Keep Row Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "condition"
+        ],
+        "title": "SetAsideRowsStep"
+      },
       "SourceFormat": {
         "type": "string",
         "enum": [
@@ -591,6 +2323,223 @@
           "xlsx"
         ],
         "title": "SourceFormat"
+      },
+      "SplitColumnStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "split_column",
+            "title": "Type",
+            "default": "split_column"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "delimiter": {
+            "type": "string",
+            "maxLength": 5,
+            "minLength": 1,
+            "title": "Delimiter"
+          },
+          "into": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 2,
+            "title": "Into"
+          },
+          "trim_parts": {
+            "type": "boolean",
+            "title": "Trim Parts",
+            "default": true
+          },
+          "keep_original": {
+            "type": "boolean",
+            "title": "Keep Original",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "delimiter",
+          "into"
+        ],
+        "title": "SplitColumnStep"
+      },
+      "StepStatus": {
+        "type": "string",
+        "enum": [
+          "applied",
+          "disabled",
+          "blocked"
+        ],
+        "title": "StepStatus"
+      },
+      "StepUpdate": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "StepUpdate"
+      },
+      "StepView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "rows_set_aside": {
+            "type": "integer",
+            "title": "Rows Set Aside",
+            "default": 0
+          },
+          "cells_changed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cells Changed"
+          },
+          "issue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "label",
+          "description",
+          "columns",
+          "enabled",
+          "status"
+        ],
+        "title": "StepView"
+      },
+      "Tier": {
+        "type": "string",
+        "enum": [
+          "safe",
+          "likely",
+          "ask"
+        ],
+        "title": "Tier"
+      },
+      "TrimStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "trim",
+            "title": "Type",
+            "default": "trim"
+          },
+          "columns": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Columns"
+          },
+          "collapse_inner_spaces": {
+            "type": "boolean",
+            "title": "Collapse Inner Spaces",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "columns"
+        ],
+        "title": "TrimStep"
       },
       "UploadLimits": {
         "properties": {
@@ -604,6 +2553,45 @@
           "max_upload_bytes"
         ],
         "title": "UploadLimits"
+      },
+      "ValueKind": {
+        "type": "string",
+        "enum": [
+          "text",
+          "number",
+          "date",
+          "datetime"
+        ],
+        "title": "ValueKind"
+      },
+      "ValueMapping": {
+        "properties": {
+          "from_value": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "From Value"
+          },
+          "to_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "from_value",
+          "to_value"
+        ],
+        "title": "ValueMapping"
       }
     }
   }

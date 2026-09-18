@@ -210,6 +210,19 @@ def test_mixed_date_styles_are_likely_and_covered(make_dataset: MakeDataset) -> 
     assert "mixes 3 date styles" in issue.explanation
 
 
+def test_year_first_dates_are_read_without_a_question(make_dataset: MakeDataset) -> None:
+    """These have no two numbers to weigh up, so there's nothing to ask about."""
+    rows = [f"{i},2024-0{(i % 9) + 1}-15" for i in range(20)]
+    ds = make_dataset(csv_file("id,when", rows))
+
+    issue = only(ds.issues("dates"))
+
+    assert issue.tier is Tier.SAFE
+    step = issue.steps[0]
+    assert isinstance(step, ParseDateStep)
+    assert step.formats == ["%Y-%m-%d"]
+
+
 def test_a_few_dates_in_a_text_column_are_not_a_date_issue(make_dataset: MakeDataset) -> None:
     rows = [f"{i},note {i}" for i in range(40)] + ["41,1/2/2024", "42,3/4/2024"]
     ds = make_dataset(csv_file("id,comment", rows))
