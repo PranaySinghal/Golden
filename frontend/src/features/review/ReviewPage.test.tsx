@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ReviewPage } from './ReviewPage'
 import {
   askIssue,
+  comparison,
   dataset,
   issue,
   issueList,
@@ -48,6 +49,7 @@ const PREVIEW = `GET /api/datasets/${FILE.id}/preview`
 const TOGGLE = `PATCH /api/datasets/${FILE.id}/recipe/steps/step-1`
 const REMOVE = `DELETE /api/datasets/${FILE.id}/recipe/steps/step-1`
 const UNDO = `POST /api/datasets/${FILE.id}/recipe/undo`
+const COMPARE = `GET /api/datasets/${FILE.id}/compare`
 
 function card(title: string | RegExp): HTMLElement {
   return screen.getByRole('heading', { name: title }).closest('article') as HTMLElement
@@ -333,6 +335,73 @@ describe('ReviewPage', () => {
     await waitFor(() => {
       expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/undo'))).toBe(true)
     })
+  })
+
+  it('leaves the comparison alone until it is asked for', async () => {
+    const fetchMock = mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [COMPARE]: () => jsonResponse(200, comparison()),
+    })
+
+    renderPage()
+    await screen.findByRole('heading', { name: /Suggested/ })
+
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/compare'))).toBe(false)
+  })
+
+  it('shows what changed on the other tab, with the recipe still in view', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [COMPARE]: () => jsonResponse(200, comparison()),
+    })
+
+    renderPage()
+    fireEvent.click(await screen.findByRole('tab', { name: 'What changed' }))
+
+    expect(await screen.findByText('83,151.41')).toBeTruthy()
+    const panel = screen.getByRole('complementary', { name: "What we're doing" })
+    expect(within(panel).getByText('Read "Salary" as numbers')).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: /Suggested/ })).toBeNull()
+  })
+
+  it('offers both downloads', async () => {
+    const fetchMock = mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [`GET /api/datasets/${FILE.id}/export`]: () =>
+        new Response('id,name\n1,Ann\n', {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/csv',
+            'Content-Disposition': "attachment; filename*=UTF-8''people%20(tidied).csv",
+          },
+        }),
+    })
+    const clicks: string[] = []
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      clicks.push(this.download)
+    })
+    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} })
+
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Download cleaned file' }))
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.some(([url]) => String(url).includes('format=csv'))).toBe(true)
+    })
+    await waitFor(() => expect(clicks).toEqual(['people (tidied).csv']))
+  })
+
+  it('says so when a download fails', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [`GET /api/datasets/${FILE.id}/export`]: () =>
+        jsonResponse(404, { code: 'dataset_not_found', message: 'File has expired.' }),
+    })
+
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Download the steps' }))
+
+    expect(await screen.findByText('File has expired.')).toBeTruthy()
   })
 
   it('offers a way back to a different file', async () => {

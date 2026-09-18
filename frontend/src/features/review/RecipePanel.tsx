@@ -1,22 +1,48 @@
-import type { RecipeResponse, StepView } from '../../api/client'
+import { useState } from 'react'
+
+import { api, type RecipeResponse, type StepView } from '../../api/client'
 import { rowsKept, stepEffect } from './copy'
 
 interface RecipePanelProps {
+  datasetId: string
   recipe: RecipeResponse
   busy: boolean
+  highlighted: string[]
   onToggle: (step: StepView, enabled: boolean) => void
   onRemove: (step: StepView) => void
   onUndo: () => void
 }
 
-export function RecipePanel({ recipe, busy, onToggle, onRemove, onUndo }: RecipePanelProps) {
+type Format = 'csv' | 'recipe'
+
+export function RecipePanel({
+  datasetId,
+  recipe,
+  busy,
+  highlighted,
+  onToggle,
+  onRemove,
+  onUndo,
+}: RecipePanelProps) {
   const steps = recipe.steps ?? []
+  const [downloading, setDownloading] = useState<Format | null>(null)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
+
+  function save(format: Format) {
+    setDownloading(format)
+    setDownloadError(null)
+    api
+      .exportDataset(datasetId, format)
+      .then(({ blob, filename }) => saveToDisk(blob, filename))
+      .catch((error: Error) => setDownloadError(error.message))
+      .finally(() => setDownloading(null))
+  }
 
   return (
     <aside className="panel" aria-labelledby="recipe-title" aria-busy={busy}>
       <div className="panel__head">
         <h3 id="recipe-title" className="panel__title">
-          What we're doing
+          What we&apos;re doing
         </h3>
         <p className="muted small">{rowsKept(recipe.row_count, recipe.set_aside_count)}</p>
       </div>
@@ -30,7 +56,13 @@ export function RecipePanel({ recipe, busy, onToggle, onRemove, onUndo }: Recipe
           {steps.map((step) => (
             <li
               key={step.id}
-              className={`panel__step${step.status === 'blocked' ? ' panel__step--blocked' : ''}`}
+              className={[
+                'panel__step',
+                step.status === 'blocked' ? 'panel__step--blocked' : '',
+                highlighted.includes(step.id) ? 'panel__step--lit' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <label className="panel__toggle">
                 <input
@@ -67,6 +99,46 @@ export function RecipePanel({ recipe, busy, onToggle, onRemove, onUndo }: Recipe
       >
         Undo last change
       </button>
+
+      <div className="panel__downloads">
+        <button
+          type="button"
+          className="button"
+          disabled={downloading !== null}
+          onClick={() => save('csv')}
+        >
+          {downloading === 'csv' ? 'Preparing…' : 'Download cleaned file'}
+        </button>
+        <button
+          type="button"
+          className="link-button"
+          disabled={downloading !== null}
+          onClick={() => save('recipe')}
+        >
+          {downloading === 'recipe' ? 'Preparing…' : 'Download the steps'}
+        </button>
+        <p className="muted small">
+          The cleaned file opens in a spreadsheet. The steps can be used again on next month&apos;s
+          file.
+        </p>
+        {downloadError && (
+          <p className="card__error" role="alert">
+            {downloadError}
+          </p>
+        )}
+      </div>
     </aside>
   )
+}
+
+/** Hand the file to the browser under the name the server chose. */
+function saveToDisk(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.append(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }

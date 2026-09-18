@@ -433,3 +433,61 @@ names and no rows. Both now `coalesce` to 0, with a test each.
 
 **Downloads and answer impact wait for M7** (owner decision), so the review
 screen stays about reviewing.
+
+---
+
+## 2026-09-17 · M7 · "What changed" UI
+
+**The comparison is a view over the engine, not a second implementation.**
+`GET /datasets/{id}/compare` calls the M5 engine and turns each `AnswerDiff`
+into what a card needs. No number is computed in the API layer; `kind` is the
+only thing it decides (no `group_by` → headline, a grain → trend, otherwise a
+breakdown). The seven "before" rules are sent with the response, straight from
+`before.RULES`, so the explainer can't drift from the rules the answers used.
+
+**One screen, two tabs.** Review and What changed sit under the same file
+header and share the recipe panel (owner decision), so "why" can light up a
+step without navigating, and a decision can be changed while its effect is on
+screen. The decisions strip at the top of the comparison lists the questions
+already answered as segmented controls.
+
+**Three layers keep a choice change cheap** (the acceptance criterion is "within
+a moment"):
+1. `RecipeResponse` now carries `recipe_key`, and the client keys its comparison
+   on it. Two recipes that make the same rows share a key, so going back to a
+   previous answer is a cache hit with no request at all.
+2. On the server, `engine.recompute` carries over every answer and attribution
+   the changed steps can't reach. Switching "N/A in Salary" re-answers the
+   Salary questions and leaves the rest alone.
+3. `keepPreviousData` holds the old cards on screen while the new ones arrive,
+   so nothing jumps.
+
+**Charts** (Recharts, a new dependency, named in CLAUDE.md). Paired bars with a
+negative `barGap`: the before bar sits faintly behind the after bar, like a
+shadow of where the answer was. Up to 8 groups, biggest first, trends in period
+order. Each chart is preceded by a visually hidden table of the same numbers.
+
+**A merged spelling gets no bar.** When "Sales " folds into "Sales", drawing it
+collapsing to zero would say those rows vanished, which is the opposite of what
+happened. It becomes a footnote — "'Sales ' is now counted with 'Sales'" — and
+its rows show up inside the target's bar. Groups that really lost their rows do
+get a zero bar, footnoted. When every group in a breakdown is new (a column that
+didn't exist), one line says so rather than naming them all.
+
+**A missing count is zero; a missing average is nothing.** For counts, "no rows"
+really is 0 and is drawn. For averages there is no value at all, so no bar is
+drawn — a bar at zero would be a different, false claim. This is why the group
+values are nullable rather than defaulted.
+
+**Downloads** live in the recipe panel, on both tabs (owner decision), and go
+through fetch so a failure shows our wording rather than raw JSON. The server
+names the file (`Messy_Employee_dataset (tidied).csv`) with an RFC 5987 header
+so spaces and accents survive. Both use the M2 export code, routed for the first
+time here.
+
+**Empty states.** Nothing applied yet → a pointer back to Review. Cleaning
+changed nothing → "Your answers came out the same either way," with the number
+of questions checked, because that's a real outcome on a tidy file, not a
+failure. The summary line above it doesn't repeat the count.
+
+**Deferred to M8:** all wording here is template text; AI rewrites it later.

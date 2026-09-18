@@ -1,5 +1,7 @@
 import type {
+  AnswerCardView,
   ColumnProfile,
+  ComparisonResponse,
   DatasetSummary,
   IssueListResponse,
   IssueView,
@@ -80,6 +82,7 @@ export function step(overrides: Partial<StepView> = {}): StepView {
 export function recipe(overrides: Partial<RecipeResponse> = {}): RecipeResponse {
   return {
     steps: [step()],
+    recipe_key: 'key-1',
     can_undo: false,
     row_count: 1020,
     set_aside_count: 0,
@@ -161,6 +164,63 @@ export function preview(overrides: Partial<Preview> = {}): Preview {
     changed_rows: 38,
     set_aside_rows: 0,
     note: null,
+    ...overrides,
+  }
+}
+
+export function card(overrides: Partial<AnswerCardView> = {}): AnswerCardView {
+  return {
+    question_id: 'q-salary',
+    label: 'What\'s the average "Salary"?',
+    kind: 'headline',
+    measure: 'avg',
+    changed: true,
+    unlocked: false,
+    impact: 0.8,
+    before: { answerable: true, value: 85155.06, note: null, rows_used: 996, rows_skipped: 24 },
+    after: { answerable: true, value: 83151.41, note: null, rows_used: 1020, rows_skipped: 0 },
+    change: -2003.65,
+    relative_change: -0.0235,
+    groups: [],
+    merged: [],
+    why: { step_ids: ['step-1'], groups: [{ step_ids: ['step-1'], together: false, contribution: 1 }], method: 'exact' },
+    ...overrides,
+  }
+}
+
+export function breakdownCard(overrides: Partial<AnswerCardView> = {}): AnswerCardView {
+  return card({
+    question_id: 'q-team',
+    label: 'How many rows are there for each "team"?',
+    kind: 'breakdown',
+    measure: 'count',
+    impact: 0.6,
+    before: { answerable: true, value: null, note: null, rows_used: 40, rows_skipped: 0 },
+    after: { answerable: true, value: null, note: null, rows_used: 40, rows_skipped: 0 },
+    change: null,
+    relative_change: null,
+    groups: [
+      { label: 'Sales', before: 20, after: 30, status: 'changed' },
+      { label: 'Support', before: 10, after: 10, status: 'same' },
+    ],
+    merged: [{ label: 'Sales ', into: 'Sales' }],
+    ...overrides,
+  })
+}
+
+export function comparison(overrides: Partial<ComparisonResponse> = {}): ComparisonResponse {
+  return {
+    cards: [card(), breakdownCard()],
+    unlocked: [],
+    unchanged: ['How many rows are there?'],
+    before_rules: [
+      'Every row in the file counts, including repeated rows.',
+      'Dates count only when written like 2024-03-15 or 3/15/2024.',
+    ],
+    recipe_key: 'key-1',
+    has_steps: true,
+    questions_asked: 3,
+    recomputed: 0,
     ...overrides,
   }
 }
