@@ -15,6 +15,8 @@ from pathlib import Path
 import duckdb
 
 from app.compare.compare import AnswerCache
+from app.compare.engine import ComparisonEngine
+from app.compare.models import Comparison
 from app.config import Settings
 from app.db import create_workspace, open_dataset_connection, raw_db_path, remove_workspace
 from app.detectors.models import Issue
@@ -58,6 +60,10 @@ class DatasetSession:
     rejected: set[str] = field(default_factory=set)
     # Which issue each step came from, for showing them together in the panel.
     step_origin: dict[str, str] = field(default_factory=dict)
+    # The before/after engine and its last result. Keeping the engine keeps its
+    # answer cache, which is what makes changing an answer cheap to redo.
+    engine: ComparisonEngine | None = None
+    comparison: Comparison | None = None
     # One DuckDB connection isn't safe to use from two threads at once.
     lock: threading.RLock = field(default_factory=threading.RLock)
 

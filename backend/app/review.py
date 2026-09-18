@@ -10,7 +10,9 @@ seconds on a messy file) and kept on the session until the file is read again.
 
 from dataclasses import dataclass
 
+from app.compare.engine import ComparisonEngine
 from app.compare.issue_impact import score_issues
+from app.compare.models import Comparison
 from app.detectors.models import Issue, Tier
 from app.detectors.registry import detect_issues, rank_issues
 from app.detectors.step_order import RANK, chosen_steps
@@ -75,6 +77,26 @@ def prepare(session: DatasetSession) -> list[Issue]:
 
 def issues_of(session: DatasetSession) -> list[Issue]:
     return prepare(session)
+
+
+def compare_now(session: DatasetSession) -> Comparison:
+    """Answer every question before and after, reusing whatever the last pass found.
+
+    The engine lives as long as the file does, so its answers are still there
+    when a user changes their mind; `recompute` then only re-asks the questions
+    the changed steps can reach.
+    """
+    prepare(session)
+    if session.engine is None:
+        session.engine = ComparisonEngine(
+            session.conn, session.profile, questions=session.questions
+        )
+    previous = session.comparison
+    if previous is None:
+        session.comparison = session.engine.compare(session.recipe)
+    else:
+        session.comparison = session.engine.recompute(previous, session.recipe)
+    return session.comparison
 
 
 def find_issue(session: DatasetSession, issue_id: str) -> Issue:

@@ -651,6 +651,101 @@
           }
         }
       }
+    },
+    "/api/datasets/{dataset_id}/compare": {
+      "get": {
+        "tags": [
+          "compare"
+        ],
+        "summary": "Get Comparison",
+        "operationId": "getComparison",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/export": {
+      "get": {
+        "tags": [
+          "compare"
+        ],
+        "summary": "Export Dataset",
+        "operationId": "exportDataset",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "csv",
+                "recipe"
+              ],
+              "type": "string",
+              "default": "csv",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {},
+              "application/json": {}
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -671,6 +766,101 @@
         },
         "type": "object",
         "title": "AcceptRequest"
+      },
+      "AnswerCardView": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "title": "Question Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "headline",
+              "breakdown",
+              "trend"
+            ],
+            "title": "Kind"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "changed": {
+            "type": "boolean",
+            "title": "Changed"
+          },
+          "unlocked": {
+            "type": "boolean",
+            "title": "Unlocked"
+          },
+          "impact": {
+            "type": "number",
+            "title": "Impact"
+          },
+          "before": {
+            "$ref": "#/components/schemas/ValueView"
+          },
+          "after": {
+            "$ref": "#/components/schemas/ValueView"
+          },
+          "change": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change"
+          },
+          "relative_change": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Change"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupChangeView"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "merged": {
+            "items": {
+              "$ref": "#/components/schemas/MergedNote"
+            },
+            "type": "array",
+            "title": "Merged"
+          },
+          "why": {
+            "$ref": "#/components/schemas/WhyView"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "label",
+          "kind",
+          "measure",
+          "changed",
+          "unlocked",
+          "impact",
+          "before",
+          "after",
+          "why"
+        ],
+        "title": "AnswerCardView"
       },
       "AskQuestion": {
         "properties": {
@@ -1091,6 +1281,62 @@
         ],
         "title": "ColumnProfile"
       },
+      "ComparisonResponse": {
+        "properties": {
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/AnswerCardView"
+            },
+            "type": "array",
+            "title": "Cards"
+          },
+          "unlocked": {
+            "items": {
+              "$ref": "#/components/schemas/AnswerCardView"
+            },
+            "type": "array",
+            "title": "Unlocked"
+          },
+          "unchanged": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unchanged"
+          },
+          "before_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Before Rules"
+          },
+          "recipe_key": {
+            "type": "string",
+            "title": "Recipe Key"
+          },
+          "has_steps": {
+            "type": "boolean",
+            "title": "Has Steps"
+          },
+          "questions_asked": {
+            "type": "integer",
+            "title": "Questions Asked"
+          },
+          "recomputed": {
+            "type": "integer",
+            "title": "Recomputed",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe_key",
+          "has_steps",
+          "questions_asked"
+        ],
+        "title": "ComparisonResponse"
+      },
       "DatasetSummary": {
         "properties": {
           "id": {
@@ -1433,6 +1679,54 @@
         ],
         "title": "FillMissingStep"
       },
+      "GroupChangeView": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "same",
+              "changed",
+              "appeared",
+              "disappeared"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "before",
+          "after",
+          "status"
+        ],
+        "title": "GroupChangeView"
+      },
       "HeaderMode": {
         "type": "string",
         "enum": [
@@ -1635,6 +1929,35 @@
           "mappings"
         ],
         "title": "MapValuesStep"
+      },
+      "Measure": {
+        "type": "string",
+        "enum": [
+          "count",
+          "count_distinct",
+          "sum",
+          "avg"
+        ],
+        "title": "Measure"
+      },
+      "MergedNote": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "into": {
+            "type": "string",
+            "title": "Into"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "into"
+        ],
+        "title": "MergedNote",
+        "description": "A spelling that now counts as another: \"sales\" folded into \"Sales\"."
       },
       "NormalizeCaseStep": {
         "properties": {
@@ -2105,6 +2428,11 @@
             "type": "array",
             "title": "Steps"
           },
+          "recipe_key": {
+            "type": "string",
+            "title": "Recipe Key",
+            "default": ""
+          },
           "can_undo": {
             "type": "boolean",
             "title": "Can Undo",
@@ -2385,6 +2713,33 @@
         ],
         "title": "SplitColumnStep"
       },
+      "StepContribution": {
+        "properties": {
+          "step_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Step Ids"
+          },
+          "together": {
+            "type": "boolean",
+            "title": "Together",
+            "default": false
+          },
+          "contribution": {
+            "type": "number",
+            "title": "Contribution",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "step_ids"
+        ],
+        "title": "StepContribution",
+        "description": "Steps that moved one answer, and how far the answer goes back without them."
+      },
       "StepStatus": {
         "type": "string",
         "enum": [
@@ -2592,6 +2947,81 @@
           "to_value"
         ],
         "title": "ValueMapping"
+      },
+      "ValueView": {
+        "properties": {
+          "answerable": {
+            "type": "boolean",
+            "title": "Answerable"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "rows_used": {
+            "type": "integer",
+            "title": "Rows Used",
+            "default": 0
+          },
+          "rows_skipped": {
+            "type": "integer",
+            "title": "Rows Skipped",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "answerable"
+        ],
+        "title": "ValueView"
+      },
+      "WhyView": {
+        "properties": {
+          "step_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Step Ids"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/StepContribution"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "estimated",
+              "none"
+            ],
+            "title": "Method",
+            "default": "none"
+          }
+        },
+        "type": "object",
+        "title": "WhyView"
       }
     }
   }

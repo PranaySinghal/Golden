@@ -15,6 +15,12 @@ export type Tier = components['schemas']['Tier']
 export type RecipeResponse = components['schemas']['RecipeResponse']
 export type StepView = components['schemas']['StepView']
 export type Preview = components['schemas']['Preview']
+export type ComparisonResponse = components['schemas']['ComparisonResponse']
+export type AnswerCardView = components['schemas']['AnswerCardView']
+export type GroupChangeView = components['schemas']['GroupChangeView']
+export type MergedNote = components['schemas']['MergedNote']
+export type WhyView = components['schemas']['WhyView']
+export type Measure = components['schemas']['Measure']
 export type PreviewRow = components['schemas']['PreviewRow']
 type ErrorResponse = components['schemas']['ErrorResponse']
 
@@ -122,6 +128,29 @@ function getPreview(id: string, query: PreviewQuery): Promise<Preview> {
   return request<Preview>(datasetPath(id, `/preview?${params.toString()}`))
 }
 
+export interface DownloadedFile {
+  blob: Blob
+  filename: string
+}
+
+async function download(path: string): Promise<DownloadedFile> {
+  let response: Response
+  try {
+    response = await fetch(path)
+  } catch {
+    throw new ApiError(0, 'network_error', NETWORK_MESSAGE)
+  }
+  if (!response.ok) throw await toApiError(response)
+  return { blob: await response.blob(), filename: filenameFrom(response) }
+}
+
+/** The name the server asked us to save it as, percent-encoded per RFC 5987. */
+function filenameFrom(response: Response): string {
+  const header = response.headers.get('content-disposition') ?? ''
+  const match = /filename\*=UTF-8''([^;]+)/i.exec(header)
+  return match ? decodeURIComponent(match[1]) : 'tidylab-download'
+}
+
 export const api = {
   getHealth: () => request<HealthResponse>('/api/health'),
   getUploadLimits: () => request<UploadLimits>('/api/upload-limits'),
@@ -144,4 +173,6 @@ export const api = {
     send<RecipeResponse>(datasetPath(id, `/recipe/steps/${encodeURIComponent(stepId)}`), 'DELETE'),
   undoRecipe: (id: string) => send<RecipeResponse>(datasetPath(id, '/recipe/undo'), 'POST'),
   getPreview,
+  getComparison: (id: string) => request<ComparisonResponse>(datasetPath(id, '/compare')),
+  exportDataset: (id: string, format: 'csv' | 'recipe') => download(datasetPath(id, `/export?format=${format}`)),
 }

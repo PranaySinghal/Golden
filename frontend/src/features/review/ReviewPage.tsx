@@ -9,12 +9,14 @@ import {
   type RecipeResponse,
   type StepView,
 } from '../../api/client'
-import { EmptyState, ErrorState, Spinner } from '../../components/states'
+import { ErrorState, Spinner } from '../../components/states'
+import { ComparePage } from '../compare/ComparePage'
 import { ColumnTable } from '../upload/ColumnTable'
 import { describeRows } from '../upload/format'
-import { IssueCard } from './IssueCard'
+import { IssueList } from './IssueList'
 import { RecipePanel } from './RecipePanel'
-import { TIERS, TIER_ORDER } from './copy'
+
+type Tab = 'review' | 'changed'
 
 interface ActionError {
   id: string
@@ -29,9 +31,11 @@ interface ReviewPageProps {
 
 export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
   const queryClient = useQueryClient()
+  const [tab, setTab] = useState<Tab>('review')
   const [showColumns, setShowColumns] = useState(false)
   const [acting, setActing] = useState<string | null>(null)
   const [actionError, setActionError] = useState<ActionError | null>(null)
+  const [highlighted, setHighlighted] = useState<string[]>([])
 
   const issuesKey = ['issues', dataset.id]
   const issues = useQuery({
@@ -82,10 +86,13 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
 
   const { issues: found, recipe, needs_decision: decisions } = issues.data
   const list = found ?? []
+  const steps = recipe.steps ?? []
   const busyWith = (id: string) => acting === id || undo.isPending
   const errorFor = (id: string) =>
     actionError?.where === 'card' && actionError.id === id ? actionError.message : null
   const panelError = actionError?.where === 'panel' ? actionError.message : null
+  const accept = (issue: IssueView, choiceId?: string) =>
+    runAction(issue.id, 'card', () => api.acceptIssue(dataset.id, issue.id, choiceId))
 
   return (
     <section className="review" aria-labelledby="review-title">
@@ -116,52 +123,72 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
 
       {showColumns && <ColumnTable columns={dataset.columns} />}
 
+      <div className="tabs" role="tablist" aria-label="What to look at">
+        <button
+          type="button"
+          role="tab"
+          id="tab-review"
+          aria-selected={tab === 'review'}
+          aria-controls="panel-review"
+          className={`tabs__tab${tab === 'review' ? ' tabs__tab--on' : ''}`}
+          onClick={() => setTab('review')}
+        >
+          Review
+          {list.length > 0 && <span className="group__count">{list.length}</span>}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-changed"
+          aria-selected={tab === 'changed'}
+          aria-controls="panel-changed"
+          className={`tabs__tab${tab === 'changed' ? ' tabs__tab--on' : ''}`}
+          onClick={() => setTab('changed')}
+        >
+          What changed
+        </button>
+      </div>
+
       <div className="review__layout">
-        <div className="review__issues">
-          {list.length === 0 ? (
-            <EmptyState title="Nothing needs fixing — this file is already tidy.">
-              <p className="muted small">
-                We looked for blanks, repeated rows, mixed spellings, and numbers or dates stored
-                as text.
-              </p>
-            </EmptyState>
+        <div
+          className="review__issues"
+          role="tabpanel"
+          id={tab === 'review' ? 'panel-review' : 'panel-changed'}
+          aria-labelledby={tab === 'review' ? 'tab-review' : 'tab-changed'}
+        >
+          {tab === 'review' ? (
+            <IssueList
+              datasetId={dataset.id}
+              issues={list}
+              busyWith={busyWith}
+              errorFor={errorFor}
+              onAccept={accept}
+              onReject={(issue) =>
+                runAction(issue.id, 'card', () => api.rejectIssue(dataset.id, issue.id))
+              }
+            />
           ) : (
-            TIER_ORDER.map((tier) => {
-              const forTier = list.filter((issue: IssueView) => issue.tier === tier)
-              if (forTier.length === 0) return null
-              return (
-                <section key={tier} className="group" aria-labelledby={`group-${tier}`}>
-                  <h3 id={`group-${tier}`} className="group__title">
-                    {TIERS[tier].title}
-                    <span className="group__count">{forTier.length}</span>
-                  </h3>
-                  <p className="muted small">{TIERS[tier].blurb}</p>
-                  {forTier.map((issue: IssueView) => (
-                    <IssueCard
-                      key={issue.id}
-                      datasetId={dataset.id}
-                      issue={issue}
-                      busy={busyWith(issue.id)}
-                      error={errorFor(issue.id)}
-                      onAccept={(choiceId) =>
-                        runAction(issue.id, 'card', () =>
-                          api.acceptIssue(dataset.id, issue.id, choiceId),
-                        )
-                      }
-                      onReject={() =>
-                        runAction(issue.id, 'card', () => api.rejectIssue(dataset.id, issue.id))
-                      }
-                    />
-                  ))}
-                </section>
-              )
-            })
+            <ComparePage
+              datasetId={dataset.id}
+              recipeKey={recipe.recipe_key}
+              steps={steps}
+              issues={list}
+              choosing={acting}
+              onChoose={(issueId, choiceId) => {
+                const issue = list.find((candidate) => candidate.id === issueId)
+                if (issue) accept(issue, choiceId)
+              }}
+              onHighlight={setHighlighted}
+              onBackToReview={() => setTab('review')}
+            />
           )}
         </div>
 
         <RecipePanel
+          datasetId={dataset.id}
           recipe={recipe}
           busy={acting !== null || undo.isPending}
+          highlighted={highlighted}
           onToggle={(step: StepView, enabled: boolean) =>
             runAction(step.id, 'panel', () => api.setStepEnabled(dataset.id, step.id, enabled))
           }

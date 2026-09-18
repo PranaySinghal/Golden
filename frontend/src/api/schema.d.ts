@@ -209,6 +209,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/datasets/{dataset_id}/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Comparison */
+        get: operations["getComparison"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Dataset */
+        get: operations["exportDataset"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -217,6 +251,36 @@ export interface components {
         AcceptRequest: {
             /** Choice Id */
             choice_id?: string | null;
+        };
+        /** AnswerCardView */
+        AnswerCardView: {
+            /** Question Id */
+            question_id: string;
+            /** Label */
+            label: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "headline" | "breakdown" | "trend";
+            measure: components["schemas"]["Measure"];
+            /** Changed */
+            changed: boolean;
+            /** Unlocked */
+            unlocked: boolean;
+            /** Impact */
+            impact: number;
+            before: components["schemas"]["ValueView"];
+            after: components["schemas"]["ValueView"];
+            /** Change */
+            change?: number | null;
+            /** Relative Change */
+            relative_change?: number | null;
+            /** Groups */
+            groups?: components["schemas"]["GroupChangeView"][];
+            /** Merged */
+            merged?: components["schemas"]["MergedNote"][];
+            why: components["schemas"]["WhyView"];
         };
         /** AskQuestion */
         AskQuestion: {
@@ -381,6 +445,28 @@ export interface components {
              */
             sample_values: string[];
         };
+        /** ComparisonResponse */
+        ComparisonResponse: {
+            /** Cards */
+            cards?: components["schemas"]["AnswerCardView"][];
+            /** Unlocked */
+            unlocked?: components["schemas"]["AnswerCardView"][];
+            /** Unchanged */
+            unchanged?: string[];
+            /** Before Rules */
+            before_rules?: string[];
+            /** Recipe Key */
+            recipe_key: string;
+            /** Has Steps */
+            has_steps: boolean;
+            /** Questions Asked */
+            questions_asked: number;
+            /**
+             * Recomputed
+             * @default 0
+             */
+            recomputed: number;
+        };
         /** DatasetSummary */
         DatasetSummary: {
             /** Id */
@@ -520,6 +606,20 @@ export interface components {
             /** Value */
             value?: string | number | null;
         };
+        /** GroupChangeView */
+        GroupChangeView: {
+            /** Label */
+            label: string;
+            /** Before */
+            before: number | null;
+            /** After */
+            after: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "same" | "changed" | "appeared" | "disappeared";
+        };
         /**
          * HeaderMode
          * @description Whether the first row holds column names.
@@ -605,6 +705,21 @@ export interface components {
              * @enum {string}
              */
             match: "exact" | "ignore_case_and_spaces";
+        };
+        /**
+         * Measure
+         * @enum {string}
+         */
+        Measure: "count" | "count_distinct" | "sum" | "avg";
+        /**
+         * MergedNote
+         * @description A spelling that now counts as another: "sales" folded into "Sales".
+         */
+        MergedNote: {
+            /** Label */
+            label: string;
+            /** Into */
+            into: string;
         };
         /** NormalizeCaseStep */
         NormalizeCaseStep: {
@@ -783,6 +898,11 @@ export interface components {
             /** Steps */
             steps?: components["schemas"]["StepView"][];
             /**
+             * Recipe Key
+             * @default
+             */
+            recipe_key: string;
+            /**
              * Can Undo
              * @default false
              */
@@ -906,6 +1026,24 @@ export interface components {
             keep_original: boolean;
         };
         /**
+         * StepContribution
+         * @description Steps that moved one answer, and how far the answer goes back without them.
+         */
+        StepContribution: {
+            /** Step Ids */
+            step_ids: string[];
+            /**
+             * Together
+             * @default false
+             */
+            together: boolean;
+            /**
+             * Contribution
+             * @default 0
+             */
+            contribution: number;
+        };
+        /**
          * StepStatus
          * @enum {string}
          */
@@ -985,6 +1123,38 @@ export interface components {
             from_value: string;
             /** To Value */
             to_value: string | null;
+        };
+        /** ValueView */
+        ValueView: {
+            /** Answerable */
+            answerable: boolean;
+            /** Value */
+            value?: number | null;
+            /** Note */
+            note?: string | null;
+            /**
+             * Rows Used
+             * @default 0
+             */
+            rows_used: number;
+            /**
+             * Rows Skipped
+             * @default 0
+             */
+            rows_skipped: number;
+        };
+        /** WhyView */
+        WhyView: {
+            /** Step Ids */
+            step_ids?: string[];
+            /** Groups */
+            groups?: components["schemas"]["StepContribution"][];
+            /**
+             * Method
+             * @default none
+             * @enum {string}
+             */
+            method: "exact" | "estimated" | "none";
         };
     };
     responses: never;
@@ -1404,6 +1574,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Preview"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getComparison: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComparisonResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    exportDataset: {
+        parameters: {
+            query?: {
+                format?: "csv" | "recipe";
+            };
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": unknown;
+                    "application/json": unknown;
                 };
             };
             /** @description A problem the user can fix */

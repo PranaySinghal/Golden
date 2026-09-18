@@ -6,7 +6,14 @@ from pydantic import BaseModel, Field
 
 from app import review
 from app.detectors.models import AskQuestion, DetectorName, Issue, Tier
-from app.steps.apply import OutputColumn, StepOutcome, StepStatus, apply_recipe
+from app.steps.apply import (
+    OutputColumn,
+    StepOutcome,
+    StepStatus,
+    answer_key,
+    apply_recipe,
+    plan_recipe,
+)
 from app.steps.copy import columns_of, describe
 from app.steps.models import STEP_LABELS
 from app.store import DatasetSession
@@ -30,6 +37,9 @@ class StepView(BaseModel):
 
 class RecipeResponse(BaseModel):
     steps: list[StepView] = Field(default_factory=list)
+    # What the cleaned rows look like. Two recipes that make the same rows share
+    # this, so the screen knows when an answer can't have changed.
+    recipe_key: str = ""
     can_undo: bool = False
     row_count: int = 0
     set_aside_count: int = 0
@@ -68,6 +78,7 @@ def recipe_response(session: DatasetSession) -> RecipeResponse:
     outcomes = {outcome.step_id: outcome for outcome in result.outcomes}
     return RecipeResponse(
         steps=[_step_view(session, step.id, outcomes) for step in session.recipe.steps],
+        recipe_key=answer_key(plan_recipe(session.recipe, session.base_schema), session.recipe),
         can_undo=bool(session.history.past),
         row_count=result.row_count,
         set_aside_count=result.set_aside_count,
