@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ReviewPage } from './ReviewPage'
 import {
+  aiResponse,
   askIssue,
   comparison,
   dataset,
@@ -50,6 +51,7 @@ const TOGGLE = `PATCH /api/datasets/${FILE.id}/recipe/steps/step-1`
 const REMOVE = `DELETE /api/datasets/${FILE.id}/recipe/steps/step-1`
 const UNDO = `POST /api/datasets/${FILE.id}/recipe/undo`
 const COMPARE = `GET /api/datasets/${FILE.id}/compare`
+const AI = `GET /api/datasets/${FILE.id}/ai`
 
 function card(title: string | RegExp): HTMLElement {
   return screen.getByRole('heading', { name: title }).closest('article') as HTMLElement
@@ -402,6 +404,98 @@ describe('ReviewPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Download the steps' }))
 
     expect(await screen.findByText('File has expired.')).toBeTruthy()
+  })
+
+  it('says nothing about AI when no model service is configured', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [AI]: () => jsonResponse(200, aiResponse({ status: 'off' })),
+    })
+
+    renderPage()
+    await screen.findByRole('heading', { name: /Suggested/ })
+
+    await waitFor(() => expect(screen.queryByText(/Suggested by AI/)).toBeNull())
+    expect(screen.queryByText(/couldn.t be fetched/)).toBeNull()
+  })
+
+  it('marks a card a model suggested, and leaves it to be reviewed', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [AI]: () =>
+        jsonResponse(
+          200,
+          aiResponse({
+            added: [
+              issue({
+                id: 'issue-ai',
+                source: 'ai',
+                title: '"Notes" holds two things in one column',
+              }),
+            ],
+          }),
+        ),
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Suggested by AI')).toBeTruthy()
+    const card = screen
+      .getByRole('heading', { name: /holds two things/ })
+      .closest('article') as HTMLElement
+    expect(within(card).getByRole('button', { name: 'Accept' })).toBeTruthy()
+  })
+
+  it('shows better wording in place of the template', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [AI]: () =>
+        jsonResponse(
+          200,
+          aiResponse({
+            issue_copy: {
+              'issue-likely': {
+                title: 'Some names have stray spaces around them',
+                explanation: 'Those spaces split one name into two groups when you count.',
+              },
+            },
+          }),
+        ),
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Some names have stray spaces around them')).toBeTruthy()
+    expect(screen.queryByText(/38 names have extra spaces/)).toBeNull()
+  })
+
+  it('mentions a failure quietly, without losing anything', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [AI]: () =>
+        jsonResponse(
+          200,
+          aiResponse({ status: 'failed', note: "Extra suggestions couldn't be fetched just now." }),
+        ),
+    })
+
+    renderPage()
+
+    expect(await screen.findByText(/Extra suggestions couldn.t be fetched/)).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /Needs your decision/ })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /Suggested/ })).toBeTruthy()
+  })
+
+  it('carries on when the AI request itself fails', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [AI]: () => jsonResponse(500, { code: 'unknown_error', message: 'boom' }),
+    })
+
+    renderPage()
+
+    expect(await screen.findByRole('heading', { name: /Suggested/ })).toBeTruthy()
+    expect(screen.queryByText('boom')).toBeNull()
   })
 
   it('offers a way back to a different file', async () => {

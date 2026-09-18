@@ -491,3 +491,58 @@ of questions checked, because that's a real outcome on a tidy file, not a
 failure. The summary line above it doesn't repeat the count.
 
 **Deferred to M8:** all wording here is template text; AI rewrites it later.
+
+---
+
+## 2026-09-17 · M8 · AI layer
+
+**Nothing here is required.** With `LLM_PROVIDER=none` — the default — the whole
+app works and the entire test suite passes without a key. Every AI test uses a
+fake provider, so no test has ever made a network call.
+
+**Asked for after the rules, not instead of them** (owner decision).
+`GET /datasets/{id}/ai` is a separate request the screen makes once the
+rule-based review is already on it. The review is never slower, and a model that
+can't be reached costs nothing but one quiet line.
+
+**A model proposes; the code decides.** A proposed fix has to survive all of
+this or it's dropped: it parses into the reply schema (unknown fields refused);
+every column it names exists; every step is a real step type whose arguments
+validate against that step's own model; the step compiles where it would run;
+every value it matches on actually occurs in that column (one count query each);
+and it changes something. How many rows a fix touches is **counted here**, by
+running the step through the M7 preview machinery — never taken from the model.
+Whatever survives is built with the detectors' own `IssueBuilder`, so it gets
+stable ids and behaves like any other issue from then on.
+
+**A model never applies anything.** Proposed fixes are capped at the `likely`
+tier whatever confidence they claim (owner decision), so they're reviewed like
+every other suggestion, with a "Suggested by AI" chip. `Issue.source` says where
+a card came from; `DetectorName.AI_SUGGESTION` says which detector didn't.
+
+**No new numbers.** A rewrite may change how something is said, never what it
+says. Every figure in a rewritten title or label has to appear in the text it
+replaces, compared after normalising how it was written — "1,020" matches
+"1020", "2.50" matches "2.5", but "about 12%" against an input that never
+mentioned 12 is refused. Jargon and markdown are refused too. Rejection is per
+item, so one bad title doesn't lose the rest.
+
+**The payload is a value, not a promise.** `app/ai/payload.py` builds one dict —
+column facts, at most five example values each, at most 20 sample rows with
+every value cut to 80 characters — so what a model may see is something a test
+reads rather than something the code claims. Nothing else ever reaches a
+provider: not the file, not the recipe, not a key.
+
+**Providers are one POST each** (owner decision: raw HTTP over two SDKs), behind
+a three-method interface with `NoProvider` as the default. The provider is a
+FastAPI dependency, so a test stands a fake in its place without a key existing.
+`httpx` moves from a dev dependency to a runtime one.
+
+**Prompts are files, versioned**: `app/ai/prompts/<name>.v1.md`, loaded by name
+and version, logged by both. One retry when the service stumbles; none when the
+reply is malformed, because the model already had the schema.
+
+**Logging says what happened, never what was said**: prompt, version, provider,
+outcome, latency, and counts of what was rejected and why. A test asserts no
+sample value reaches the log. `app/main.py` now configures the `tidylab` logger,
+because the server configures its own and ours was going nowhere.

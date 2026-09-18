@@ -746,6 +746,48 @@
           }
         }
       }
+    },
+    "/api/datasets/{dataset_id}/ai": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Get Ai Suggestions",
+        "operationId": "getAiSuggestions",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -766,6 +808,56 @@
         },
         "type": "object",
         "title": "AcceptRequest"
+      },
+      "AiResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "off",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "added": {
+            "items": {
+              "$ref": "#/components/schemas/IssueView"
+            },
+            "type": "array",
+            "title": "Added"
+          },
+          "issue_copy": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RewordedCopy"
+            },
+            "type": "object",
+            "title": "Issue Copy"
+          },
+          "question_labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Question Labels"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "AiResponse"
       },
       "AnswerCardView": {
         "properties": {
@@ -1526,7 +1618,8 @@
           "identifier_repeats",
           "out_of_range",
           "contact_formats",
-          "missing_values"
+          "missing_values",
+          "ai_suggestion"
         ],
         "title": "DetectorName"
       },
@@ -1793,6 +1886,15 @@
           },
           "detector": {
             "$ref": "#/components/schemas/DetectorName"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rules",
+              "ai"
+            ],
+            "title": "Source",
+            "default": "rules"
           },
           "columns": {
             "items": {
@@ -2534,6 +2636,25 @@
           "characters"
         ],
         "title": "RemoveCharactersStep"
+      },
+      "RewordedCopy": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "explanation"
+        ],
+        "title": "RewordedCopy",
+        "description": "The title and explanation a card should show, once a rewrite was accepted."
       },
       "RowIdsCondition": {
         "properties": {

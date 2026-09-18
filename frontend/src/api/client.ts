@@ -21,6 +21,8 @@ export type GroupChangeView = components['schemas']['GroupChangeView']
 export type MergedNote = components['schemas']['MergedNote']
 export type WhyView = components['schemas']['WhyView']
 export type Measure = components['schemas']['Measure']
+export type AiResponse = components['schemas']['AiResponse']
+export type RewordedCopy = components['schemas']['RewordedCopy']
 export type PreviewRow = components['schemas']['PreviewRow']
 type ErrorResponse = components['schemas']['ErrorResponse']
 
@@ -174,5 +176,6 @@ export const api = {
   undoRecipe: (id: string) => send<RecipeResponse>(datasetPath(id, '/recipe/undo'), 'POST'),
   getPreview,
   getComparison: (id: string) => request<ComparisonResponse>(datasetPath(id, '/compare')),
+  getAiSuggestions: (id: string) => request<AiResponse>(datasetPath(id, '/ai')),
   exportDataset: (id: string, format: 'csv' | 'recipe') => download(datasetPath(id, `/export?format=${format}`)),
 }

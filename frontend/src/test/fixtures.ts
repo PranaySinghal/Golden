@@ -1,4 +1,5 @@
 import type {
+  AiResponse,
   AnswerCardView,
   ColumnProfile,
   ComparisonResponse,
@@ -95,6 +96,7 @@ export function issue(overrides: Partial<IssueView> = {}): IssueView {
   return {
     id: 'issue-likely',
     detector: 'extra_spaces',
+    source: 'rules',
     columns: ['First_Name'],
     title: '38 names have extra spaces around them',
     explanation: 'Extra spaces split one name into two groups when you count them.',
@@ -221,6 +223,17 @@ export function comparison(overrides: Partial<ComparisonResponse> = {}): Compari
     has_steps: true,
     questions_asked: 3,
     recomputed: 0,
+    ...overrides,
+  }
+}
+
+export function aiResponse(overrides: Partial<AiResponse> = {}): AiResponse {
+  return {
+    status: 'ready',
+    added: [],
+    issue_copy: {},
+    question_labels: {},
+    note: null,
     ...overrides,
   }
 }

@@ -33,6 +33,11 @@ export function IssueCard({
     <article className={`card${applied ? ' card--applied' : ''}`} aria-busy={busy}>
       <div className="card__head">
         <h4 className="card__title">{issue.title}</h4>
+        {issue.source === 'ai' && (
+          <span className="chip chip--soft" title="Found by the writing assistant, checked by us">
+            Suggested by AI
+          </span>
+        )}
         {applied && <span className="chip chip--done">Done</span>}
         {rejected && <span className="chip">Not doing this</span>}
       </div>

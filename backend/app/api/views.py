@@ -49,6 +49,8 @@ class RecipeResponse(BaseModel):
 class IssueView(BaseModel):
     id: str
     detector: DetectorName
+    # "ai" cards carry a chip saying so, and are never applied automatically.
+    source: Literal["rules", "ai"] = "rules"
     columns: list[str]
     title: str
     explanation: str
@@ -88,7 +90,7 @@ def recipe_response(session: DatasetSession) -> RecipeResponse:
 
 def issue_list_response(session: DatasetSession) -> IssueListResponse:
     issues = review.ranked(session)
-    views = [_issue_view(session, issue) for issue in issues]
+    views = [issue_view(session, issue) for issue in issues]
     counts = {tier: sum(1 for issue in issues if issue.tier is tier) for tier in Tier}
     return IssueListResponse(
         issues=views,
@@ -100,11 +102,12 @@ def issue_list_response(session: DatasetSession) -> IssueListResponse:
     )
 
 
-def _issue_view(session: DatasetSession, issue: Issue) -> IssueView:
+def issue_view(session: DatasetSession, issue: Issue) -> IssueView:
     state = review.state_of(session, issue)
     return IssueView(
         id=issue.id,
         detector=issue.detector,
+        source=issue.source,
         columns=issue.columns,
         title=issue.title,
         explanation=issue.explanation,
