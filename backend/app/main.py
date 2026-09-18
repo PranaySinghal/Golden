@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from app.api import datasets, health
+from app.api import datasets, health, issues, preview, recipe
 from app.api.errors import ErrorResponse, register_error_handlers
 from app.api.limits import UploadSizeMiddleware
 from app.config import get_settings
@@ -32,3 +32,6 @@ register_error_handlers(app)
 app.add_middleware(UploadSizeMiddleware)
 app.include_router(health.router)
 app.include_router(datasets.router)
+app.include_router(issues.router)
+app.include_router(recipe.router)
+app.include_router(preview.router)

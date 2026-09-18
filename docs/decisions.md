@@ -371,3 +371,65 @@ and `Comparison` (recipe, key, diffs, queries run, questions recomputed).
 **Small changes elsewhere.** Column stats and question generation take the table
 to read, defaulting to the raw table, so the cleaned rows can be profiled the
 same way. No new dependencies.
+
+---
+
+## 2026-09-17 · M6 · Review API and review UI
+
+**Cards act on issues, not steps** (owner approved, a change from PLAN.md's
+`POST /recipe/steps`). The screen shows suggestions and questions, so the API
+takes `POST /issues/{id}/accept` (with a `choice_id` for a question) and
+`POST /issues/{id}/reject`. Which steps a choice means, and the order they have
+to run in, stay on the server with `recipe_for`'s ranking. The recipe panel
+still edits steps directly: `PATCH` to turn one off, `DELETE` to remove it,
+`POST /recipe/undo` to step back.
+
+**The recipe is the only record of what will happen.** An issue is "applied"
+when its steps are in the recipe, "rejected" when the user turned it down, and
+"available" otherwise — worked out on each request instead of stored, so the two
+can't drift apart. The session keeps only what the recipe can't say: which
+answer was chosen, which suggestions were turned down, and which issue each step
+came from.
+
+**Certain fixes are applied on arrival** (owner decision). The first request for
+the issue list, or for the recipe, seeds the recipe with every safe-tier issue's
+steps, and they show as "Already fixed" with an undo. Seeding isn't a user edit,
+so it leaves nothing to undo to.
+
+**One request draws the screen.** The issue list carries the recipe with it, and
+every action answers with the new recipe, so a click costs one round trip.
+Detection and impact scoring take 0.5–2.3 seconds on the samples; they run once
+per file, on the first request that needs them, behind a loading state.
+
+**Steps are described, not named.** `app/steps/copy.py` turns a step into a
+sentence: "Keep one row per Employee_ID (the first one)", "Clear 'N/A' and '-'
+in Salary". A blocked step shows its plain reason in place of its counts. Tested
+against a jargon list.
+
+**Previews come from the engine, not a re-implementation.** `app/preview.py`
+builds the recipe with and without the steps in question, joins the two on the
+row id, and returns up to five rows where something differs, for up to six
+touched columns. Rows that would be set aside keep their values and are marked,
+rather than reading as changed. The two sides are built as separate statements
+so their bound parameters can't collide.
+
+**Validation errors get the same shape as everything else.** FastAPI's field
+paths mean nothing to a business user, so a request that doesn't validate comes
+back as `{code: "invalid_request", message: …}` like every other error.
+
+**The file lives in the address** (owner decision): `?dataset=<id>`, so a
+refresh doesn't lose the work. No router library; the app has two screens.
+
+**Frontend state.** TanStack Query holds server state: `['issues', id]` for the
+list and `['preview', id, …]` per card, fetched only when a card is expanded.
+Actions write the returned recipe into the cache and re-read the list. A card's
+failure shows on that card; a recipe-panel failure shows under the panel.
+Queries don't retry a 4xx — a file we can't find won't appear on a second ask.
+
+**Fixed while checking it in the browser:** `count_if` answers NULL when nothing
+it looks at is true or false, which crashed the date detector on a file whose
+dates are all year-first, and would have crashed a preview of a file with column
+names and no rows. Both now `coalesce` to 0, with a test each.
+
+**Downloads and answer impact wait for M7** (owner decision), so the review
+screen stays about reviewing.

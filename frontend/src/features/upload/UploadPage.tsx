@@ -6,8 +6,13 @@ import { DatasetOverview } from './DatasetOverview'
 import { DropZone } from './DropZone'
 import { formatBytes } from './format'
 
-export function UploadPage() {
-  const [dataset, setDataset] = useState<DatasetSummary | null>(null)
+interface UploadPageProps {
+  dataset: DatasetSummary | null
+  onDataset: (dataset: DatasetSummary | null) => void
+  onReview: () => void
+}
+
+export function UploadPage({ dataset, onDataset, onReview }: UploadPageProps) {
   const [tooLarge, setTooLarge] = useState<string | null>(null)
 
   const limits = useQuery({ queryKey: ['upload-limits'], queryFn: api.getUploadLimits })
@@ -15,12 +20,12 @@ export function UploadPage() {
 
   const upload = useMutation({
     mutationFn: (file: File) => api.uploadDataset(file),
-    onSuccess: setDataset,
+    onSuccess: onDataset,
   })
   const reread = useMutation({
     mutationFn: ({ id, request }: { id: string; request: ReingestRequest }) =>
       api.reingestDataset(id, request),
-    onSuccess: setDataset,
+    onSuccess: onDataset,
   })
 
   function handleFile(file: File) {
@@ -38,7 +43,7 @@ export function UploadPage() {
   }
 
   function startOver() {
-    setDataset(null)
+    onDataset(null)
     setTooLarge(null)
     upload.reset()
     reread.reset()
@@ -52,6 +57,7 @@ export function UploadPage() {
         rereadError={reread.error?.message ?? null}
         onReread={(request) => reread.mutate({ id: dataset.id, request })}
         onUploadAnother={startOver}
+        onReview={onReview}
       />
     )
   }

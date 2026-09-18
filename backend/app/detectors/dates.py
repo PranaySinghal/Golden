@@ -56,9 +56,12 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
                     TRY_CAST(regexp_extract(t, $parts, 1) AS INTEGER) AS a,
                     TRY_CAST(regexp_extract(t, $parts, 2) AS INTEGER) AS b
                   FROM v WHERE t IS NOT NULL)
+            -- count_if answers NULL when nothing it looks at is true or false,
+            -- which is what happens when no value has two numbers to compare.
             SELECT count(*),
-              count_if(b > 12 AND a <= 12), count_if(a > 12 AND b <= 12),
-              count_if(a BETWEEN 1 AND 12 AND b BETWEEN 1 AND 12),
+              coalesce(count_if(b > 12 AND a <= 12), 0),
+              coalesce(count_if(a > 12 AND b <= 12), 0),
+              coalesce(count_if(a BETWEEN 1 AND 12 AND b BETWEEN 1 AND 12), 0),
               min(t) FILTER (WHERE b > 12 AND a <= 12),
               min(t) FILTER (WHERE a > 12 AND b <= 12),
               min(t) FILTER (WHERE a BETWEEN 1 AND 12 AND b BETWEEN 1 AND 12 AND a <> b)

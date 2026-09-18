@@ -89,10 +89,152 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/datasets/{dataset_id}/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Issues */
+        get: operations["getIssues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/issues/{issue_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Issue */
+        post: operations["acceptIssue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/issues/{issue_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject Issue */
+        post: operations["rejectIssue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/recipe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Recipe */
+        get: operations["getRecipe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/recipe/steps/{step_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Step */
+        delete: operations["removeStep"];
+        options?: never;
+        head?: never;
+        /** Update Step */
+        patch: operations["updateStep"];
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/recipe/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo Recipe */
+        post: operations["undoRecipe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preview */
+        get: operations["getPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptRequest */
+        AcceptRequest: {
+            /** Choice Id */
+            choice_id?: string | null;
+        };
+        /** AskQuestion */
+        AskQuestion: {
+            /** Prompt */
+            prompt: string;
+            /** Choices */
+            choices: components["schemas"]["Choice"][];
+        };
+        /** BlankCondition */
+        BlankCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "blank";
+            /** Column */
+            column: string;
+        };
         /** Body_uploadDataset */
         Body_uploadDataset: {
             /**
@@ -104,6 +246,81 @@ export interface components {
             sheet?: string | null;
             /** @default auto */
             header: components["schemas"]["HeaderMode"];
+        };
+        /** CastNumberStep */
+        CastNumberStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "cast_number";
+            /** Column */
+            column: string;
+            /**
+             * Decimal Separator
+             * @default .
+             * @enum {string}
+             */
+            decimal_separator: "." | ",";
+            /**
+             * Percent
+             * @default keep
+             * @enum {string}
+             */
+            percent: "keep" | "fraction";
+            /**
+             * Allow K M Suffix
+             * @default false
+             */
+            allow_k_m_suffix: boolean;
+        };
+        /**
+         * Choice
+         * @description One answer to an ask-tier question.
+         */
+        Choice: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+            /** Steps */
+            steps?: (components["schemas"]["TrimStep"] | components["schemas"]["RemoveCharactersStep"] | components["schemas"]["NormalizeCaseStep"] | components["schemas"]["MapValuesStep"] | components["schemas"]["NullPlaceholdersStep"] | components["schemas"]["CastNumberStep"] | components["schemas"]["ParseDateStep"] | components["schemas"]["SplitColumnStep"] | components["schemas"]["DedupeStep"] | components["schemas"]["SetAsideRowsStep"] | components["schemas"]["ClearValuesStep"] | components["schemas"]["FillMissingStep"])[];
+            /**
+             * Recommended
+             * @default false
+             */
+            recommended: boolean;
+        };
+        /**
+         * ClearValuesStep
+         * @description Blank out values that match a condition, keeping the rest of the row.
+         */
+        ClearValuesStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "clear_values";
+            /** Column */
+            column: string;
+            /** Condition */
+            condition: components["schemas"]["BlankCondition"] | components["schemas"]["EqualsCondition"] | components["schemas"]["OneOfCondition"] | components["schemas"]["RowIdsCondition"] | components["schemas"]["OutsideRangeCondition"] | components["schemas"]["NotMatchingCondition"] | components["schemas"]["DigitsFewerThanCondition"];
         };
         /**
          * ColumnFlag
@@ -187,6 +404,37 @@ export interface components {
             /** Columns */
             columns: components["schemas"]["ColumnProfile"][];
         };
+        /** DedupeStep */
+        DedupeStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "dedupe";
+            /** Columns */
+            columns?: string[] | null;
+            /**
+             * Match
+             * @default exact
+             * @enum {string}
+             */
+            match: "exact" | "ignore_case_and_spaces";
+            /**
+             * Keep
+             * @default first
+             * @enum {string}
+             */
+            keep: "first" | "last";
+            /** Keep Row Ids */
+            keep_row_ids?: number[];
+        };
         /** DetectedPattern */
         DetectedPattern: {
             kind: components["schemas"]["PatternKind"];
@@ -203,12 +451,74 @@ export interface components {
              */
             detail?: string | null;
         };
+        /**
+         * DetectorName
+         * @enum {string}
+         */
+        DetectorName: "placeholders" | "numbers_as_text" | "dates" | "category_variants" | "extra_spaces" | "combined_columns" | "duplicates" | "identifier_repeats" | "out_of_range" | "contact_formats" | "missing_values";
+        /**
+         * DigitsFewerThanCondition
+         * @description Filled values with fewer digits than `count`, e.g. phone numbers that are too short.
+         */
+        DigitsFewerThanCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "digits_fewer_than";
+            /** Column */
+            column: string;
+            /** Count */
+            count: number;
+        };
+        /** EqualsCondition */
+        EqualsCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "equals";
+            /** Column */
+            column: string;
+            /** Value */
+            value: string | number;
+            /**
+             * Match
+             * @default exact
+             * @enum {string}
+             */
+            match: "exact" | "ignore_case_and_spaces";
+        };
         /** ErrorResponse */
         ErrorResponse: {
             /** Code */
             code: string;
             /** Message */
             message: string;
+        };
+        /** FillMissingStep */
+        FillMissingStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "fill_missing";
+            /** Column */
+            column: string;
+            /**
+             * Strategy
+             * @enum {string}
+             */
+            strategy: "value" | "mean" | "median" | "most_common" | "previous";
+            /** Value */
+            value?: string | number | null;
         };
         /**
          * HeaderMode
@@ -227,6 +537,194 @@ export interface components {
              */
             status: "ok";
         };
+        /** IssueListResponse */
+        IssueListResponse: {
+            /** Issues */
+            issues?: components["schemas"]["IssueView"][];
+            /** Counts */
+            counts?: {
+                [key: string]: number;
+            };
+            /**
+             * Needs Decision
+             * @default 0
+             */
+            needs_decision: number;
+            recipe: components["schemas"]["RecipeResponse"];
+        };
+        /** IssueView */
+        IssueView: {
+            /** Id */
+            id: string;
+            detector: components["schemas"]["DetectorName"];
+            /** Columns */
+            columns: string[];
+            /** Title */
+            title: string;
+            /** Explanation */
+            explanation: string;
+            /** Examples */
+            examples?: string[];
+            /** Affected Rows */
+            affected_rows: number;
+            tier: components["schemas"]["Tier"];
+            /** Impact */
+            impact: number;
+            ask?: components["schemas"]["AskQuestion"] | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "applied" | "available" | "rejected";
+            /** Chosen Choice Id */
+            chosen_choice_id?: string | null;
+            /** Step Ids */
+            step_ids?: string[];
+        };
+        /** MapValuesStep */
+        MapValuesStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "map_values";
+            /** Column */
+            column: string;
+            /** Mappings */
+            mappings: components["schemas"]["ValueMapping"][];
+            /**
+             * Match
+             * @default exact
+             * @enum {string}
+             */
+            match: "exact" | "ignore_case_and_spaces";
+        };
+        /** NormalizeCaseStep */
+        NormalizeCaseStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "normalize_case";
+            /** Columns */
+            columns: string[];
+            /**
+             * Case
+             * @enum {string}
+             */
+            case: "lower" | "upper" | "title";
+        };
+        /** NotMatchingCondition */
+        NotMatchingCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "not_matching";
+            /** Column */
+            column: string;
+            /**
+             * Pattern
+             * @enum {string}
+             */
+            pattern: "email" | "phone" | "number" | "date";
+        };
+        /** NullPlaceholdersStep */
+        NullPlaceholdersStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "null_placeholders";
+            /** Columns */
+            columns: string[];
+            /** Placeholders */
+            placeholders: string[];
+        };
+        /** OneOfCondition */
+        OneOfCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "one_of";
+            /** Column */
+            column: string;
+            /** Values */
+            values: (string | number)[];
+            /**
+             * Match
+             * @default exact
+             * @enum {string}
+             */
+            match: "exact" | "ignore_case_and_spaces";
+        };
+        /** OutputColumn */
+        OutputColumn: {
+            /** Name */
+            name: string;
+            kind: components["schemas"]["ValueKind"];
+        };
+        /** OutsideRangeCondition */
+        OutsideRangeCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "outside_range";
+            /** Column */
+            column: string;
+            /** Min */
+            min?: number | null;
+            /** Max */
+            max?: number | null;
+        };
+        /** ParseDateStep */
+        ParseDateStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "parse_date";
+            /** Column */
+            column: string;
+            /** Formats */
+            formats: ("%Y-%m-%d" | "%Y/%m/%d" | "%Y.%m.%d" | "%m/%d/%Y" | "%d/%m/%Y" | "%m-%d-%Y" | "%d-%m-%Y" | "%d.%m.%Y" | "%m/%d/%y" | "%d/%m/%y" | "%d %b %Y" | "%d-%b-%Y" | "%d-%b-%y" | "%d %B %Y" | "%b %d, %Y" | "%B %d, %Y" | "%b %d %Y" | "%B %d %Y" | "%Y-%m-%d %H:%M:%S" | "%Y-%m-%dT%H:%M:%S" | "%Y-%m-%d %H:%M" | "%m/%d/%Y %H:%M" | "%d/%m/%Y %H:%M" | "%m/%d/%Y %H:%M:%S" | "%d/%m/%Y %H:%M:%S")[];
+            /**
+             * Output
+             * @default date
+             * @enum {string}
+             */
+            output: "date" | "datetime";
+        };
         /**
          * PatternKind
          * @enum {string}
@@ -238,6 +736,70 @@ export interface components {
          * @enum {string}
          */
         PhysicalType: "empty" | "boolean" | "integer" | "decimal" | "date" | "datetime" | "text";
+        /** Preview */
+        Preview: {
+            /** Columns */
+            columns: string[];
+            /** Rows */
+            rows?: components["schemas"]["PreviewRow"][];
+            /**
+             * Changed Rows
+             * @default 0
+             */
+            changed_rows: number;
+            /**
+             * Set Aside Rows
+             * @default 0
+             */
+            set_aside_rows: number;
+            /** Note */
+            note?: string | null;
+        };
+        /** PreviewCell */
+        PreviewCell: {
+            /** Before */
+            before: string | null;
+            /** After */
+            after: string | null;
+            /** Changed */
+            changed: boolean;
+        };
+        /** PreviewRow */
+        PreviewRow: {
+            /** Row Id */
+            row_id: number;
+            /** Cells */
+            cells: {
+                [key: string]: components["schemas"]["PreviewCell"];
+            };
+            /**
+             * Set Aside
+             * @default false
+             */
+            set_aside: boolean;
+        };
+        /** RecipeResponse */
+        RecipeResponse: {
+            /** Steps */
+            steps?: components["schemas"]["StepView"][];
+            /**
+             * Can Undo
+             * @default false
+             */
+            can_undo: boolean;
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count: number;
+            /**
+             * Set Aside Count
+             * @default 0
+             */
+            set_aside_count: number;
+            /** Columns */
+            columns?: components["schemas"]["OutputColumn"][];
+        };
         /** ReingestRequest */
         ReingestRequest: {
             /**
@@ -248,20 +810,181 @@ export interface components {
             /** @default auto */
             header: components["schemas"]["HeaderMode"];
         };
+        /** RemoveCharactersStep */
+        RemoveCharactersStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "remove_characters";
+            /** Columns */
+            columns: string[];
+            /** Characters */
+            characters: string;
+            /**
+             * Where
+             * @default leading
+             * @enum {string}
+             */
+            where: "leading" | "trailing" | "anywhere";
+        };
+        /** RowIdsCondition */
+        RowIdsCondition: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "row_ids";
+            /** Row Ids */
+            row_ids: number[];
+        };
         /**
          * SemanticRole
          * @enum {string}
          */
         SemanticRole: "identifier" | "category" | "measure" | "date" | "contact" | "text";
+        /** SetAsideRowsStep */
+        SetAsideRowsStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "set_aside_rows";
+            /** Condition */
+            condition: components["schemas"]["BlankCondition"] | components["schemas"]["EqualsCondition"] | components["schemas"]["OneOfCondition"] | components["schemas"]["RowIdsCondition"] | components["schemas"]["OutsideRangeCondition"] | components["schemas"]["NotMatchingCondition"] | components["schemas"]["DigitsFewerThanCondition"];
+            /** Keep Row Ids */
+            keep_row_ids?: number[];
+        };
         /**
          * SourceFormat
          * @enum {string}
          */
         SourceFormat: "csv" | "xlsx";
+        /** SplitColumnStep */
+        SplitColumnStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "split_column";
+            /** Column */
+            column: string;
+            /** Delimiter */
+            delimiter: string;
+            /** Into */
+            into: string[];
+            /**
+             * Trim Parts
+             * @default true
+             */
+            trim_parts: boolean;
+            /**
+             * Keep Original
+             * @default true
+             */
+            keep_original: boolean;
+        };
+        /**
+         * StepStatus
+         * @enum {string}
+         */
+        StepStatus: "applied" | "disabled" | "blocked";
+        /** StepUpdate */
+        StepUpdate: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** StepView */
+        StepView: {
+            /** Id */
+            id: string;
+            /** Type */
+            type: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+            /** Columns */
+            columns: string[];
+            /** Enabled */
+            enabled: boolean;
+            status: components["schemas"]["StepStatus"];
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Rows Set Aside
+             * @default 0
+             */
+            rows_set_aside: number;
+            /** Cells Changed */
+            cells_changed?: number | null;
+            /** Issue Id */
+            issue_id?: string | null;
+        };
+        /**
+         * Tier
+         * @enum {string}
+         */
+        Tier: "safe" | "likely" | "ask";
+        /** TrimStep */
+        TrimStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "trim";
+            /** Columns */
+            columns: string[];
+            /**
+             * Collapse Inner Spaces
+             * @default false
+             */
+            collapse_inner_spaces: boolean;
+        };
         /** UploadLimits */
         UploadLimits: {
             /** Max Upload Bytes */
             max_upload_bytes: number;
+        };
+        /**
+         * ValueKind
+         * @enum {string}
+         */
+        ValueKind: "text" | "number" | "date" | "datetime";
+        /** ValueMapping */
+        ValueMapping: {
+            /** From Value */
+            from_value: string;
+            /** To Value */
+            to_value: string | null;
         };
     };
     responses: never;
@@ -416,6 +1139,271 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DatasetSummary"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getIssues: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueListResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    acceptIssue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+                issue_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rejectIssue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+                issue_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRecipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    removeStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+                step_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+                step_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StepUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    undoRecipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPreview: {
+        parameters: {
+            query?: {
+                issue_id?: string | null;
+                choice_id?: string | null;
+                step_id?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preview"];
                 };
             };
             /** @description A problem the user can fix */

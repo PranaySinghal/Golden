@@ -7,6 +7,15 @@ export type SemanticRole = components['schemas']['SemanticRole']
 export type HeaderMode = components['schemas']['HeaderMode']
 export type ReingestRequest = components['schemas']['ReingestRequest']
 export type UploadLimits = components['schemas']['UploadLimits']
+export type IssueListResponse = components['schemas']['IssueListResponse']
+export type IssueView = components['schemas']['IssueView']
+export type AskQuestion = components['schemas']['AskQuestion']
+export type Choice = components['schemas']['Choice']
+export type Tier = components['schemas']['Tier']
+export type RecipeResponse = components['schemas']['RecipeResponse']
+export type StepView = components['schemas']['StepView']
+export type Preview = components['schemas']['Preview']
+export type PreviewRow = components['schemas']['PreviewRow']
 type ErrorResponse = components['schemas']['ErrorResponse']
 
 export class ApiError extends Error {
@@ -85,10 +94,54 @@ function reingestDataset(id: string, body: ReingestRequest): Promise<DatasetSumm
   })
 }
 
+function send<T>(path: string, method: string, body?: unknown): Promise<T> {
+  return request<T>(path, {
+    method,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+}
+
+function datasetPath(id: string, rest = ''): string {
+  return `/api/datasets/${encodeURIComponent(id)}${rest}`
+}
+
+export interface PreviewQuery {
+  issueId?: string
+  choiceId?: string
+  stepId?: string
+  limit?: number
+}
+
+function getPreview(id: string, query: PreviewQuery): Promise<Preview> {
+  const params = new URLSearchParams()
+  if (query.issueId) params.set('issue_id', query.issueId)
+  if (query.choiceId) params.set('choice_id', query.choiceId)
+  if (query.stepId) params.set('step_id', query.stepId)
+  if (query.limit) params.set('limit', String(query.limit))
+  return request<Preview>(datasetPath(id, `/preview?${params.toString()}`))
+}
+
 export const api = {
   getHealth: () => request<HealthResponse>('/api/health'),
   getUploadLimits: () => request<UploadLimits>('/api/upload-limits'),
-  getDataset: (id: string) => request<DatasetSummary>(`/api/datasets/${encodeURIComponent(id)}`),
+  getDataset: (id: string) => request<DatasetSummary>(datasetPath(id)),
   uploadDataset,
   reingestDataset,
+  getIssues: (id: string) => request<IssueListResponse>(datasetPath(id, '/issues')),
+  acceptIssue: (id: string, issueId: string, choiceId?: string | null) =>
+    send<RecipeResponse>(datasetPath(id, `/issues/${encodeURIComponent(issueId)}/accept`), 'POST', {
+      choice_id: choiceId ?? null,
+    }),
+  rejectIssue: (id: string, issueId: string) =>
+    send<RecipeResponse>(datasetPath(id, `/issues/${encodeURIComponent(issueId)}/reject`), 'POST'),
+  getRecipe: (id: string) => request<RecipeResponse>(datasetPath(id, '/recipe')),
+  setStepEnabled: (id: string, stepId: string, enabled: boolean) =>
+    send<RecipeResponse>(datasetPath(id, `/recipe/steps/${encodeURIComponent(stepId)}`), 'PATCH', {
+      enabled,
+    }),
+  removeStep: (id: string, stepId: string) =>
+    send<RecipeResponse>(datasetPath(id, `/recipe/steps/${encodeURIComponent(stepId)}`), 'DELETE'),
+  undoRecipe: (id: string) => send<RecipeResponse>(datasetPath(id, '/recipe/undo'), 'POST'),
+  getPreview,
 }

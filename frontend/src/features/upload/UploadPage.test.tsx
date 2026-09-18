@@ -2,6 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { useState } from 'react'
+
+import type { DatasetSummary } from '../../api/client'
 import { column, dataset, jsonResponse } from '../../test/fixtures'
 import { UploadPage } from './UploadPage'
 
@@ -22,13 +25,19 @@ const LIMITS: Record<string, Handler> = {
   'GET /api/upload-limits': () => jsonResponse(200, { max_upload_bytes: 50 * 1024 * 1024 }),
 }
 
-function renderPage() {
+/** Stands in for App, which owns the file the page is working on. */
+function Harness({ onReview = () => {} }: { onReview?: () => void }) {
+  const [current, setCurrent] = useState<DatasetSummary | null>(null)
+  return <UploadPage dataset={current} onDataset={setCurrent} onReview={onReview} />
+}
+
+function renderPage(onReview?: () => void) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   return render(
     <QueryClientProvider client={client}>
-      <UploadPage />
+      <Harness onReview={onReview} />
     </QueryClientProvider>,
   )
 }

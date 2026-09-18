@@ -8,6 +8,7 @@ interface DatasetOverviewProps {
   rereading: boolean
   rereadError: string | null
   onUploadAnother: () => void
+  onReview: () => void
 }
 
 export function DatasetOverview({
@@ -16,6 +17,7 @@ export function DatasetOverview({
   rereading,
   rereadError,
   onUploadAnother,
+  onReview,
 }: DatasetOverviewProps) {
   const showSheets = dataset.format === 'xlsx' && dataset.available_sheets.length > 1
   const skipped = dataset.empty_rows_skipped
@@ -95,6 +97,18 @@ export function DatasetOverview({
       )}
 
       <ColumnTable columns={dataset.columns} />
+
+      {dataset.row_count > 0 && (
+        <div className="overview__next">
+          <button type="button" className="button" onClick={onReview} disabled={rereading}>
+            See what needs fixing
+          </button>
+          <p className="muted small">
+            We'll look for blanks, repeated rows, mixed spellings, and numbers or dates stored as
+            text.
+          </p>
+        </div>
+      )}
     </section>
   )
 }

@@ -14,13 +14,16 @@ from pathlib import Path
 
 import duckdb
 
+from app.compare.compare import AnswerCache
 from app.config import Settings
 from app.db import create_workspace, open_dataset_connection, raw_db_path, remove_workspace
+from app.detectors.models import Issue
 from app.errors import DatasetNotFoundError
 from app.ingest.loader import ingest_to_file
 from app.ingest.models import IngestOptions, IngestResult
 from app.profile.models import DatasetProfile
 from app.profile.profiler import profile_table
+from app.questions.models import Question
 from app.steps.apply import ApplyResult
 from app.steps.models import Recipe
 from app.steps.recipe_ops import RecipeHistory
@@ -43,6 +46,18 @@ class DatasetSession:
     recipe: Recipe = field(default_factory=Recipe)
     history: RecipeHistory = field(default_factory=RecipeHistory)
     applied: ApplyResult | None = None
+    # What review found, worked out once and kept: detection and impact scoring
+    # cost a second or two, and neither changes until the file is read again.
+    issues: list[Issue] | None = None
+    questions: list[Question] | None = None
+    answer_cache: AnswerCache = field(default_factory=dict)
+    safe_applied: bool = False
+    # Which ask-tier question got which answer, and which suggestions the user
+    # turned down. The recipe says what runs; these say what the user decided.
+    answers: dict[str, str] = field(default_factory=dict)
+    rejected: set[str] = field(default_factory=set)
+    # Which issue each step came from, for showing them together in the panel.
+    step_origin: dict[str, str] = field(default_factory=dict)
     # One DuckDB connection isn't safe to use from two threads at once.
     lock: threading.RLock = field(default_factory=threading.RLock)
 
