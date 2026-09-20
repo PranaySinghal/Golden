@@ -14,6 +14,7 @@ from pathlib import Path
 
 import duckdb
 
+from app.ai.enhance import Enhancement
 from app.compare.compare import AnswerCache
 from app.compare.engine import ComparisonEngine
 from app.compare.models import Comparison
@@ -64,6 +65,8 @@ class DatasetSession:
     # answer cache, which is what makes changing an answer cheap to redo.
     engine: ComparisonEngine | None = None
     comparison: Comparison | None = None
+    # What a model added, asked for once per file after the rules have run.
+    enhancement: Enhancement | None = None
     # One DuckDB connection isn't safe to use from two threads at once.
     lock: threading.RLock = field(default_factory=threading.RLock)
 

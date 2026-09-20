@@ -10,9 +10,12 @@ seconds on a messy file) and kept on the session until the file is read again.
 
 from dataclasses import dataclass
 
+from app.ai.enhance import Enhancement, enhance
+from app.ai.provider import Provider
 from app.compare.engine import ComparisonEngine
 from app.compare.issue_impact import score_issues
 from app.compare.models import Comparison
+from app.config import Settings
 from app.detectors.models import Issue, Tier
 from app.detectors.registry import detect_issues, rank_issues
 from app.detectors.step_order import RANK, chosen_steps
@@ -77,6 +80,27 @@ def prepare(session: DatasetSession) -> list[Issue]:
 
 def issues_of(session: DatasetSession) -> list[Issue]:
     return prepare(session)
+
+
+def ai_enhancement(
+    session: DatasetSession, settings: Settings, provider: Provider | None = None
+) -> Enhancement:
+    """Ask a model for more, once per file, and keep what survived checking.
+
+    The extra issues join the session's list, so accepting, previewing and
+    undoing them all work through the paths that already exist.
+    """
+    if session.enhancement is not None:
+        return session.enhancement
+    issues = prepare(session)
+    result = enhance(
+        session.conn, session.profile, issues, session.questions or [], settings, provider
+    )
+    session.enhancement = result
+    if result.added:
+        known = {issue.id for issue in issues}
+        session.issues = [*issues, *(i for i in result.added if i.id not in known)]
+    return result
 
 
 def compare_now(session: DatasetSession) -> Comparison:

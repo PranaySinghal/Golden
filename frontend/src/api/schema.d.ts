@@ -243,6 +243,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/datasets/{dataset_id}/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Ai Suggestions */
+        get: operations["getAiSuggestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -251,6 +268,26 @@ export interface components {
         AcceptRequest: {
             /** Choice Id */
             choice_id?: string | null;
+        };
+        /** AiResponse */
+        AiResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "off" | "ready" | "failed";
+            /** Added */
+            added?: components["schemas"]["IssueView"][];
+            /** Issue Copy */
+            issue_copy?: {
+                [key: string]: components["schemas"]["RewordedCopy"];
+            };
+            /** Question Labels */
+            question_labels?: {
+                [key: string]: string;
+            };
+            /** Note */
+            note?: string | null;
         };
         /** AnswerCardView */
         AnswerCardView: {
@@ -541,7 +578,7 @@ export interface components {
          * DetectorName
          * @enum {string}
          */
-        DetectorName: "placeholders" | "numbers_as_text" | "dates" | "category_variants" | "extra_spaces" | "combined_columns" | "duplicates" | "identifier_repeats" | "out_of_range" | "contact_formats" | "missing_values";
+        DetectorName: "placeholders" | "numbers_as_text" | "dates" | "category_variants" | "extra_spaces" | "combined_columns" | "duplicates" | "identifier_repeats" | "out_of_range" | "contact_formats" | "missing_values" | "ai_suggestion";
         /**
          * DigitsFewerThanCondition
          * @description Filled values with fewer digits than `count`, e.g. phone numbers that are too short.
@@ -657,6 +694,12 @@ export interface components {
             /** Id */
             id: string;
             detector: components["schemas"]["DetectorName"];
+            /**
+             * Source
+             * @default rules
+             * @enum {string}
+             */
+            source: "rules" | "ai";
             /** Columns */
             columns: string[];
             /** Title */
@@ -954,6 +997,16 @@ export interface components {
              * @enum {string}
              */
             where: "leading" | "trailing" | "anywhere";
+        };
+        /**
+         * RewordedCopy
+         * @description The title and explanation a card should show, once a rewrite was accepted.
+         */
+        RewordedCopy: {
+            /** Title */
+            title: string;
+            /** Explanation */
+            explanation: string;
         };
         /** RowIdsCondition */
         RowIdsCondition: {
@@ -1639,6 +1692,37 @@ export interface operations {
                 content: {
                     "text/csv": unknown;
                     "application/json": unknown;
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getAiSuggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiResponse"];
                 };
             };
             /** @description A problem the user can fix */

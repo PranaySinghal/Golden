@@ -11,6 +11,8 @@ interface ComparePageProps {
   recipeKey: string
   steps: StepView[]
   issues: IssueView[]
+  /** Better labels for the questions, when a model offered any. */
+  questionLabels?: Record<string, string>
   choosing: string | null
   onChoose: (issueId: string, choiceId: string) => void
   onHighlight: (stepIds: string[]) => void
@@ -22,6 +24,7 @@ export function ComparePage({
   recipeKey,
   steps,
   issues,
+  questionLabels,
   choosing,
   onChoose,
   onHighlight,
@@ -116,7 +119,7 @@ export function ComparePage({
             <AnswerCard
               key={card.question_id}
               datasetId={datasetId}
-              card={card}
+              card={labelled(card, questionLabels)}
               steps={steps}
               updating={updating}
               onHighlight={onHighlight}
@@ -137,7 +140,7 @@ export function ComparePage({
               <AnswerCard
                 key={card.question_id}
                 datasetId={datasetId}
-                card={card}
+                card={labelled(card, questionLabels)}
                 steps={steps}
                 updating={updating}
                 onHighlight={onHighlight}
@@ -161,6 +164,12 @@ export function ComparePage({
       )}
     </section>
   )
+}
+
+/** The question as a person would ask it, when a model gave us a better wording. */
+function labelled(card: AnswerCardView, labels: Record<string, string> | undefined): AnswerCardView {
+  const better = labels?.[card.question_id]
+  return better ? { ...card, label: better } : card
 }
 
 function summary(changed: number, asked: number): string {

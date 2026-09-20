@@ -10,6 +10,8 @@ interface IssueListProps {
   errorFor: (id: string) => string | null
   onAccept: (issue: IssueView, choiceId?: string) => void
   onReject: (issue: IssueView) => void
+  /** Shown once, quietly, when extra suggestions were asked for and didn't arrive. */
+  note?: string | null
 }
 
 export function IssueList({
@@ -19,6 +21,7 @@ export function IssueList({
   errorFor,
   onAccept,
   onReject,
+  note,
 }: IssueListProps) {
   if (issues.length === 0) {
     return (
@@ -32,6 +35,11 @@ export function IssueList({
 
   return (
     <>
+      {note && (
+        <p className="muted small" role="status">
+          {note}
+        </p>
+      )}
       {TIER_ORDER.map((tier) => {
         const forTier = issues.filter((issue) => issue.tier === tier)
         if (forTier.length === 0) return null

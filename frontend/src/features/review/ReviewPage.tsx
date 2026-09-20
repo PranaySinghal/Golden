@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import {
   api,
+  type AiResponse,
   type DatasetSummary,
   type IssueListResponse,
   type IssueView,
@@ -17,6 +18,19 @@ import { IssueList } from './IssueList'
 import { RecipePanel } from './RecipePanel'
 
 type Tab = 'review' | 'changed'
+
+/** Cards a model added, and wording it improved, folded into the rule-based list. */
+function withAiHelp(issues: IssueView[], ai: AiResponse | undefined): IssueView[] {
+  if (!ai) return issues
+  const byId = new Map(issues.map((issue) => [issue.id, issue]))
+  for (const added of ai.added ?? []) {
+    if (!byId.has(added.id)) byId.set(added.id, added)
+  }
+  return [...byId.values()].map((issue) => {
+    const better = ai.issue_copy?.[issue.id]
+    return better ? { ...issue, title: better.title, explanation: better.explanation } : issue
+  })
+}
 
 interface ActionError {
   id: string
@@ -41,6 +55,15 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
   const issues = useQuery({
     queryKey: issuesKey,
     queryFn: () => api.getIssues(dataset.id),
+  })
+
+  // Asked for once, after the rule-based review is already on screen. Whatever
+  // comes back is extra; nothing here waits on it.
+  const ai = useQuery({
+    queryKey: ['ai', dataset.id],
+    queryFn: () => api.getAiSuggestions(dataset.id),
+    enabled: issues.isSuccess,
+    staleTime: Infinity,
   })
 
   /** Every action answers with the new recipe; the list is re-read to follow it. */
@@ -85,8 +108,9 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
   }
 
   const { issues: found, recipe, needs_decision: decisions } = issues.data
-  const list = found ?? []
+  const list = withAiHelp(found ?? [], ai.data)
   const steps = recipe.steps ?? []
+  const aiFailed = ai.data?.status === 'failed'
   const busyWith = (id: string) => acting === id || undo.isPending
   const errorFor = (id: string) =>
     actionError?.where === 'card' && actionError.id === id ? actionError.message : null
@@ -166,6 +190,7 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
               onReject={(issue) =>
                 runAction(issue.id, 'card', () => api.rejectIssue(dataset.id, issue.id))
               }
+              note={aiFailed ? (ai.data?.note ?? null) : null}
             />
           ) : (
             <ComparePage
@@ -178,6 +203,7 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
                 const issue = list.find((candidate) => candidate.id === issueId)
                 if (issue) accept(issue, choiceId)
               }}
+              questionLabels={ai.data?.question_labels ?? {}}
               onHighlight={setHighlighted}
               onBackToReview={() => setTab('review')}
             />

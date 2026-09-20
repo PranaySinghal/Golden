@@ -1,10 +1,11 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
 
-from app.api import compare, datasets, health, issues, preview, recipe
+from app.api import ai, compare, datasets, health, issues, preview, recipe
 from app.api.errors import ErrorResponse, register_error_handlers
 from app.api.limits import UploadSizeMiddleware
 from app.config import get_settings
@@ -16,8 +17,20 @@ _ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
 }
 
 
+def _setup_logging() -> None:
+    """Send our own log lines somewhere. The server configures its loggers, not ours."""
+    logger = logging.getLogger("tidylab")
+    if logger.handlers:
+        return
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(levelname)s:     %(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    _setup_logging()
     app.state.settings = get_settings()
     app.state.store = DatasetStore(app.state.settings)
     try:
@@ -36,3 +49,4 @@ app.include_router(issues.router)
 app.include_router(recipe.router)
 app.include_router(preview.router)
 app.include_router(compare.router)
+app.include_router(ai.router)

@@ -1,7 +1,7 @@
 """Issues: problems found in a table, each with a confidence tier and proposed fixes."""
 
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -29,6 +29,8 @@ class DetectorName(StrEnum):
     OUT_OF_RANGE = "out_of_range"
     CONTACT_FORMATS = "contact_formats"
     MISSING_VALUES = "missing_values"
+    # Not a detector: a fix a model proposed, which passed every check.
+    AI_SUGGESTION = "ai_suggestion"
 
 
 class Choice(BaseModel):
@@ -55,6 +57,9 @@ class AskQuestion(BaseModel):
 class Issue(BaseModel):
     id: str
     detector: DetectorName
+    # Where it came from. "ai" issues are shown for review and never applied
+    # automatically, whatever tier they carry.
+    source: Literal["rules", "ai"] = "rules"
     columns: list[str]
     title: str
     explanation: str
