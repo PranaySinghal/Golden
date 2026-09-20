@@ -16,12 +16,19 @@ from app.ai import payload as payloads
 from app.ai.client import ask, load_prompt
 from app.ai.fixes import accepted_fixes
 from app.ai.provider import Provider, build_provider
-from app.ai.schemas import RewordIssuesReply, RewordQuestionsReply, SuggestFixesReply
+from app.ai.schemas import (
+    RewordIssuesReply,
+    RewordQuestionsReply,
+    StoryReply,
+    SuggestFixesReply,
+)
+from app.ai.story_wording import accepted_story, story_facts
 from app.ai.wording import RewordedCopy, accepted_issue_copy, accepted_question_labels
 from app.config import Settings
 from app.detectors.models import Issue
 from app.profile.models import DatasetProfile
-from app.questions.models import Question
+from app.questions.models import AnswerDiff, Question
+from app.story import Story
 
 logger = logging.getLogger("tidylab.ai")
 
@@ -34,6 +41,9 @@ class Enhancement(BaseModel):
     added: list[Issue] = Field(default_factory=list)
     issue_copy: dict[str, RewordedCopy] = Field(default_factory=dict)
     question_labels: dict[str, str] = Field(default_factory=dict)
+    # The comparison already carries a story built from templates; this replaces
+    # it when a model wrote a better one that only uses our figures.
+    story: Story | None = None
     note: str | None = None
 
 
@@ -45,6 +55,7 @@ def enhance(
     settings: Settings,
     provider: Provider | None = None,
     today: date | None = None,
+    diffs: list[AnswerDiff] | None = None,
 ) -> Enhancement:
     if not settings.llm_enabled:
         return Enhancement(status="off")
@@ -73,7 +84,24 @@ def enhance(
         timeout,
     )
 
-    if suggested is None and reworded_issues is None and reworded_questions is None:
+    told = (
+        ask(
+            service,
+            load_prompt("story"),
+            story_facts(diffs),
+            StoryReply,
+            timeout,
+        )
+        if diffs
+        else None
+    )
+
+    if (
+        suggested is None
+        and reworded_issues is None
+        and reworded_questions is None
+        and told is None
+    ):
         return Enhancement(status="failed", note=FAILED_NOTE)
 
     added = accepted_fixes(conn, profile, suggested, issues, today) if suggested else []
@@ -88,4 +116,10 @@ def enhance(
         len(labels),
         len(reworded_questions.items) if reworded_questions else 0,
     )
-    return Enhancement(status="ready", added=added, issue_copy=copy, question_labels=labels)
+    return Enhancement(
+        status="ready",
+        added=added,
+        issue_copy=copy,
+        question_labels=labels,
+        story=accepted_story(diffs, told) if told and diffs else None,
+    )

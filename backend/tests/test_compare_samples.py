@@ -4,7 +4,6 @@ import json
 import time
 from typing import Any
 
-import duckdb
 import pytest
 
 from app.compare.after import AfterReading
@@ -14,15 +13,11 @@ from app.compare.issue_impact import score_issues
 from app.detectors.step_order import recipe_for
 from app.questions.generate import generate_questions
 from app.questions.models import AnswerDiff, Measure
-from tests.conftest import GOLDEN_DIR, SAMPLES_DIR, Dataset, load
-
-SAMPLES = ["Messy_Employee_dataset", "store_orders", "Messy_Employee_dataset_messier"]
+from tests.conftest import GOLDEN_DIR, SAMPLES, Dataset, open_sample
 
 
 def sample(name: str) -> Dataset:
-    conn = duckdb.connect(":memory:")
-    load(conn, (SAMPLES_DIR / f"{name}.csv").read_bytes())
-    return Dataset(conn)
+    return open_sample(name)
 
 
 def run(ds: Dataset, answers: dict[str, str] | None = None) -> list[AnswerDiff]:

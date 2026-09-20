@@ -9,6 +9,7 @@ from app import review
 from app.ai.wording import RewordedCopy
 from app.api.deps import ProviderDep, SettingsDep, StoreDep
 from app.api.views import IssueView, issue_view
+from app.story import Story
 
 router = APIRouter(prefix="/api/datasets", tags=["ai"])
 
@@ -20,6 +21,7 @@ class AiResponse(BaseModel):
     added: list[IssueView] = Field(default_factory=list)
     issue_copy: dict[str, RewordedCopy] = Field(default_factory=dict)
     question_labels: dict[str, str] = Field(default_factory=dict)
+    story: Story | None = None
     # Only set when a service was asked and couldn't answer.
     note: str | None = None
 
@@ -36,5 +38,6 @@ def get_ai_suggestions(
             added=[issue_view(session, issue) for issue in result.added],
             issue_copy=result.issue_copy,
             question_labels=result.question_labels,
+            story=result.story,
             note=result.note,
         )

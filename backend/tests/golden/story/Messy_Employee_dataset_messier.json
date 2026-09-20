@@ -1,0 +1,16 @@
+{
+  "sentences": [
+    "Your file went from 1,071 rows to 1,020, once repeated and set-aside rows were taken out.",
+    "\u201cWhat's the total \"Salary\"?\u201d went from 77,893,429.76 to 83,072,878.79.",
+    "\u201cHow many different \"Phone\" values are there?\u201d went from 1,020 to 928.",
+    "Your file could not answer \u201cHow many rows are there for each \"Department\"?\u201d at all before. Now it can."
+  ],
+  "figures": [
+    "1,071",
+    "1,020",
+    "77,893,429.76",
+    "83,072,878.79",
+    "1,020",
+    "928"
+  ]
+}

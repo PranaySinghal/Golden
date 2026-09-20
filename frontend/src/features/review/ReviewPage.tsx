@@ -204,6 +204,7 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
                 if (issue) accept(issue, choiceId)
               }}
               questionLabels={ai.data?.question_labels ?? {}}
+              aiStory={ai.data?.story ?? null}
               onHighlight={setHighlighted}
               onBackToReview={() => setTab('review')}
             />

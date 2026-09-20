@@ -1,6 +1,7 @@
 import type {
   AiResponse,
   AnswerCardView,
+  Story,
   ColumnProfile,
   ComparisonResponse,
   DatasetSummary,
@@ -223,6 +224,34 @@ export function comparison(overrides: Partial<ComparisonResponse> = {}): Compari
     has_steps: true,
     questions_asked: 3,
     recomputed: 0,
+    story: story(),
+    ...overrides,
+  }
+}
+
+export function story(overrides: Partial<Story> = {}): Story {
+  return {
+    source: 'template',
+    sentences: [
+      {
+        parts: [
+          { text: 'Your file went from ', question_id: null },
+          { text: '1,071', question_id: 'q-rows' },
+          { text: ' rows to ', question_id: null },
+          { text: '1,020', question_id: 'q-rows' },
+          { text: '.', question_id: null },
+        ],
+      },
+      {
+        parts: [
+          { text: '“What\'s the average "Salary"?” went from ', question_id: null },
+          { text: '85,155.06', question_id: 'q-salary' },
+          { text: ' to ', question_id: null },
+          { text: '83,151.41', question_id: 'q-salary' },
+          { text: '.', question_id: null },
+        ],
+      },
+    ],
     ...overrides,
   }
 }
@@ -233,6 +262,7 @@ export function aiResponse(overrides: Partial<AiResponse> = {}): AiResponse {
     added: [],
     issue_copy: {},
     question_labels: {},
+    story: null,
     note: null,
     ...overrides,
   }

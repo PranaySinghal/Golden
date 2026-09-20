@@ -11,6 +11,7 @@ import {
   jsonResponse,
   preview,
   step,
+  story,
 } from '../../test/fixtures'
 import { ComparePage } from './ComparePage'
 
@@ -32,6 +33,7 @@ function mockApi(routes: Record<string, Handler>) {
 }
 
 interface PageOptions {
+  aiStory?: ReturnType<typeof story> | null
   recipeKey?: string
   steps?: StepView[]
   issues?: IssueView[]
@@ -51,6 +53,7 @@ function renderPage(options: PageOptions = {}) {
         recipeKey={options.recipeKey ?? 'key-1'}
         steps={options.steps ?? [step({ description: 'Replace "N/A" with "0" in "Salary"' })]}
         issues={options.issues ?? []}
+        aiStory={options.aiStory ?? null}
         choosing={null}
         onChoose={options.onChoose ?? (() => {})}
         onHighlight={options.onHighlight ?? (() => {})}
@@ -298,6 +301,62 @@ describe('ComparePage', () => {
     expect(screen.getByText(/We asked 2 questions of your file/)).toBeTruthy()
   })
 
+  // --- the story ---------------------------------------------------------------------------
+
+  it('tells the short version over the cards', async () => {
+    mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
+
+    renderPage()
+
+    expect(await screen.findByText(/Your file went from/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: '1,071' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '83,151.41' })).toBeTruthy()
+  })
+
+  it('takes the reader from a figure to the answer it came from', async () => {
+    mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
+    const scrolled: string[] = []
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this.id)
+    }
+
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: '83,151.41' }))
+
+    expect(scrolled).toEqual(['answer-q-salary'])
+  })
+
+  it('says nothing when there is no story to tell', async () => {
+    mockApi({ [COMPARE]: () => jsonResponse(200, comparison({ story: null })) })
+
+    renderPage()
+    await screen.findByRole('heading', { name: /average "Salary"/ })
+
+    expect(screen.queryByText(/Your file went from/)).toBeNull()
+  })
+
+  it('prefers the version a model told, when there is one', async () => {
+    mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
+
+    renderPage({
+      aiStory: story({
+        source: 'ai',
+        sentences: [
+          {
+            parts: [
+              { text: 'Your customer list lost ', question_id: null },
+              { text: '92', question_id: 'q-rows' },
+              { text: ' duplicated people.', question_id: null },
+            ],
+          },
+        ],
+      }),
+    })
+
+    expect(await screen.findByText(/lost/)).toBeTruthy()
+    expect(screen.queryByText(/Your file went from/)).toBeNull()
+  })
+
   // --- changing an answer from here --------------------------------------------------------
 
   it('offers the answers already given, and asks for a different one', async () => {
@@ -319,7 +378,7 @@ describe('ComparePage', () => {
   it('keeps the old answers on screen while the new ones are worked out', async () => {
     mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
     const { rerender, client } = renderPage()
-    await screen.findByText('83,151.41')
+    await screen.findByRole('heading', { name: /average "Salary"/ })
 
     // A different recipe means a different key, which is what triggers the refetch.
     mockApi({ [COMPARE]: () => new Promise(() => {}) })
@@ -339,13 +398,13 @@ describe('ComparePage', () => {
     )
 
     await waitFor(() => expect(screen.getAllByRole('status').length).toBeGreaterThan(0))
-    expect(screen.getByText('83,151.41')).toBeTruthy()
+    expect(within(answerCard(/average "Salary"/)).getByText('83,151.41')).toBeTruthy()
   })
 
   it('asks nothing again when the rows are the ones it already compared', async () => {
     const fetchMock = mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
     const { rerender, client } = renderPage()
-    await screen.findByText('83,151.41')
+    await screen.findByRole('heading', { name: /average "Salary"/ })
     const calls = fetchMock.mock.calls.length
 
     rerender(

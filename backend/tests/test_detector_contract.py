@@ -28,9 +28,17 @@ from app.detectors.models import Issue, Tier
 from app.detectors.step_order import RANK, recipe_for
 from app.steps.apply import StepStatus
 from app.steps.models import STEP_LABELS
-from tests.conftest import GOLDEN_DIR, REPO_ROOT, SAMPLES_DIR, TODAY, Dataset, load
+from tests.conftest import (
+    GOLDEN_DIR,
+    REPO_ROOT,
+    SAMPLE_FILES,
+    SAMPLES,
+    SAMPLES_DIR,
+    TODAY,
+    Dataset,
+    load,
+)
 
-SAMPLES = ["Messy_Employee_dataset", "store_orders", "Messy_Employee_dataset_messier"]
 DETECTOR_MODULES = [
     placeholders,
     numbers_as_text,
@@ -52,13 +60,14 @@ JARGON = re.compile(
 
 
 def dataset(name: str, anonymize: bool = False) -> Dataset:
-    data = (SAMPLES_DIR / f"{name}.csv").read_bytes()
+    filename = SAMPLE_FILES[name]
+    data = (SAMPLES_DIR / filename).read_bytes()
     if anonymize:
         header, rest = data.split(b"\n", 1)
         width = len(header.split(b","))
         data = ",".join(f"col_{i + 1}" for i in range(width)).encode() + b"\n" + rest
     conn = duckdb.connect(":memory:")
-    load(conn, data, filename=f"{name}.csv")
+    load(conn, data, filename=filename)
     return Dataset(conn)
 
 

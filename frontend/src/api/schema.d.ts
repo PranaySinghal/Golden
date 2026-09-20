@@ -286,6 +286,7 @@ export interface components {
             question_labels?: {
                 [key: string]: string;
             };
+            story?: components["schemas"]["Story"] | null;
             /** Note */
             note?: string | null;
         };
@@ -503,6 +504,7 @@ export interface components {
              * @default 0
              */
             recomputed: number;
+            story?: components["schemas"]["Story"] | null;
         };
         /** DatasetSummary */
         DatasetSummary: {
@@ -1132,6 +1134,29 @@ export interface components {
             cells_changed?: number | null;
             /** Issue Id */
             issue_id?: string | null;
+        };
+        /** Story */
+        Story: {
+            /** Sentences */
+            sentences?: components["schemas"]["StorySentence"][];
+            /**
+             * Source
+             * @default template
+             * @enum {string}
+             */
+            source: "template" | "ai";
+        };
+        /** StoryPart */
+        StoryPart: {
+            /** Text */
+            text: string;
+            /** Question Id */
+            question_id?: string | null;
+        };
+        /** StorySentence */
+        StorySentence: {
+            /** Parts */
+            parts?: components["schemas"]["StoryPart"][];
         };
         /**
          * Tier

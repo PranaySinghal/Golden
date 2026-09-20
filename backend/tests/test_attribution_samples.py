@@ -3,7 +3,6 @@
 import json
 from typing import Any
 
-import duckdb
 import pytest
 
 from app.compare.engine import ComparisonEngine
@@ -11,15 +10,11 @@ from app.compare.models import Comparison
 from app.config import Settings
 from app.detectors.step_order import recipe_for
 from app.steps.models import Recipe, Step
-from tests.conftest import GOLDEN_DIR, SAMPLES_DIR, Dataset, load
-
-SAMPLES = ["Messy_Employee_dataset", "store_orders", "Messy_Employee_dataset_messier"]
+from tests.conftest import GOLDEN_DIR, SAMPLES, Dataset, open_sample
 
 
 def sample(name: str) -> Dataset:
-    conn = duckdb.connect(":memory:")
-    load(conn, (SAMPLES_DIR / f"{name}.csv").read_bytes())
-    return Dataset(conn)
+    return open_sample(name)
 
 
 def describe(step: Step) -> str:

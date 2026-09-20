@@ -115,11 +115,18 @@ def _range(stats: ColumnStats, decision: RoleDecision) -> tuple[str | None, str 
 
 
 def _format_number(value: float | None) -> str | None:
+    """A number as a person would write it.
+
+    `repr` shows how a decimal is really stored — 2.2140000000000004 for a value
+    a spreadsheet displays as 2.214 — which reads as nonsense in a column
+    summary. Ten significant digits keep every figure these files hold without
+    showing the noise underneath them.
+    """
     if value is None:
         return None
     if value.is_integer() and abs(value) < _MAX_EXACT_WHOLE:
         return str(int(value))
-    return repr(value)
+    return f"{value:.10g}"
 
 
 def _ratio(part: int, whole: int) -> float:

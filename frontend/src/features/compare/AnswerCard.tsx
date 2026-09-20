@@ -28,7 +28,7 @@ export function AnswerCard({
     .filter((step): step is StepView => step !== undefined)
 
   return (
-    <article className="answer" aria-busy={updating}>
+    <article id={`answer-${card.question_id}`} className="answer" aria-busy={updating}>
       <h4 className="answer__question">{card.label}</h4>
 
       {card.kind === 'headline' ? (

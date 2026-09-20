@@ -94,7 +94,13 @@ def ai_enhancement(
         return session.enhancement
     issues = prepare(session)
     result = enhance(
-        session.conn, session.profile, issues, session.questions or [], settings, provider
+        session.conn,
+        session.profile,
+        issues,
+        session.questions or [],
+        settings,
+        provider,
+        diffs=session.comparison.diffs if session.comparison else None,
     )
     session.enhancement = result
     if result.added:

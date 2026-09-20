@@ -1,0 +1,11 @@
+{
+  "sentences": [
+    "\u201cWhat's the average \"Qty\" each month, by \"Order Date\"?\u201d came out differently, group by group.",
+    "Your file could not answer \u201cWhat's the average \"Discount\"?\u201d at all before. It comes to 6.17.",
+    "Nor could it answer \u201cWhat's the average \"Unit Price\"?\u201d. It comes to 344.77."
+  ],
+  "figures": [
+    "6.17",
+    "344.77"
+  ]
+}
