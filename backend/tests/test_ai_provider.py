@@ -147,7 +147,12 @@ def test_each_service_reply_shape_is_read(monkeypatch: pytest.MonkeyPatch) -> No
 def test_prompts_live_in_files_with_versions() -> None:
     files = sorted(path.name for path in PROMPTS_DIR.glob("*.md"))
 
-    assert files == ["reword_issues.v1.md", "reword_questions.v1.md", "suggest_fixes.v1.md"]
+    assert files == [
+        "reword_issues.v1.md",
+        "reword_questions.v1.md",
+        "story.v1.md",
+        "suggest_fixes.v1.md",
+    ]
     assert PROMPT.id == "reword_questions.v1"
     assert "JSON" in PROMPT.system
 

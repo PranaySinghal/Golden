@@ -841,6 +841,16 @@
             "type": "object",
             "title": "Question Labels"
           },
+          "story": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Story"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "note": {
             "anyOf": [
               {
@@ -1419,6 +1429,16 @@
             "type": "integer",
             "title": "Recomputed",
             "default": 0
+          },
+          "story": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Story"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2965,6 +2985,65 @@
           "status"
         ],
         "title": "StepView"
+      },
+      "Story": {
+        "properties": {
+          "sentences": {
+            "items": {
+              "$ref": "#/components/schemas/StorySentence"
+            },
+            "type": "array",
+            "title": "Sentences"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "template",
+              "ai"
+            ],
+            "title": "Source",
+            "default": "template"
+          }
+        },
+        "type": "object",
+        "title": "Story"
+      },
+      "StoryPart": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "question_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "StoryPart"
+      },
+      "StorySentence": {
+        "properties": {
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/StoryPart"
+            },
+            "type": "array",
+            "title": "Parts"
+          }
+        },
+        "type": "object",
+        "title": "StorySentence"
       },
       "Tier": {
         "type": "string",

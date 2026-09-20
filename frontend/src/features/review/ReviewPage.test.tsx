@@ -360,7 +360,8 @@ describe('ReviewPage', () => {
     renderPage()
     fireEvent.click(await screen.findByRole('tab', { name: 'What changed' }))
 
-    expect(await screen.findByText('83,151.41')).toBeTruthy()
+    // The figure is on the card and in the story over it; either proves the tab switched.
+    expect(await screen.findAllByText('83,151.41')).not.toHaveLength(0)
     const panel = screen.getByRole('complementary', { name: "What we're doing" })
     expect(within(panel).getByText('Read "Salary" as numbers')).toBeTruthy()
     expect(screen.queryByRole('heading', { name: /Suggested/ })).toBeNull()

@@ -546,3 +546,68 @@ reply is malformed, because the model already had the schema.
 outcome, latency, and counts of what was rejected and why. A test asserts no
 sample value reaches the log. `app/main.py` now configures the `tidylab` logger,
 because the server configures its own and ours was going nowhere.
+
+---
+
+## 2026-09-18 · M9 · Story, a harder dataset, and an end-to-end test
+
+**The story is parts, not a sentence.** A `Story` is sentences of `StoryPart`s,
+and only a part carrying a `question_id` may hold a figure. That makes "the
+story contains only numbers from computed diffs" something the type enforces
+and a test can check character by character, rather than a promise about
+wording. On screen each figure is a button that scrolls to the card it came
+from.
+
+**What it chooses to say.** Rows first when the row count moved, then the
+answers that moved *with a figure* (whatever their rank — a number says more
+than "this changed"), at most one breakdown ("came out differently, group by
+group", with no figure, because a breakdown has no single number), and at most
+two answers the file couldn't give at all before, carrying their new value.
+Nothing to say means no panel, which is what the cross-tab file gets.
+
+**AI wording is held to a stricter rule than other copy** (`story_wording.py`):
+every figure in a model's story must match a value the engine computed, and is
+matched back to the answer it belongs to — the check and the link are the same
+step. One unmatched figure rejects the whole story, because half a story isn't
+worth showing. The templates then stand.
+
+**Golden files now cover four fixtures**, including the cross-tab, across five
+suites: profile, issues, answers, attribution, and the new story. `SAMPLE_FILES`
+in `tests/conftest.py` is the one list; a test asserts every file in
+`data/samples` is a fixture and every fixture has golden files, so adding a
+sample without pinning it fails.
+
+### The generality check: `1.-Badly-Structured-Sales-Data-1.xlsx`
+
+A pivot export, not a table: two header rows, a stub `Order ID` column,
+subtotal columns, and a sparse 825 × 16 matrix. **Nothing crashed**, at any
+stage, in either header mode. What it did reveal:
+
+**Fixed here**
+- *Fifteen near-identical questions.* The missing-values detector asked "what
+  should happen to rows with no X?" once per column, including columns that are
+  96% empty — where "fill 800 blanks from the 30 values that are there" is bad
+  advice, and fifteen of them bury everything else. It now skips columns flagged
+  mostly-blank: 30 issues became 16, and the one remaining question is about the
+  fullest column. The three original fixtures are unaffected.
+- *Float noise in the column summary.* A range read `2.214000000000000 –
+  20802.17299999999`, because the profile formatted decimals with `repr`. It now
+  uses ten significant digits: `2.214 – 20802.173`. Only this file was affected;
+  the other fixtures' values were already clean.
+
+**Left alone, deliberately**
+- The file stores `10.272000000000002` where Excel displays `10.272`. Ingest
+  keeps what the file says, because the raw table is the record of the upload.
+- "Read X as numbers" clears a stray non-numeric value (the leftover second
+  header row). That's what the step does, it's visible in the preview and the
+  change log, and it's the honest behaviour.
+- Everything that would need a new capability — unpivoting, two-row headers,
+  spotting subtotal columns, grouping the fifteen safe cards — is in
+  `docs/ideas.md`. M9 is not the place for new features.
+
+**Playwright** (`frontend/e2e/flow.spec.ts`) drives the whole circle in one
+spec: upload, accept a suggestion, answer a question, read the story, follow a
+figure to its card, open "why", and download the cleaned file — asserting the
+saved name and that the split actually added columns. Its config starts both
+servers itself with `LLM_PROVIDER=none`, so the run needs no key and no manual
+setup. CI wiring is M10.

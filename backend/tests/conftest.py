@@ -34,6 +34,17 @@ from app.steps.schema import base_schema
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SAMPLES_DIR = REPO_ROOT / "data" / "samples"
+# The fixtures every golden-file suite runs over. The key is what the golden
+# files are named; the value is the file on disk.
+SAMPLE_FILES = {
+    "Messy_Employee_dataset": "Messy_Employee_dataset.csv",
+    "store_orders": "store_orders.csv",
+    "Messy_Employee_dataset_messier": "Messy_Employee_dataset_messier.csv",
+    # A cross-tab export from the challenge: two header rows, subtotal columns,
+    # and a sparse matrix. Nothing about it is a table.
+    "sales_cross_tab": "1.-Badly-Structured-Sales-Data-1.xlsx",
+}
+SAMPLES = list(SAMPLE_FILES)
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
 # Detection takes "today" as input so date checks don't drift as time passes.
 TODAY = date(2026, 9, 16)
@@ -175,6 +186,14 @@ class Dataset:
     def raw_fingerprint(self) -> str:
         rows = self.conn.execute(f"SELECT * FROM {RAW_REF} ORDER BY _row_id").fetchall()
         return hashlib.sha256(repr(rows).encode()).hexdigest()
+
+
+def open_sample(name: str) -> Dataset:
+    """A fixture dataset, loaded the way the app would load it."""
+    filename = SAMPLE_FILES[name]
+    connection = duckdb.connect(":memory:")
+    load(connection, (SAMPLES_DIR / filename).read_bytes(), filename=filename)
+    return Dataset(connection)
 
 
 @pytest.fixture

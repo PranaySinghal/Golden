@@ -1,0 +1,22 @@
+{
+  "row_count": 825,
+  "columns": {
+    "Segment>>": {"role": "identifier", "physical_type": "text", "flags": []},
+    "Consumer": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "2.214", "max": "20802.173"},
+    "column_3": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "10.272", "max": "8132.409"},
+    "column_4": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "2.064", "max": "49724.2545"},
+    "column_5": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "2.61", "max": "116922.1345"},
+    "Consumer Total": {"role": "measure", "physical_type": "decimal", "flags": [], "min": "2.064", "max": "195580.971"},
+    "Corporate": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "2.896", "max": "20792.607"},
+    "column_8": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "111.904", "max": "9907.308"},
+    "column_9": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "3.76", "max": "35243.231"},
+    "column_10": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "1.167", "max": "55942.7865"},
+    "Corporate Total": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "1.167", "max": "121885.9325"},
+    "Home Office": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "3.744", "max": "7737.786"},
+    "column_13": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "7.968", "max": "2977.456"},
+    "column_14": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "3.444", "max": "8791.127"},
+    "column_15": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "3.76", "max": "54748.6325"},
+    "Home Office Total": {"role": "measure", "physical_type": "decimal", "flags": ["mostly_blank"], "min": "3.444", "max": "74255.0015"}
+  },
+  "anonymized_overrides": {}
+}

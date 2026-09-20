@@ -1,0 +1,146 @@
+[
+  {
+    "detector": "missing_values",
+    "columns": [
+      "Consumer Total"
+    ],
+    "tier": "ask",
+    "affected_rows": 380,
+    "recommended": "Leave them blank"
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Consumer"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_3"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_4"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_5"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Consumer Total"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Corporate"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_8"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_9"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_10"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Corporate Total"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Home Office"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_13"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_14"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "column_15"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  },
+  {
+    "detector": "numbers_as_text",
+    "columns": [
+      "Home Office Total"
+    ],
+    "tier": "safe",
+    "affected_rows": 0,
+    "recommended": null
+  }
+]

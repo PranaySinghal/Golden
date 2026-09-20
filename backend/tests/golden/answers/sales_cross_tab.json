@@ -1,0 +1,114 @@
+[
+  {
+    "question": "How many rows are there?",
+    "before": 825.0,
+    "after": 825.0,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "How many different \"Segment>>\" values are there?",
+    "before": 825.0,
+    "after": 825.0,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Consumer Total\"?",
+    "before": 879.0156,
+    "after": 879.0156,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"Consumer Total\"?",
+    "before": 391161.942,
+    "after": 391161.942,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"column_5\"?",
+    "before": 920.6467,
+    "after": 920.6467,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"column_5\"?",
+    "before": 233844.269,
+    "after": 233844.269,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Corporate Total\"?",
+    "before": 982.9511,
+    "after": 982.9511,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"Corporate Total\"?",
+    "before": 243771.865,
+    "after": 243771.865,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"column_10\"?",
+    "before": 731.2783,
+    "after": 731.2783,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"column_10\"?",
+    "before": 111885.573,
+    "after": 111885.573,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"Home Office Total\"?",
+    "before": 1125.0758,
+    "after": 1125.0758,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"Home Office Total\"?",
+    "before": 148510.003,
+    "after": 148510.003,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"column_4\"?",
+    "before": 1080.9621,
+    "after": 1080.9621,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"column_4\"?",
+    "before": 99448.509,
+    "after": 99448.509,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the average \"column_15\"?",
+    "before": 1203.2666,
+    "after": 1203.2666,
+    "changed": false,
+    "impact": 0.0
+  },
+  {
+    "question": "What's the total \"column_15\"?",
+    "before": 109497.265,
+    "after": 109497.265,
+    "changed": false,
+    "impact": 0.0
+  }
+]

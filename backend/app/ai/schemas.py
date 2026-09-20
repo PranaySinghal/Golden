@@ -14,6 +14,8 @@ MAX_STEPS_PER_FIX = 4
 MAX_TITLE_CHARS = 120
 MAX_EXPLANATION_CHARS = 400
 MAX_LABEL_CHARS = 100
+MAX_STORY_SENTENCES = 4
+MAX_SENTENCE_CHARS = 200
 
 Title = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_TITLE_CHARS)
@@ -56,6 +58,20 @@ class RewordedIssue(_Reply):
 
 class RewordIssuesReply(_Reply):
     items: list[RewordedIssue] = Field(default_factory=list)
+
+
+class StoryReply(_Reply):
+    sentences: Annotated[
+        list[
+            Annotated[
+                str,
+                StringConstraints(
+                    strip_whitespace=True, min_length=1, max_length=MAX_SENTENCE_CHARS
+                ),
+            ]
+        ],
+        Field(max_length=MAX_STORY_SENTENCES),
+    ] = Field(default_factory=list)
 
 
 class RewordedQuestion(_Reply):

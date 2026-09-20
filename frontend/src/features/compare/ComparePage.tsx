@@ -1,10 +1,17 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { api, type AnswerCardView, type IssueView, type StepView } from '../../api/client'
+import {
+  api,
+  type AnswerCardView,
+  type IssueView,
+  type StepView,
+  type Story,
+} from '../../api/client'
 import { EmptyState, ErrorState, Spinner } from '../../components/states'
 import { AnswerCard } from './AnswerCard'
 import { DecisionsStrip } from './DecisionsStrip'
+import { StoryPanel } from './StoryPanel'
 
 interface ComparePageProps {
   datasetId: string
@@ -13,6 +20,8 @@ interface ComparePageProps {
   issues: IssueView[]
   /** Better labels for the questions, when a model offered any. */
   questionLabels?: Record<string, string>
+  /** A model's version of the story, which replaces the one built from templates. */
+  aiStory?: Story | null
   choosing: string | null
   onChoose: (issueId: string, choiceId: string) => void
   onHighlight: (stepIds: string[]) => void
@@ -25,12 +34,22 @@ export function ComparePage({
   steps,
   issues,
   questionLabels,
+  aiStory,
   choosing,
   onChoose,
   onHighlight,
   onBackToReview,
 }: ComparePageProps) {
   const [showRules, setShowRules] = useState(false)
+
+  /** Take the reader to the card a figure in the story came from. */
+  function showAnswer(questionId: string) {
+    const card = document.getElementById(`answer-${questionId}`)
+    if (!card) return
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    card.classList.add('answer--lit')
+    window.setTimeout(() => card.classList.remove('answer--lit'), 1600)
+  }
 
   // Keyed on what the cleaned rows look like: going back to an earlier answer
   // is the same key, so the answer is already here and nothing is asked again.
@@ -51,7 +70,15 @@ export function ComparePage({
     )
   }
 
-  const { cards, unlocked, unchanged, before_rules: rules, has_steps: hasSteps } = comparison.data
+  const {
+    cards,
+    unlocked,
+    unchanged,
+    before_rules: rules,
+    has_steps: hasSteps,
+    story,
+  } = comparison.data
+  const told = aiStory ?? story
   const changed = cards ?? []
   const nowAskable = unlocked ?? []
   const same = unchanged ?? []
@@ -78,6 +105,7 @@ export function ComparePage({
       </h2>
 
       <DecisionsStrip issues={issues} busy={choosing} onChoose={onChoose} />
+      {told && <StoryPanel story={told} onFollow={showAnswer} />}
       {explainer}
       {showRules && (
         <div className="rules">

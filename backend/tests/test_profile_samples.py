@@ -16,9 +16,10 @@ import pytest
 
 from app.profile.models import ColumnFlag, DatasetProfile
 from app.profile.profiler import profile_table
-from tests.conftest import GOLDEN_DIR, SAMPLES_DIR, load
+from tests.conftest import GOLDEN_DIR, SAMPLE_FILES, SAMPLES, SAMPLES_DIR, load
 
-SAMPLES = ["Messy_Employee_dataset", "store_orders", "Messy_Employee_dataset_messier"]
+# Anonymising a header means rewriting the first line, which only works on text.
+CSV_SAMPLES = [name for name, file in SAMPLE_FILES.items() if file.endswith(".csv")]
 JARGON = re.compile(
     r"\b(null|nan|varchar|string|dtype|regex|cardinality|semantic|schema|parse|boolean"
     r"|column type|data type|duplicate rows)\b",
@@ -32,14 +33,15 @@ def golden(sample: str) -> dict[str, Any]:
 
 
 def profile_sample(sample: str, anonymize: bool = False) -> DatasetProfile:
-    data = (SAMPLES_DIR / f"{sample}.csv").read_bytes()
+    filename = SAMPLE_FILES[sample]
+    data = (SAMPLES_DIR / filename).read_bytes()
     if anonymize:
         header, rest = data.split(b"\n", 1)
         width = len(header.split(b","))
         data = ",".join(f"col_{i + 1}" for i in range(width)).encode() + b"\n" + rest
     conn = duckdb.connect(":memory:")
     try:
-        load(conn, data, filename=f"{sample}.csv")
+        load(conn, data, filename=filename)
         return profile_table(conn)
     finally:
         conn.close()
@@ -70,7 +72,7 @@ def test_sample_matches_golden_profile(sample: str) -> None:
         check_column(column, expected["columns"][column.name])
 
 
-@pytest.mark.parametrize("sample", SAMPLES)
+@pytest.mark.parametrize("sample", CSV_SAMPLES)
 def test_roles_survive_anonymized_headers(sample: str) -> None:
     expected = golden(sample)
     named = profile_sample(sample)
@@ -118,5 +120,9 @@ def test_role_notes_use_business_language(sample: str) -> None:
 
 
 def test_golden_files_exist_for_every_sample() -> None:
-    csv_samples = {path.stem for path in Path(SAMPLES_DIR).glob("*.csv")}
-    assert csv_samples == set(SAMPLES)
+    """Every file in data/samples is a fixture, and every fixture has a golden file."""
+    on_disk = {path.name for path in Path(SAMPLES_DIR).iterdir() if path.is_file()}
+
+    assert on_disk == set(SAMPLE_FILES.values())
+    for name in SAMPLES:
+        assert (GOLDEN_DIR / "profile" / f"{name}.json").exists(), name

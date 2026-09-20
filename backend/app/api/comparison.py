@@ -12,6 +12,7 @@ from app.compare.before import RULES
 from app.compare.models import Comparison
 from app.questions.models import AnswerDiff, GroupDiff, Measure, StepContribution
 from app.steps.models import Recipe
+from app.story import Story, build_story
 
 CardKind = Literal["headline", "breakdown", "trend"]
 BLANK_LABEL = "(blank)"
@@ -78,6 +79,8 @@ class ComparisonResponse(BaseModel):
     has_steps: bool
     questions_asked: int
     recomputed: int = 0
+    # Three or four sentences over the cards. None when there's nothing to say.
+    story: Story | None = None
 
 
 def comparison_response(comparison: Comparison) -> ComparisonResponse:
@@ -92,6 +95,7 @@ def comparison_response(comparison: Comparison) -> ComparisonResponse:
         has_steps=_runs_anything(comparison.recipe),
         questions_asked=len(comparison.diffs),
         recomputed=len(comparison.recomputed),
+        story=build_story(comparison.diffs),
     )
 
 
