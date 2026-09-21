@@ -11,7 +11,7 @@ afterEach(() => {
 })
 
 describe('App', () => {
-  it('shows the TidyLab name, the tagline, and the upload screen', async () => {
+  it('shows the Tidy Labs name, the tagline, and the upload screen', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(jsonResponse(200, { max_upload_bytes: 50 * 1024 * 1024 })),
@@ -24,7 +24,7 @@ describe('App', () => {
       </QueryClientProvider>,
     )
 
-    expect(screen.getByRole('heading', { level: 1, name: 'TidyLab' })).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 1, name: 'Tidy Labs' })).toBeTruthy()
     expect(screen.getByText('Tidy your data. See what it was hiding.')).toBeTruthy()
     expect(await screen.findByText(/up to 50 MB/)).toBeTruthy()
   })

@@ -1,39 +1,24 @@
 :root {
-  --bg: #f7f7f5;
-  --surface: #ffffff;
-  --surface-muted: #f1f1ee;
-  --text: #1c1917;
-  --muted: #6b6560;
-  --border: #e3e1dc;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
-  --error: #b42318;
-  --error-soft: #fef3f2;
-  --tooltip-bg: #1c1917;
-  --tooltip-text: #fafaf9;
+  --bg: #F7F9FB;
+  --surface: #FFFFFF;
+  --surface-muted: #BFE3F0;
+  --text: #0F172A;
+  --muted: #64748B;
+  --border: #E7EDF1;
+  --accent: #3E7C8C;
+  --accent-soft: #BFE3F0;
+  --error: #C1553F;
+  --error-soft: #FBE8E3;
+  --tooltip-bg: var(--text);
+  --tooltip-text: var(--bg);
   --radius: 10px;
+  --highlight-ask: #FCE8A8;
+  --font-serif: 'Fraunces', Georgia, serif;
 
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   color: var(--text);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #161514;
-    --surface: #1f1e1c;
-    --surface-muted: #292725;
-    --text: #f5f5f4;
-    --muted: #a8a29e;
-    --border: #3a3734;
-    --accent: #2dd4bf;
-    --accent-soft: #134e4a;
-    --error: #f97066;
-    --error-soft: #3b1a17;
-    --tooltip-bg: #f5f5f4;
-    --tooltip-text: #1c1917;
-  }
 }
 
 * {
@@ -82,14 +67,32 @@ select {
   padding-bottom: 1.5rem;
 }
 
+.masthead__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.masthead__logo {
+  height: 36px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
 .masthead__title {
   margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
   font-size: 2rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: var(--accent);
 }
 
 .masthead__tagline {
   margin: 0.25rem 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
   color: var(--muted);
   font-size: 1.125rem;
 }
@@ -158,9 +161,17 @@ select {
 }
 
 .button {
-  border-radius: 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--surface);
   padding: 0.5rem 0.9rem;
   cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .button--secondary {
@@ -206,7 +217,7 @@ select {
 
 .field select {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
   padding: 0.25rem 0.5rem;
@@ -415,6 +426,11 @@ select {
   color: var(--muted);
 }
 
+.group__count--ask {
+  background: var(--highlight-ask);
+  color: var(--text);
+}
+
 .empty {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
@@ -440,6 +456,10 @@ select {
 
 .card--applied {
   background: var(--surface-muted);
+}
+
+.card--ask {
+  border-left: 3px solid var(--highlight-ask);
 }
 
 .card[aria-busy='true'] {
