@@ -68,6 +68,14 @@ NEW_TOTAL = diff(
     impact=0.8,
 )
 UNCHANGED = diff('What\'s the total "Age"?', 5, 5, measure="sum", column="Age", changed=False)
+CROSS_TAB = diff(
+    'What\'s the total "column_3"?',
+    2214.0,
+    8132.41,
+    measure="sum",
+    column="column_3",
+    impact=0.6,
+)
 
 
 def figures(story: Story) -> list[str]:
@@ -251,3 +259,31 @@ def test_one_bad_sentence_loses_the_whole_story() -> None:
 
 def test_a_model_that_says_nothing_leaves_the_templates_alone() -> None:
     assert accepted_story(DIFFS, reply()) is None
+
+
+def test_a_digit_in_a_column_name_is_not_a_figure() -> None:
+    """Columns arrive called "column_3" or "2023 Sales". Naming one states nothing."""
+    story = accepted_story(
+        [CROSS_TAB], reply('“What\'s the total "column_3"?” went from 2,214 to 8,132.41.')
+    )
+    assert story is not None
+
+    linked = {
+        part.text: part.question_id for s in story.sentences for part in s.parts if part.question_id
+    }
+    assert set(linked) == {"2,214", "8,132.41"}
+
+
+def test_a_digit_outside_a_column_name_is_still_checked() -> None:
+    """The name is excused, not the sentence around it."""
+    story = accepted_story([CROSS_TAB], reply('The total "column_3" went up by 5,918.'))
+
+    assert story is None
+
+
+def test_a_figure_from_an_answer_that_did_not_move_is_not_ours_to_use() -> None:
+    """A model is only shown what changed, so anything else it cites is a coincidence."""
+    allowed = known_figures([*DIFFS, UNCHANGED])
+    assert "5" not in allowed
+
+    assert accepted_story([*DIFFS, UNCHANGED], reply('"Age" still totals 5.')) is None

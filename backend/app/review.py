@@ -10,7 +10,7 @@ seconds on a messy file) and kept on the session until the file is read again.
 
 from dataclasses import dataclass
 
-from app.ai.enhance import Enhancement, enhance
+from app.ai.enhance import Enhancement, enhance, tell_story
 from app.ai.provider import Provider
 from app.compare.engine import ComparisonEngine
 from app.compare.issue_impact import score_issues
@@ -25,6 +25,7 @@ from app.steps import recipe_ops
 from app.steps.models import Recipe, Step
 from app.steps.recipe_ops import RecipeHistory
 from app.store import DatasetSession
+from app.story import Story
 
 
 class IssueNotFoundError(AppError):
@@ -89,24 +90,37 @@ def ai_enhancement(
 
     The extra issues join the session's list, so accepting, previewing and
     undoing them all work through the paths that already exist.
+
+    The story is the exception to "once": it describes the answers rather than
+    the file, so it's asked again whenever they move, and carried on the result
+    so the screen still gets everything from one place.
     """
-    if session.enhancement is not None:
-        return session.enhancement
-    issues = prepare(session)
-    result = enhance(
-        session.conn,
-        session.profile,
-        issues,
-        session.questions or [],
-        settings,
-        provider,
-        diffs=session.comparison.diffs if session.comparison else None,
+    if session.enhancement is None:
+        issues = prepare(session)
+        result = enhance(
+            session.conn, session.profile, issues, session.questions or [], settings, provider
+        )
+        session.enhancement = result
+        if result.added:
+            known = {issue.id for issue in issues}
+            session.issues = [*issues, *(i for i in result.added if i.id not in known)]
+    return session.enhancement.model_copy(
+        update={"story": ai_story(session, settings, provider)}
     )
-    session.enhancement = result
-    if result.added:
-        known = {issue.id for issue in issues}
-        session.issues = [*issues, *(i for i in result.added if i.id not in known)]
-    return result
+
+
+def ai_story(
+    session: DatasetSession, settings: Settings, provider: Provider | None = None
+) -> Story | None:
+    """A model's story for the rows as they stand now, asked once per recipe."""
+    if not settings.llm_enabled:
+        return None
+    comparison = compare_now(session)
+    if comparison.recipe_key not in session.stories:
+        session.stories[comparison.recipe_key] = tell_story(
+            comparison.diffs, comparison.recipe_key, settings, provider
+        )
+    return session.stories[comparison.recipe_key]
 
 
 def compare_now(session: DatasetSession) -> Comparison:

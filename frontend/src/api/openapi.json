@@ -3003,6 +3003,17 @@
             ],
             "title": "Source",
             "default": "template"
+          },
+          "recipe_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe Key"
           }
         },
         "type": "object",

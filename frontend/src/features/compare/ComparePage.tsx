@@ -77,8 +77,12 @@ export function ComparePage({
     before_rules: rules,
     has_steps: hasSteps,
     story,
+    recipe_key: answeredFor,
   } = comparison.data
-  const told = aiStory ?? story
+  // A model's story is fetched apart from the answers it describes, so it can
+  // still be the one written for the previous recipe. Its figures would then
+  // disagree with the cards under it, which the templates never do.
+  const told = aiStory?.recipe_key === answeredFor ? aiStory : story
   const changed = cards ?? []
   const nowAskable = unlocked ?? []
   const same = unchanged ?? []

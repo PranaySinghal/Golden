@@ -611,3 +611,53 @@ figure to its card, open "why", and download the cleaned file — asserting the
 saved name and that the split actually added columns. Its config starts both
 servers itself with `LLM_PROVIDER=none`, so the run needs no key and no manual
 setup. CI wiring is M10.
+
+---
+
+## A model's story is asked per recipe, not per file
+
+A review of M9 found the AI story was unreachable in the running app. It was
+bundled into the one-shot enhancement, which the review screen asks for at
+mount and the server caches for the life of the file. At that moment only the
+safe steps have run, so nothing has moved yet — on the employee file the
+comparison is literally "every answer matched" — and a story-less result was
+cached forever. The prompt, its validation and the whole `story` field were
+dead code that no test touched, because the tests called the pure functions
+directly.
+
+The rest of what a model offers describes *the file*: which fixes the detectors
+missed, how to word an issue. That doesn't change, so asking once is right. A
+story describes *the answers*, and those move every time the user accepts,
+answers or undoes something. Those are two different lifetimes, and they can't
+share one cache.
+
+So `enhance` went back to fixes and wording only, and `tell_story` became its
+own call, cached on the session per `recipe_key`. `/ai` still answers with
+everything in one response; the client keys its query on the recipe and keeps
+the previous reply on screen while a new one is fetched, so improved wording
+never flickers back to templates.
+
+Three smaller things fell out of the same review:
+
+- *A story now says which rows it describes.* `Story.recipe_key` carries the
+  comparison it was written about, and the screen shows a model's story only
+  while that key still matches. Otherwise the template story — which is always
+  computed with the cards — wins. Without this, changing a choice left a story
+  quoting figures the cards below it no longer showed.
+- *A digit in a column name is not a figure.* Every number in an AI story has
+  to be one we computed, and anything else throws the story away. But the check
+  read digits anywhere in the sentence, including inside a quoted question — and
+  this repo's own cross-tab fixture has columns called `column_3` and
+  `column_10`. Quoting the question rejected the story. Names that contain a
+  digit are now excused, and only those; the sentence around them is still
+  checked.
+- *Nothing moved means nothing to ask.* The story call was gated on having
+  answers rather than on any of them having changed, so a file cleaning didn't
+  move still asked a model to write three or four sentences about an empty
+  list. It's also why the accept-set now covers only the answers that changed:
+  the model is shown those, and a figure from one it never saw is a
+  coincidence, not a citation.
+
+**Unrelated, fixed in passing:** `npm test` was red on `main` — Vitest was
+picking up the Playwright spec and failing the suite. It now runs only
+`src/**/*.test.{ts,tsx}`.

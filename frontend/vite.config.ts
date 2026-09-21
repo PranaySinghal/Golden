@@ -15,5 +15,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Only the unit tests. The end-to-end specs under e2e/ are Playwright's,
+    // and calling its test() from this runner is an error.
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 })

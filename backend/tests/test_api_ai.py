@@ -176,6 +176,81 @@ def test_better_wording_replaces_the_template(client: TestClient) -> None:
     assert body["issue_copy"][first["id"]]["title"] == "Names are stored with spaces around them"
 
 
+# The story prompt, as the scripted provider recognises it.
+STORY = "tell a business user"
+PLAIN = json.dumps({"sentences": ["Your file reads the way you meant it to."]})
+
+
+def accept_everything(client: TestClient, dataset: str) -> None:
+    """Take every suggestion, so the answers actually move."""
+    for issue in client.get(f"/api/datasets/{dataset}/issues").json()["issues"]:
+        choice = issue["ask"]["choices"][0]["id"] if issue.get("ask") else None
+        client.post(
+            f"/api/datasets/{dataset}/issues/{issue['id']}/accept",
+            json={"choice_id": choice} if choice else {},
+        )
+
+
+def test_a_story_is_told_for_the_rows_as_they_stand(client: TestClient) -> None:
+    """Asked for from the review screen, before anything has opened "what changed"."""
+    dataset = upload(client, EMPLOYEE, "Messy_Employee_dataset.csv")
+    accept_everything(client, dataset)
+    provider = ScriptedProvider({STORY: PLAIN})
+    use_provider(provider)
+
+    body = ai(client, dataset)
+
+    assert STORY in provider.asked
+    assert body["story"]["source"] == "ai"
+    assert [part["text"] for part in body["story"]["sentences"][0]["parts"]] == [
+        "Your file reads the way you meant it to."
+    ]
+
+
+def test_a_story_says_which_rows_it_describes(client: TestClient) -> None:
+    """So the screen can tell that its figures are the ones on the cards."""
+    dataset = upload(client, EMPLOYEE, "Messy_Employee_dataset.csv")
+    accept_everything(client, dataset)
+    use_provider(ScriptedProvider({STORY: PLAIN}))
+
+    told = ai(client, dataset)["story"]
+    compared = client.get(f"/api/datasets/{dataset}/compare").json()
+
+    assert told["recipe_key"] == compared["recipe_key"]
+    assert compared["story"]["recipe_key"] == compared["recipe_key"]
+
+
+def test_a_story_is_told_again_once_the_answers_move(client: TestClient) -> None:
+    """The rest of what a model offers describes the file; this describes the answers."""
+    dataset = upload(client, EMPLOYEE, "Messy_Employee_dataset.csv")
+    accept_everything(client, dataset)
+    provider = ScriptedProvider({STORY: PLAIN})
+    use_provider(provider)
+    first = ai(client, dataset)
+    client.post(f"/api/datasets/{dataset}/recipe/undo")
+
+    again = ai(client, dataset)
+
+    assert provider.asked.count(STORY) == 2
+    # and the rest was not asked for a second time
+    assert provider.asked.count("fixes") == 1
+    assert first["story"]["recipe_key"] != again["story"]["recipe_key"]
+
+
+def test_a_file_cleaning_does_not_move_is_never_asked_about(client: TestClient) -> None:
+    """Nothing moved means nothing to tell, and no reason to invite an invention."""
+    dataset = upload(client, "Team,Notes\nSales,ok\nSupport,fine\nSales,ok\n")
+    client.get(f"/api/datasets/{dataset}/issues")
+    provider = ScriptedProvider({STORY: PLAIN})
+    use_provider(provider)
+
+    body = ai(client, dataset)
+
+    assert client.get(f"/api/datasets/{dataset}/compare").json()["cards"] == []
+    assert STORY not in provider.asked
+    assert body["story"] is None
+
+
 def test_the_answer_is_worked_out_once_and_kept(client: TestClient) -> None:
     dataset = upload(client, NAMES)
     client.get(f"/api/datasets/{dataset}/issues")

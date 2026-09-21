@@ -95,7 +95,7 @@ def comparison_response(comparison: Comparison) -> ComparisonResponse:
         has_steps=_runs_anything(comparison.recipe),
         questions_asked=len(comparison.diffs),
         recomputed=len(comparison.recomputed),
-        story=build_story(comparison.diffs),
+        story=build_story(comparison.diffs, comparison.recipe_key),
     )
 
 
