@@ -30,7 +30,12 @@ export function IssueCard({
   const previewChoice = considering ?? issue.chosen_choice_id ?? undefined
 
   return (
-    <article className={`card${applied ? ' card--applied' : ''}`} aria-busy={busy}>
+    <article
+      className={`card${applied ? ' card--applied' : ''}${
+        issue.tier === 'ask' && !applied ? ' card--ask' : ''
+      }`}
+      aria-busy={busy}
+    >
       <div className="card__head">
         <h4 className="card__title">{issue.title}</h4>
         {issue.source === 'ai' && (

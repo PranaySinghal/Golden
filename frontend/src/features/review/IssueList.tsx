@@ -47,7 +47,9 @@ export function IssueList({
           <section key={tier} className="group" aria-labelledby={`group-${tier}`}>
             <h3 id={`group-${tier}`} className="group__title">
               {TIERS[tier].title}
-              <span className="group__count">{forTier.length}</span>
+              <span className={`group__count${tier === 'ask' ? ' group__count--ask' : ''}`}>
+                {forTier.length}
+              </span>
             </h3>
             <p className="muted small">{TIERS[tier].blurb}</p>
             {forTier.map((issue) => (

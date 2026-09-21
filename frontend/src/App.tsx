@@ -43,7 +43,10 @@ export default function App() {
   return (
     <div className="app">
       <header className="masthead">
-        <h1 className="masthead__title">TidyLab</h1>
+        <div className="masthead__brand">
+          <img src="/logo.webp" alt="" width="36" height="36" className="masthead__logo" />
+          <h1 className="masthead__title">Tidy Labs</h1>
+        </div>
         <p className="masthead__tagline">Tidy your data. See what it was hiding.</p>
       </header>
       <main className="page">
