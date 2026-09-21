@@ -16,16 +16,25 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
 }) => {
   await page.goto('/')
 
-  // --- upload ------------------------------------------------------------------
+  // --- the landing page --------------------------------------------------------
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('what it was hiding')
+  await expect(page.getByRole('link', { name: 'FAQ' })).toBeVisible()
   await expect(page.getByText('Drop a CSV or Excel file here')).toBeVisible()
   await page.getByLabel('Choose a file to upload').setInputFiles(SAMPLE)
 
+  // --- the file ----------------------------------------------------------------
   await expect(page.getByRole('heading', { name: 'Messy_Employee_dataset.csv' })).toBeVisible()
   await expect(page.getByText('1,020 rows · 12 columns')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Features' })).toHaveCount(0)
+
+  // how the file was read now lives behind the toggle. Closed again afterwards so
+  // the column table doesn't compete with the review below it.
+  await page.getByRole('button', { name: 'See the columns' }).click()
+  await expect(page.getByRole('checkbox', { name: 'First row has column names' })).toBeChecked()
+  await page.getByRole('button', { name: 'Hide columns' }).click()
+  await expect(page.getByRole('checkbox', { name: 'First row has column names' })).toHaveCount(0)
 
   // --- review ------------------------------------------------------------------
-  await page.getByRole('button', { name: 'See what needs fixing' }).click()
-
   await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
   const panel = page.getByRole('complementary', { name: "What we're doing" })
   await expect(panel.getByText('Read "Join_Date" as dates')).toBeVisible()
@@ -72,4 +81,9 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
   const cleaned = readFileSync(await file.path(), 'utf8')
   expect(columnCount(cleaned)).toBeGreaterThan(columnCount(readFileSync(SAMPLE, 'utf8')))
   expect(cleaned).toContain('Department')
+
+  // --- and back to the start -----------------------------------------------------
+  await page.getByRole('button', { name: 'Home' }).click()
+  await expect(page.getByText('Drop a CSV or Excel file here')).toBeVisible()
+  expect(new URL(page.url()).searchParams.get('dataset')).toBeNull()
 })
