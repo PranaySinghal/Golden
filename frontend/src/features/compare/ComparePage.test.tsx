@@ -357,6 +357,23 @@ describe('ComparePage', () => {
     expect(screen.queryByText(/Your file went from/)).toBeNull()
   })
 
+  it('ignores a model story written about a different set of rows', async () => {
+    // The model's story is fetched apart from the answers, so it can lag behind
+    // a choice the user just changed. Its figures would contradict the cards.
+    mockApi({ [COMPARE]: () => jsonResponse(200, comparison()) })
+
+    renderPage({
+      aiStory: story({
+        source: 'ai',
+        recipe_key: 'an-older-key',
+        sentences: [{ parts: [{ text: 'Your customer list lost people.', question_id: null }] }],
+      }),
+    })
+
+    expect(await screen.findByText(/Your file went from/)).toBeTruthy()
+    expect(screen.queryByText(/lost people/)).toBeNull()
+  })
+
   // --- changing an answer from here --------------------------------------------------------
 
   it('offers the answers already given, and asks for a different one', async () => {

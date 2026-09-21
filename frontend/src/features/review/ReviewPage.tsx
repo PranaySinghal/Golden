@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import {
@@ -57,13 +57,18 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
     queryFn: () => api.getIssues(dataset.id),
   })
 
-  // Asked for once, after the rule-based review is already on screen. Whatever
-  // comes back is extra; nothing here waits on it.
+  // Asked for after the rule-based review is already on screen. Whatever comes
+  // back is extra; nothing here waits on it. Keyed on the recipe because the
+  // story describes the answers, which move; the server still works out the
+  // suggestions and wording only once. The previous reply stays on screen while
+  // a new one is fetched, so improved wording doesn't flicker back to templates.
+  const recipeKey = issues.data?.recipe.recipe_key
   const ai = useQuery({
-    queryKey: ['ai', dataset.id],
+    queryKey: ['ai', dataset.id, recipeKey],
     queryFn: () => api.getAiSuggestions(dataset.id),
     enabled: issues.isSuccess,
     staleTime: Infinity,
+    placeholderData: keepPreviousData,
   })
 
   /** Every action answers with the new recipe; the list is re-read to follow it. */

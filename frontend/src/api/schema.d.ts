@@ -1145,6 +1145,8 @@ export interface components {
              * @enum {string}
              */
             source: "template" | "ai";
+            /** Recipe Key */
+            recipe_key?: string | null;
         };
         /** StoryPart */
         StoryPart: {

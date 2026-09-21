@@ -39,6 +39,10 @@ class StorySentence(BaseModel):
 class Story(BaseModel):
     sentences: list[StorySentence] = Field(default_factory=list)
     source: Literal["template", "ai"] = "template"
+    # The cleaned rows this story describes. A story outlives the answers it was
+    # written about — a model's especially, since it's fetched once — so the
+    # screen has to be able to tell that its figures are the ones on the cards.
+    recipe_key: str | None = None
 
 
 def say_number(value: float | None, measure: Measure) -> str:
@@ -50,7 +54,7 @@ def say_number(value: float | None, measure: Measure) -> str:
     return f"{value:,.2f}"
 
 
-def build_story(diffs: list[AnswerDiff]) -> Story | None:
+def build_story(diffs: list[AnswerDiff], recipe_key: str | None = None) -> Story | None:
     """The story for a comparison, or None when there's nothing worth saying."""
     changed = [diff for diff in diffs if diff.changed and not diff.unlocked]
     unlocked = [diff for diff in diffs if diff.unlocked]
@@ -89,7 +93,7 @@ def build_story(diffs: list[AnswerDiff]) -> Story | None:
             break
         sentences.append(_unlocked_sentence(diff, first=position == 0))
 
-    return Story(sentences=sentences) if sentences else None
+    return Story(sentences=sentences, recipe_key=recipe_key) if sentences else None
 
 
 def _has_figures(diff: AnswerDiff) -> bool:

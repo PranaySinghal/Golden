@@ -1,8 +1,12 @@
-"""The one call the API makes: ask a model for more, keep only what survives.
+"""Asking a model for more, and keeping only what survives.
 
-Three prompts run: one for fixes the detectors missed, two for wording. Each is
-independent, so a model that writes good titles but bad fixes still helps, and a
-model that can't be reached at all costs the user nothing but a quiet note.
+`enhance` runs three prompts: one for fixes the detectors missed, two for
+wording. Each is independent, so a model that writes good titles but bad fixes
+still helps, and a model that can't be reached at all costs the user nothing but
+a quiet note. All three describe the file, so they're asked once.
+
+`tell_story` is separate because a story describes the answers, and those move
+every time the user accepts or undoes something.
 """
 
 import logging
@@ -41,8 +45,9 @@ class Enhancement(BaseModel):
     added: list[Issue] = Field(default_factory=list)
     issue_copy: dict[str, RewordedCopy] = Field(default_factory=dict)
     question_labels: dict[str, str] = Field(default_factory=dict)
-    # The comparison already carries a story built from templates; this replaces
-    # it when a model wrote a better one that only uses our figures.
+    # Filled in per recipe by `tell_story`, not by `enhance`. The comparison
+    # already carries a story built from templates; this replaces it when a
+    # model wrote a better one that only uses our figures.
     story: Story | None = None
     note: str | None = None
 
@@ -55,7 +60,6 @@ def enhance(
     settings: Settings,
     provider: Provider | None = None,
     today: date | None = None,
-    diffs: list[AnswerDiff] | None = None,
 ) -> Enhancement:
     if not settings.llm_enabled:
         return Enhancement(status="off")
@@ -84,24 +88,7 @@ def enhance(
         timeout,
     )
 
-    told = (
-        ask(
-            service,
-            load_prompt("story"),
-            story_facts(diffs),
-            StoryReply,
-            timeout,
-        )
-        if diffs
-        else None
-    )
-
-    if (
-        suggested is None
-        and reworded_issues is None
-        and reworded_questions is None
-        and told is None
-    ):
+    if suggested is None and reworded_issues is None and reworded_questions is None:
         return Enhancement(status="failed", note=FAILED_NOTE)
 
     added = accepted_fixes(conn, profile, suggested, issues, today) if suggested else []
@@ -116,10 +103,32 @@ def enhance(
         len(labels),
         len(reworded_questions.items) if reworded_questions else 0,
     )
-    return Enhancement(
-        status="ready",
-        added=added,
-        issue_copy=copy,
-        question_labels=labels,
-        story=accepted_story(diffs, told) if told and diffs else None,
+    return Enhancement(status="ready", added=added, issue_copy=copy, question_labels=labels)
+
+
+def tell_story(
+    diffs: list[AnswerDiff],
+    recipe_key: str,
+    settings: Settings,
+    provider: Provider | None = None,
+) -> Story | None:
+    """A model's version of the story for one set of answers.
+
+    Asked for separately from the rest: fixes and wording describe the file,
+    which doesn't change, while a story describes the answers, which move every
+    time the user accepts or undoes something.
+    """
+    if not settings.llm_enabled:
+        return None
+    # Nothing moved means nothing to tell. Asking anyway would hand a model an
+    # empty list and still request three or four sentences about it.
+    if not any(diff.changed for diff in diffs):
+        return None
+    told = ask(
+        provider or build_provider(settings),
+        load_prompt("story"),
+        story_facts(diffs),
+        StoryReply,
+        settings.llm_timeout_ms,
     )
+    return accepted_story(diffs, told, recipe_key) if told else None

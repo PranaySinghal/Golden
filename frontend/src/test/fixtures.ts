@@ -232,6 +232,7 @@ export function comparison(overrides: Partial<ComparisonResponse> = {}): Compari
 export function story(overrides: Partial<Story> = {}): Story {
   return {
     source: 'template',
+    recipe_key: 'key-1',
     sentences: [
       {
         parts: [

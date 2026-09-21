@@ -31,6 +31,7 @@ from app.steps.apply import ApplyResult
 from app.steps.models import Recipe
 from app.steps.recipe_ops import RecipeHistory
 from app.steps.schema import StageSchema, base_schema
+from app.story import Story
 
 
 @dataclass
@@ -67,6 +68,10 @@ class DatasetSession:
     comparison: Comparison | None = None
     # What a model added, asked for once per file after the rules have run.
     enhancement: Enhancement | None = None
+    # A model's story per set of cleaned rows. Unlike the rest of what a model
+    # offers, this describes the answers, so it's asked again when they move.
+    # A key that's present with no story means "asked, nothing worth showing".
+    stories: dict[str, Story | None] = field(default_factory=dict)
     # One DuckDB connection isn't safe to use from two threads at once.
     lock: threading.RLock = field(default_factory=threading.RLock)
 
