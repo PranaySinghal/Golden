@@ -1,18 +1,15 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { api, type DatasetSummary, type ReingestRequest } from '../../api/client'
-import { DatasetOverview } from './DatasetOverview'
+import { api, type DatasetSummary } from '../../api/client'
 import { DropZone } from './DropZone'
 import { formatBytes } from './format'
 
-interface UploadPageProps {
-  dataset: DatasetSummary | null
-  onDataset: (dataset: DatasetSummary | null) => void
-  onReview: () => void
+interface UploadPanelProps {
+  onUploaded: (dataset: DatasetSummary) => void
 }
 
-export function UploadPage({ dataset, onDataset, onReview }: UploadPageProps) {
+export function UploadPanel({ onUploaded }: UploadPanelProps) {
   const [tooLarge, setTooLarge] = useState<string | null>(null)
 
   const limits = useQuery({ queryKey: ['upload-limits'], queryFn: api.getUploadLimits })
@@ -20,12 +17,7 @@ export function UploadPage({ dataset, onDataset, onReview }: UploadPageProps) {
 
   const upload = useMutation({
     mutationFn: (file: File) => api.uploadDataset(file),
-    onSuccess: onDataset,
-  })
-  const reread = useMutation({
-    mutationFn: ({ id, request }: { id: string; request: ReingestRequest }) =>
-      api.reingestDataset(id, request),
-    onSuccess: onDataset,
+    onSuccess: onUploaded,
   })
 
   function handleFile(file: File) {
@@ -40,26 +32,6 @@ export function UploadPage({ dataset, onDataset, onReview }: UploadPageProps) {
     }
     setTooLarge(null)
     upload.mutate(file)
-  }
-
-  function startOver() {
-    onDataset(null)
-    setTooLarge(null)
-    upload.reset()
-    reread.reset()
-  }
-
-  if (dataset) {
-    return (
-      <DatasetOverview
-        dataset={dataset}
-        rereading={reread.isPending}
-        rereadError={reread.error?.message ?? null}
-        onReread={(request) => reread.mutate({ id: dataset.id, request })}
-        onUploadAnother={startOver}
-        onReview={onReview}
-      />
-    )
   }
 
   const error = tooLarge ?? upload.error?.message ?? null

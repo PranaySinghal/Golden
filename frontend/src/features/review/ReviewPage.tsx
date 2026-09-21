@@ -8,11 +8,12 @@ import {
   type IssueListResponse,
   type IssueView,
   type RecipeResponse,
+  type ReingestRequest,
   type StepView,
 } from '../../api/client'
 import { ErrorState, Spinner } from '../../components/states'
 import { ComparePage } from '../compare/ComparePage'
-import { ColumnTable } from '../upload/ColumnTable'
+import { FileOptionsPanel } from '../upload/FileOptionsPanel'
 import { describeRows } from '../upload/format'
 import { IssueList } from './IssueList'
 import { RecipePanel } from './RecipePanel'
@@ -40,10 +41,12 @@ interface ActionError {
 
 interface ReviewPageProps {
   dataset: DatasetSummary
+  /** A re-read replaces the file behind the same id; the fresh summary goes up. */
+  onDataset: (dataset: DatasetSummary) => void
   onStartOver: () => void
 }
 
-export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
+export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps) {
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<Tab>('review')
   const [showColumns, setShowColumns] = useState(false)
@@ -99,22 +102,33 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
     onSuccess: applyRecipe,
   })
 
-  if (issues.isPending) {
-    return <Spinner label="Looking through your file…" />
-  }
-  if (issues.isError) {
-    return (
-      <ErrorState
-        message={issues.error.message}
-        onRetry={() => void issues.refetch()}
-        retrying={issues.isFetching}
-      />
-    )
-  }
+  const reread = useMutation({
+    mutationFn: (request: ReingestRequest) => api.reingestDataset(dataset.id, request),
+    onSuccess: (fresh) => {
+      // Reading the file again keeps the id but replaces the whole session
+      // behind it: new profile, empty recipe, issues and comparison thrown away
+      // (backend app/store.py). Every key here is built on that id, so nothing
+      // cached under it survives. removeQueries rather than invalidateQueries,
+      // because the model's reply never goes stale on its own and an empty
+      // recipe can land on a recipe_key this session has already cached — both
+      // would otherwise be served straight back.
+      queryClient.removeQueries({ queryKey: ['issues', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['ai', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['compare', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['preview', fresh.id] })
+      queryClient.setQueryData(['dataset', fresh.id], fresh)
+      // These all point at ids in the recipe that no longer exists.
+      setTab('review')
+      setHighlighted([])
+      setActionError(null)
+      setActing(null)
+      onDataset(fresh)
+    },
+  })
 
-  const { issues: found, recipe, needs_decision: decisions } = issues.data
-  const list = withAiHelp(found ?? [], ai.data)
-  const steps = recipe.steps ?? []
+  const decisions = issues.data?.needs_decision ?? 0
+  const list = withAiHelp(issues.data?.issues ?? [], ai.data)
+  const steps = issues.data?.recipe.steps ?? []
   const aiFailed = ai.data?.status === 'failed'
   const busyWith = (id: string) => acting === id || undo.isPending
   const errorFor = (id: string) =>
@@ -127,11 +141,12 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
     <section className="review" aria-labelledby="review-title">
       <header className="review__head">
         <div>
-          <h2 id="review-title" className="review__filename">
+          <h1 id="review-title" className="review__filename">
             {dataset.filename}
-          </h2>
+          </h1>
           <p className="muted">
             {describeRows(dataset.row_count, dataset.column_count)}
+            {dataset.sheet_name && <> · sheet “{dataset.sheet_name}”</>}
             {decisions > 0 && <> · {decisions} to decide</>}
           </p>
         </div>
@@ -150,8 +165,32 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
         </div>
       </header>
 
-      {showColumns && <ColumnTable columns={dataset.columns} />}
+      {showColumns && (
+        <FileOptionsPanel
+          dataset={dataset}
+          onReread={(request) => reread.mutate(request)}
+          rereading={reread.isPending}
+          rereadError={reread.error?.message ?? null}
+          stepCount={steps.length}
+        />
+      )}
 
+      {dataset.row_count === 0 && (
+        <p className="notice">
+          This file has column names but no rows yet. Add some data and upload it again.
+        </p>
+      )}
+
+      {issues.isError ? (
+        <ErrorState
+          message={issues.error.message}
+          onRetry={() => void issues.refetch()}
+          retrying={issues.isFetching}
+        />
+      ) : !issues.data ? (
+        <Spinner label="Looking through your file…" />
+      ) : (
+        <>
       <div className="tabs" role="tablist" aria-label="What to look at">
         <button
           type="button"
@@ -200,7 +239,7 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
           ) : (
             <ComparePage
               datasetId={dataset.id}
-              recipeKey={recipe.recipe_key}
+              recipeKey={issues.data.recipe.recipe_key}
               steps={steps}
               issues={list}
               choosing={acting}
@@ -218,7 +257,7 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
 
         <RecipePanel
           datasetId={dataset.id}
-          recipe={recipe}
+          recipe={issues.data.recipe}
           busy={acting !== null || undo.isPending}
           highlighted={highlighted}
           onToggle={(step: StepView, enabled: boolean) =>
@@ -230,6 +269,8 @@ export function ReviewPage({ dataset, onStartOver }: ReviewPageProps) {
           onUndo={() => undo.mutate()}
         />
       </div>
+        </>
+      )}
 
       {(panelError || undo.error) && (
         <p className="review__error" role="alert">

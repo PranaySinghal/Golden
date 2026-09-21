@@ -31,13 +31,13 @@ function mockApi(routes: Record<string, Handler>) {
   return fetchMock
 }
 
-function renderPage(onStartOver = () => {}) {
+function renderPage(onStartOver = () => {}, onDataset = () => {}, file = FILE) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   return render(
     <QueryClientProvider client={client}>
-      <ReviewPage dataset={FILE} onStartOver={onStartOver} />
+      <ReviewPage dataset={file} onDataset={onDataset} onStartOver={onStartOver} />
     </QueryClientProvider>,
   )
 }
@@ -507,5 +507,55 @@ describe('ReviewPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Upload a different file' }))
 
     expect(startOver).toHaveBeenCalled()
+  })
+
+  it('shows how the file was read behind the columns toggle', async () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+    renderPage()
+    await screen.findByRole('heading', { name: /Suggested/ })
+
+    expect(screen.queryByRole('checkbox', { name: 'First row has column names' })).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'See the columns' }))
+
+    expect(screen.getByRole('checkbox', { name: 'First row has column names' })).toBeTruthy()
+    expect(screen.getByRole('row', { name: /Salary/ })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide columns' }))
+    expect(screen.queryByRole('checkbox', { name: 'First row has column names' })).toBeNull()
+  })
+
+  it('looks at the file afresh after it is read again', async () => {
+    // The server keeps the id but throws the session away, so nothing cached
+    // under that id may be reused — including a reply it already has in hand.
+    const reread = dataset({ header_mode: 'data', header_detected: false, row_count: 1021 })
+    let issueCalls = 0
+    const onDataset = vi.fn()
+    // The recipe already has a step, so the panel checks before throwing it away.
+    vi.stubGlobal('confirm', vi.fn(() => true))
+    mockApi({
+      [ISSUES]: () => {
+        issueCalls += 1
+        return jsonResponse(200, issueList())
+      },
+      [`POST /api/datasets/${FILE.id}/reingest`]: () => jsonResponse(200, reread),
+    })
+    renderPage(() => {}, onDataset)
+    await screen.findByRole('heading', { name: /Suggested/ })
+    fireEvent.click(screen.getByRole('button', { name: 'See the columns' }))
+    expect(issueCalls).toBe(1)
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'First row has column names' }))
+
+    await waitFor(() => expect(onDataset).toHaveBeenCalledWith(reread))
+    await waitFor(() => expect(issueCalls).toBe(2))
+  })
+
+  it('says so when the file has column names but no rows', async () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+
+    renderPage(() => {}, () => {}, dataset({ row_count: 0 }))
+
+    expect(await screen.findByText(/has column names but no rows yet/)).toBeTruthy()
   })
 })

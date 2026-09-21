@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { api, type DatasetSummary } from './api/client'
+import { SiteNav } from './components/SiteNav'
 import { ErrorState, Spinner } from './components/states'
+import { LandingPage } from './features/landing/LandingPage'
 import { ReviewPage } from './features/review/ReviewPage'
-import { UploadPage } from './features/upload/UploadPage'
 
 /** The file being worked on is kept in the address, so a refresh doesn't lose it. */
 function datasetFromUrl(): string | null {
@@ -21,8 +22,6 @@ function rememberInUrl(id: string | null) {
 export default function App() {
   const [chosen, setChosen] = useState<DatasetSummary | null>(null)
   const [wantedId, setWantedId] = useState<string | null>(datasetFromUrl)
-  // A file in the address means the reader was already past the summary.
-  const [reviewing, setReviewing] = useState(datasetFromUrl() !== null)
 
   // Only runs when the page was opened with a file already in the address.
   const restored = useQuery({
@@ -33,35 +32,37 @@ export default function App() {
   })
   const dataset = chosen ?? restored.data ?? null
 
-  function choose(next: DatasetSummary | null) {
+  /** A freshly uploaded file, or the same file read again with new options. */
+  function openDataset(next: DatasetSummary) {
     setChosen(next)
-    setWantedId(next?.id ?? null)
-    setReviewing(false)
-    rememberInUrl(next?.id ?? null)
+    setWantedId(next.id)
+    rememberInUrl(next.id)
   }
+
+  function goHome() {
+    setChosen(null)
+    setWantedId(null)
+    rememberInUrl(null)
+    window.scrollTo(0, 0)
+  }
+
+  // A file named in the address is being fetched: that reader is on their way to
+  // the analysis, so don't flash the landing page at them on the way.
+  const restoring = wantedId !== null && chosen === null && restored.isPending
+  const onLanding = dataset === null && !restoring && !restored.isError
 
   return (
     <div className="app">
-      <header className="masthead">
-        <div className="masthead__brand">
-          <img src="/logo.webp" alt="" width="36" height="36" className="masthead__logo" />
-          <h1 className="masthead__title">Tidy Labs</h1>
-        </div>
-        <p className="masthead__tagline">Tidy your data. See what it was hiding.</p>
-      </header>
+      <SiteNav variant={onLanding ? 'landing' : 'analysis'} onHome={goHome} />
       <main className="page">
-        {restored.isFetching && <Spinner label="Opening your file…" />}
-        {restored.isError && (
-          <ErrorState message={restored.error.message} onRetry={() => choose(null)} />
-        )}
-        {dataset && reviewing ? (
-          <ReviewPage dataset={dataset} onStartOver={() => choose(null)} />
+        {restored.isError ? (
+          <ErrorState message={restored.error.message} onRetry={goHome} />
+        ) : restoring ? (
+          <Spinner label="Opening your file…" />
+        ) : dataset ? (
+          <ReviewPage dataset={dataset} onDataset={openDataset} onStartOver={goHome} />
         ) : (
-          <UploadPage
-            dataset={dataset}
-            onDataset={choose}
-            onReview={() => setReviewing(true)}
-          />
+          <LandingPage onUploaded={openDataset} />
         )}
       </main>
     </div>
