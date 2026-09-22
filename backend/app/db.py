@@ -17,6 +17,8 @@ from pathlib import Path
 
 import duckdb
 
+from app.steps.phone import format_phone_or_original
+
 RAW_TABLE = "raw"
 ROW_ID_COLUMN = "_row_id"
 SOURCE_CATALOG = "source"
@@ -59,8 +61,28 @@ def raw_db_path(workspace: Path) -> Path:
     return workspace / RAW_DB_FILENAME
 
 
+def _register_functions(conn: duckdb.DuckDBPyConnection) -> None:
+    """Make a step's Python-only logic callable from SQL, once per connection.
+
+    A connection can be re-attached to a different raw file (a reread keeps
+    the connection), so this has to be safe to call more than once.
+    """
+    registered = conn.execute(
+        "SELECT count(*) FROM duckdb_functions() WHERE function_name = 'tidylab_format_phone'"
+    ).fetchone()
+    if registered and registered[0]:
+        return
+    conn.create_function(
+        "tidylab_format_phone", format_phone_or_original, ["VARCHAR", "VARCHAR"], "VARCHAR"
+    )
+
+
 def attach_raw(conn: duckdb.DuckDBPyConnection, raw_path: Path) -> None:
     """Attach a raw database file read-only as `source`, replacing any earlier one."""
+    # The one place every dataset connection is set up, in production and in
+    # tests alike, so registering a step's Python-only logic here means it's
+    # always available wherever SQL runs against this connection.
+    _register_functions(conn)
     conn.execute(f"DETACH DATABASE IF EXISTS {quote_ident(SOURCE_CATALOG)}")
     conn.execute(
         f"ATTACH {quote_literal(str(raw_path))} AS {quote_ident(SOURCE_CATALOG)} (READ_ONLY)"

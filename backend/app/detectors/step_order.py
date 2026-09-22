@@ -17,6 +17,7 @@ RANK: dict[str, int] = {
     "null_placeholders": 1,
     "map_values": 2,
     "normalize_case": 2,
+    "normalize_phone": 2,
     "split_column": 3,
     "cast_number": 4,
     "parse_date": 4,

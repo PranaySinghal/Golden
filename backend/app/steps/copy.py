@@ -16,6 +16,7 @@ from app.steps.models import (
     FillMissingStep,
     MapValuesStep,
     NormalizeCaseStep,
+    NormalizePhoneStep,
     NotMatchingCondition,
     NullPlaceholdersStep,
     OneOfCondition,
@@ -60,7 +61,13 @@ def quoted(names: Sequence[str], joiner: str = "and") -> str:
 def columns_of(step: Step) -> list[str]:
     """The columns a step works on, for showing next to its description."""
     match step:
-        case TrimStep() | RemoveCharactersStep() | NormalizeCaseStep() | NullPlaceholdersStep():
+        case (
+            TrimStep()
+            | RemoveCharactersStep()
+            | NormalizeCaseStep()
+            | NormalizePhoneStep()
+            | NullPlaceholdersStep()
+        ):
             return list(step.columns)
         case DedupeStep():
             return list(step.columns or [])
@@ -82,6 +89,8 @@ def describe(step: Step) -> str:
             return f"Remove {characters} from {where} of {quoted(step.columns)}"
         case NormalizeCaseStep():
             return f"Write {quoted(step.columns)} in {CASE_WORDS[step.case]}"
+        case NormalizePhoneStep():
+            return f"Write {quoted(step.columns)} numbers consistently"
         case MapValuesStep():
             return f'{_replacements(step)} in "{step.column}"'
         case NullPlaceholdersStep():

@@ -268,6 +268,18 @@ def short_phones(column: str, n: int, usual: int, examples: Sequence[str]) -> tu
     )
 
 
+def inconsistent_phone_format(
+    column: str, n: int, examples: Sequence[tuple[str, str]]
+) -> tuple[str, str]:
+    shown = "; ".join(f'"{before}" becomes "{after}"' for before, after in examples[:2])
+    return (
+        f'{count(n)} "{column}" {plural(n, "number reads", "numbers read")} more clearly '
+        "written consistently",
+        f'Numbers in "{column}" use different spacing and punctuation for the same shape of '
+        f"number. Writing them the same way doesn't change any digits, for example {shown}.",
+    )
+
+
 def invalid_emails(column: str, n: int, examples: Sequence[str]) -> tuple[str, str, str]:
     return (
         f'{count(n)} "{column}" {plural(n, "value doesn't", "values don't")} look like an '

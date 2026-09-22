@@ -24,6 +24,7 @@ from app.steps.models import (
     FillMissingStep,
     MapValuesStep,
     NormalizeCaseStep,
+    NormalizePhoneStep,
     NotMatchingCondition,
     NullPlaceholdersStep,
     OneOfCondition,
@@ -113,6 +114,8 @@ def compile_step(step: Step, schema: StageSchema, *, index: int, source: str) ->
             return _remove_characters(step, schema, b, source)
         case NormalizeCaseStep():
             return _normalize_case(step, schema, b, source)
+        case NormalizePhoneStep():
+            return _normalize_phone(step, schema, b, source)
         case MapValuesStep():
             return _map_values(step, schema, b, source)
         case NullPlaceholdersStep():
@@ -192,7 +195,13 @@ def _same_kind_changes(schema: StageSchema, names: list[str]) -> tuple[ChangeSpe
 
 
 def _replace_text_columns(
-    step: TrimStep | RemoveCharactersStep | NormalizeCaseStep | NullPlaceholdersStep,
+    step: (
+        TrimStep
+        | RemoveCharactersStep
+        | NormalizeCaseStep
+        | NormalizePhoneStep
+        | NullPlaceholdersStep
+    ),
     schema: StageSchema,
     source: str,
     template: str,
@@ -256,6 +265,14 @@ def _normalize_case(
     return _replace_text_columns(
         step, schema, source, expr, "changed to a different case", b.params
     )
+
+
+def _normalize_phone(
+    step: NormalizePhoneStep, schema: StageSchema, b: _Builder, source: str
+) -> CompiledStep:
+    region = b.bind("region", step.default_region)
+    expr = f"tidylab_format_phone({{col}}, {region})"
+    return _replace_text_columns(step, schema, source, expr, "reformatted", b.params)
 
 
 def _null_placeholders(

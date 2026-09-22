@@ -10,6 +10,7 @@ from typing import Annotated, Literal, Self
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 from app.profile.patterns import DateFormat
+from app.steps.phone import DEFAULT_REGION
 
 MAX_STEPS = 200
 MAX_MAPPINGS = 1000
@@ -130,6 +131,16 @@ class NormalizeCaseStep(_StepBase):
     case: Literal["lower", "upper", "title"]
 
 
+class NormalizePhoneStep(_StepBase):
+    type: Literal["normalize_phone"] = "normalize_phone"
+    columns: Columns
+    # Used only for a number with no country code of its own to go by. An
+    # ISO 3166-1 alpha-2 code, e.g. "US", "GB".
+    default_region: Annotated[
+        str, StringConstraints(min_length=2, max_length=2, to_upper=True)
+    ] = DEFAULT_REGION
+
+
 class ValueMapping(_Model):
     from_value: Annotated[str, StringConstraints(min_length=1, max_length=1000)]
     # None means "make this blank".
@@ -220,6 +231,7 @@ STEP_LABELS: dict[str, str] = {
     "trim": "Trim spaces",
     "remove_characters": "Remove characters",
     "normalize_case": "Change letter case",
+    "normalize_phone": "Tidy phone numbers",
     "map_values": "Replace values",
     "null_placeholders": "Clear placeholder text",
     "cast_number": "Read as numbers",
@@ -235,6 +247,7 @@ Step = Annotated[
     TrimStep
     | RemoveCharactersStep
     | NormalizeCaseStep
+    | NormalizePhoneStep
     | MapValuesStep
     | NullPlaceholdersStep
     | CastNumberStep

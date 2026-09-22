@@ -36,6 +36,15 @@
     "recommended": null
   },
   {
+    "detector": "contact_formats",
+    "columns": [
+      "Contact Phone"
+    ],
+    "tier": "likely",
+    "affected_rows": 21,
+    "recommended": null
+  },
+  {
     "detector": "category_variants",
     "columns": [
       "Paid"
