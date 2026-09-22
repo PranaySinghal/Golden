@@ -175,6 +175,30 @@ export interface paths {
         patch: operations["updateStep"];
         trace?: never;
     };
+    "/api/datasets/{dataset_id}/recipe/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replay Recipe File
+         * @description Re-use steps saved from another file, replacing whatever is in the panel.
+         *
+         *     Steps that can't be read or don't fit this file are reported rather than
+         *     raised: the answer to "can I re-use these?" is no and here's why, which is a
+         *     result the reader needs, not a failed request.
+         */
+        post: operations["replayRecipe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/datasets/{dataset_id}/recipe/undo": {
         parameters: {
             query?: never;
@@ -337,6 +361,14 @@ export interface components {
             /** Column */
             column: string;
         };
+        /** Body_replayRecipe */
+        Body_replayRecipe: {
+            /**
+             * Recipe
+             * @description Steps saved from an earlier file.
+             */
+            recipe: string;
+        };
         /** Body_uploadDataset */
         Body_uploadDataset: {
             /**
@@ -348,6 +380,11 @@ export interface components {
             sheet?: string | null;
             /** @default auto */
             header: components["schemas"]["HeaderMode"];
+            /**
+             * Recipe
+             * @description Steps saved from an earlier file.
+             */
+            recipe?: string | null;
         };
         /** CastNumberStep */
         CastNumberStep: {
@@ -395,7 +432,7 @@ export interface components {
             /** Description */
             description: string;
             /** Steps */
-            steps?: (components["schemas"]["TrimStep"] | components["schemas"]["RemoveCharactersStep"] | components["schemas"]["NormalizeCaseStep"] | components["schemas"]["MapValuesStep"] | components["schemas"]["NullPlaceholdersStep"] | components["schemas"]["CastNumberStep"] | components["schemas"]["ParseDateStep"] | components["schemas"]["SplitColumnStep"] | components["schemas"]["DedupeStep"] | components["schemas"]["SetAsideRowsStep"] | components["schemas"]["ClearValuesStep"] | components["schemas"]["FillMissingStep"])[];
+            steps?: (components["schemas"]["TrimStep"] | components["schemas"]["RemoveCharactersStep"] | components["schemas"]["NormalizeCaseStep"] | components["schemas"]["NormalizePhoneStep"] | components["schemas"]["MapValuesStep"] | components["schemas"]["NullPlaceholdersStep"] | components["schemas"]["CastNumberStep"] | components["schemas"]["ParseDateStep"] | components["schemas"]["SplitColumnStep"] | components["schemas"]["DedupeStep"] | components["schemas"]["SetAsideRowsStep"] | components["schemas"]["ClearValuesStep"] | components["schemas"]["FillMissingStep"])[];
             /**
              * Recommended
              * @default false
@@ -528,6 +565,7 @@ export interface components {
             empty_rows_skipped: number;
             /** Columns */
             columns: components["schemas"]["ColumnProfile"][];
+            recipe_outcome?: components["schemas"]["RecipeOutcomeView"] | null;
         };
         /** DedupeStep */
         DedupeStep: {
@@ -788,6 +826,28 @@ export interface components {
              */
             case: "lower" | "upper" | "title";
         };
+        /** NormalizePhoneStep */
+        NormalizePhoneStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "normalize_phone";
+            /** Columns */
+            columns: string[];
+            /**
+             * Default Region
+             * @default US
+             */
+            default_region: string;
+        };
         /** NotMatchingCondition */
         NotMatchingCondition: {
             /**
@@ -937,6 +997,30 @@ export interface components {
              * @default false
              */
             set_aside: boolean;
+        };
+        /**
+         * RecipeOutcomeView
+         * @description What came of re-using steps saved from another file.
+         */
+        RecipeOutcomeView: {
+            /** Applied */
+            applied: boolean;
+            /**
+             * Steps Applied
+             * @default 0
+             */
+            steps_applied: number;
+            /** Source Filename */
+            source_filename?: string | null;
+            /** Problems */
+            problems?: string[];
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** RecipeReplayResponse */
+        RecipeReplayResponse: {
+            outcome: components["schemas"]["RecipeOutcomeView"];
+            recipe: components["schemas"]["RecipeResponse"];
         };
         /** RecipeResponse */
         RecipeResponse: {
@@ -1587,6 +1671,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    replayRecipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_replayRecipe"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeReplayResponse"];
                 };
             };
             /** @description A problem the user can fix */

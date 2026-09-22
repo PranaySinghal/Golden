@@ -13,6 +13,7 @@ import {
   jsonResponse,
   preview,
   recipe,
+  recipeOutcome,
   step,
 } from '../../test/fixtures'
 
@@ -557,5 +558,69 @@ describe('ReviewPage', () => {
     renderPage(() => {}, () => {}, dataset({ row_count: 0 }))
 
     expect(await screen.findByText(/has column names but no rows yet/)).toBeTruthy()
+  })
+  it('says what came of steps that arrived with the file', async () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+
+    renderPage(
+      () => {},
+      () => {},
+      dataset({ recipe_outcome: recipeOutcome({ steps_applied: 7 }) }),
+    )
+
+    const said = await screen.findByRole('status')
+    expect(said.textContent).toContain('7 steps')
+    expect(said.textContent).toContain('last-month.csv')
+  })
+
+  it('gives every reason steps could not be used', async () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+    const refused = recipeOutcome({
+      applied: false,
+      steps_applied: 0,
+      problems: ['This recipe needs a column called "Salary".', 'And one called "Join_Date".'],
+    })
+
+    renderPage(() => {}, () => {}, dataset({ recipe_outcome: refused }))
+
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getAllByRole('listitem')).toHaveLength(2)
+    expect(alert.textContent).toContain('nothing was changed')
+  })
+
+  it('uses steps from a file, once the warning is accepted', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true))
+    const replayed = recipe({ steps: [step({ id: 'from-file', description: 'Trim spaces' })] })
+    const fetchMock = mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [`POST /api/datasets/${FILE.id}/recipe/replay`]: () =>
+        jsonResponse(200, { outcome: recipeOutcome({ steps_applied: 1 }), recipe: replayed }),
+    })
+    renderPage()
+    await screen.findByRole('heading', { name: /Suggested/ })
+
+    fireEvent.change(screen.getByLabelText('Choose a saved recipe file'), {
+      target: { files: [new File(['{}'], 'last-month.tidylab.json')] },
+    })
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) => String(url).endsWith('/recipe/replay')),
+      ).toBe(true),
+    )
+    expect((await screen.findByRole('status')).textContent).toContain('1 step')
+  })
+
+  it('leaves the recipe alone when the warning is turned down', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => false))
+    const fetchMock = mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+    renderPage()
+    await screen.findByRole('heading', { name: /Suggested/ })
+
+    fireEvent.change(screen.getByLabelText('Choose a saved recipe file'), {
+      target: { files: [new File(['{}'], 'last-month.tidylab.json')] },
+    })
+
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/recipe/replay'))).toBe(false)
   })
 })

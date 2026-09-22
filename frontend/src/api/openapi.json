@@ -508,6 +508,59 @@
         }
       }
     },
+    "/api/datasets/{dataset_id}/recipe/replay": {
+      "post": {
+        "tags": [
+          "recipe"
+        ],
+        "summary": "Replay Recipe File",
+        "description": "Re-use steps saved from another file, replacing whatever is in the panel.\n\nSteps that can't be read or don't fit this file are reported rather than\nraised: the answer to \"can I re-use these?\" is no and here's why, which is a\nresult the reader needs, not a failed request.",
+        "operationId": "replayRecipe",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_replayRecipe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeReplayResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/datasets/{dataset_id}/recipe/undo": {
       "post": {
         "tags": [
@@ -1009,6 +1062,21 @@
         ],
         "title": "BlankCondition"
       },
+      "Body_replayRecipe": {
+        "properties": {
+          "recipe": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Recipe",
+            "description": "Steps saved from an earlier file."
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe"
+        ],
+        "title": "Body_replayRecipe"
+      },
       "Body_uploadDataset": {
         "properties": {
           "file": {
@@ -1031,6 +1099,19 @@
           "header": {
             "$ref": "#/components/schemas/HeaderMode",
             "default": "auto"
+          },
+          "recipe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe",
+            "description": "Steps saved from an earlier file."
           }
         },
         "type": "object",
@@ -1121,6 +1202,9 @@
                   "$ref": "#/components/schemas/NormalizeCaseStep"
                 },
                 {
+                  "$ref": "#/components/schemas/NormalizePhoneStep"
+                },
+                {
                   "$ref": "#/components/schemas/MapValuesStep"
                 },
                 {
@@ -1157,6 +1241,7 @@
                   "fill_missing": "#/components/schemas/FillMissingStep",
                   "map_values": "#/components/schemas/MapValuesStep",
                   "normalize_case": "#/components/schemas/NormalizeCaseStep",
+                  "normalize_phone": "#/components/schemas/NormalizePhoneStep",
                   "null_placeholders": "#/components/schemas/NullPlaceholdersStep",
                   "parse_date": "#/components/schemas/ParseDateStep",
                   "remove_characters": "#/components/schemas/RemoveCharactersStep",
@@ -1505,6 +1590,16 @@
             },
             "type": "array",
             "title": "Columns"
+          },
+          "recipe_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipeOutcomeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2128,6 +2223,50 @@
         ],
         "title": "NormalizeCaseStep"
       },
+      "NormalizePhoneStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "normalize_phone",
+            "title": "Type",
+            "default": "normalize_phone"
+          },
+          "columns": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Columns"
+          },
+          "default_region": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Default Region",
+            "default": "US"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "columns"
+        ],
+        "title": "NormalizePhoneStep"
+      },
       "NotMatchingCondition": {
         "properties": {
           "kind": {
@@ -2540,6 +2679,66 @@
           "cells"
         ],
         "title": "PreviewRow"
+      },
+      "RecipeOutcomeView": {
+        "properties": {
+          "applied": {
+            "type": "boolean",
+            "title": "Applied"
+          },
+          "steps_applied": {
+            "type": "integer",
+            "title": "Steps Applied",
+            "default": 0
+          },
+          "source_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Filename"
+          },
+          "problems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Problems"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "applied"
+        ],
+        "title": "RecipeOutcomeView",
+        "description": "What came of re-using steps saved from another file."
+      },
+      "RecipeReplayResponse": {
+        "properties": {
+          "outcome": {
+            "$ref": "#/components/schemas/RecipeOutcomeView"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outcome",
+          "recipe"
+        ],
+        "title": "RecipeReplayResponse"
       },
       "RecipeResponse": {
         "properties": {

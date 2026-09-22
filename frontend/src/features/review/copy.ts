@@ -33,6 +33,17 @@ export function affected(rows: number): string {
   return `${formatCount(rows)} ${rows === 1 ? 'row' : 'rows'} affected`
 }
 
+/** What came of re-using steps saved from another file. */
+export function reusedSteps(count: number, source: string | null): string {
+  const steps = `${formatCount(count)} ${count === 1 ? 'step' : 'steps'}`
+  const from = source ? ` saved from “${source}”` : ' you saved earlier'
+  // Anything certain we found in this file is applied too, so the list can be
+  // longer than what was saved. Better to say so than to look like a miscount.
+  return `We re-used the ${steps}${from}, plus anything certain we found here.`
+}
+
+export const REUSE_REFUSED = "We couldn't use those steps on this file, so nothing was changed."
+
 /** What a step did, once the recipe ran. */
 export function stepEffect(step: StepView): string | null {
   if (step.status === 'blocked') return step.reason ?? "This step can't run right now."

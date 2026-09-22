@@ -661,3 +661,68 @@ Three smaller things fell out of the same review:
 **Unrelated, fixed in passing:** `npm test` was red on `main` — Vitest was
 picking up the Playwright spec and failing the suite. It now runs only
 `src/**/*.test.{ts,tsx}`.
+
+---
+
+## Saved steps, and what a step's identity is
+
+"Download the steps" produced a file nothing could read back. The engine to
+replay one — `steps/replay.py`, with compatibility checks, near-miss column
+name suggestions and an all-or-nothing guarantee — was complete and tested, and
+no route called it. That loop is now closed at both ends: steps can be attached
+to an upload, or picked from the recipe panel on a file already open.
+
+**A step's identity is what it does, not which object does it**
+(`steps/identity.py`). This is the change everything else rested on. Step ids
+are stable rather than unique: `IssueBuilder` derives them from the detector, a
+kind and the column names, so next month's file produces *the same ids* as the
+recipe saved from last month's. `recipe_ops.add_step` refuses a duplicate id,
+which meant the safe-seeding pass in `prepare()` raised on the first
+`GET /issues` after any replay — a 422 where the review screen should be. The
+same mismatch ran the other way too: a model's fix carries an id detection
+never generates, so a card whose work the recipe plainly did would read as
+still available.
+
+So `state_of`, `_add_steps`, `_remove_steps` and the preview path all ask "does
+the recipe already do this work?" rather than "is this id present". The key
+(`model_dump_json(exclude={"id", "enabled"})`) was already written twice, in
+`compare/engine.py` and `ai/fixes.py`; both now point at the one definition.
+`enabled` stays excluded so a step switched off still counts as answered, which
+is how the panel has always read.
+
+Three consequences worth stating:
+
+- **`state_of` hands back the recipe's ids**, not the detected issue's, so the
+  panel can be pointed at steps that really exist. Nothing read that field
+  before; now it means something.
+- **Two cards proposing identical work both read as applied.** That is true —
+  the recipe does the thing each describes — and `step_order.recipe_for` has
+  always deduped them into one step for the same reason. Removal is where it
+  would do damage, so `_remove_steps` leaves alone any step `step_origin`
+  attributes to a different card.
+- **Safe seeding still runs after a replay**, so the recipe can end up a
+  superset of the one downloaded: this month's file may have a certain problem
+  last month's didn't. The banner says so rather than implying an exact copy.
+
+**A refused recipe answers 200, with the reasons as a list.** The error handler
+serialises `{code, message}` only, and `RecipeIncompatibleError` flattens its
+problems into one run-on sentence — but the list is the product: "every reason,
+not just the first" is what makes a refusal actionable. There's precedent in
+`POST /recipe/undo`, which answers 200 with `can_undo: false`. `applied` is a
+required boolean in the generated types, so the screen can't forget to branch
+on it. Genuine 4xx still covers what isn't about the recipe's content.
+
+**A bad recipe never costs a good upload.** The dataset is created first and the
+steps are applied after, so a refusal leaves a perfectly usable file with a note
+attached. `replay_recipe` builds nothing when it refuses, so there is no
+half-cleaned state to explain.
+
+**Replacing the recipe is one undoable edit** (`recipe_ops.replace`), so using
+saved steps on a file with work already in it is reversible by the panel's
+existing "Undo last change" rather than being the one action you couldn't take
+back (CLAUDE.md principle 5).
+
+Not carried: a recipe records accepted steps, not decisions. A suggestion
+turned down last month, and an ask-tier answer meaning "leave it alone", leave
+no trace in the file and come back as fresh questions. Carrying them needs a
+format v2 and is in `docs/ideas.md`.

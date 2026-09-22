@@ -6,6 +6,8 @@ import { expect, test } from '@playwright/test'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const SAMPLE = join(here, '../../data/samples/Messy_Employee_dataset.csv')
+const MESSIER = join(here, '../../data/samples/Messy_Employee_dataset_messier.csv')
+const ORDERS = join(here, '../../data/samples/store_orders.csv')
 
 function columnCount(csv: string): number {
   return csv.split('\n')[0].split(',').length
@@ -86,4 +88,59 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
   await page.getByRole('button', { name: 'Home' }).click()
   await expect(page.getByText('Drop a CSV or Excel file here')).toBeVisible()
   expect(new URL(page.url()).searchParams.get('dataset')).toBeNull()
+})
+
+test('steps saved from one file clean the next one', async ({ page }) => {
+  await page.goto('/')
+
+  // --- clean a file, and keep its steps ----------------------------------------
+  await page.getByLabel('Choose a file to upload').setInputFiles(SAMPLE)
+  await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
+
+  const suggestion = page
+    .locator('article')
+    .filter({ hasText: 'holds two things in one column' })
+    .first()
+  await suggestion.getByRole('button', { name: 'Accept' }).click()
+  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  await expect(panel.getByText(/Split "Department_Region"/)).toBeVisible()
+
+  const saving = page.waitForEvent('download')
+  await panel.getByRole('button', { name: 'Download the steps' }).click()
+  const steps = await (await saving).path()
+
+  // --- use them on next month's file -------------------------------------------
+  await page.getByRole('button', { name: 'Home' }).click()
+  await expect(page.getByText('Drop a CSV or Excel file here')).toBeVisible()
+
+  await page.getByLabel('Choose a saved recipe file').setInputFiles(steps)
+  await page.getByLabel('Choose a file to upload').setInputFiles(MESSIER)
+
+  await expect(page.getByRole('heading', { name: 'Messy_Employee_dataset_messier.csv' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'We re-used' })).toBeVisible()
+  // The split it was told to do is in the panel, without anyone accepting it again.
+  await expect(panel.getByText(/Split "Department_Region"/)).toBeVisible()
+  // And the review screen still renders: the steps it detects carry the same ids.
+  await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
+})
+
+test('steps that do not fit are refused without costing the upload', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByLabel('Choose a file to upload').setInputFiles(SAMPLE)
+  await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
+  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const saving = page.waitForEvent('download')
+  await panel.getByRole('button', { name: 'Download the steps' }).click()
+  const steps = await (await saving).path()
+
+  await page.getByRole('button', { name: 'Home' }).click()
+  await page.getByLabel('Choose a saved recipe file').setInputFiles(steps)
+  await page.getByLabel('Choose a file to upload').setInputFiles(ORDERS)
+
+  // The file is open and usable; only the steps were turned away.
+  await expect(page.getByRole('heading', { name: 'store_orders.csv' })).toBeVisible()
+  const refusal = page.getByRole('alert').filter({ hasText: "couldn't use those steps" })
+  await expect(refusal).toBeVisible()
+  await expect(refusal.getByRole('listitem').first()).toContainText('needs a column called')
 })

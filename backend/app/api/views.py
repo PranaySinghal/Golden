@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from app import review
 from app.detectors.models import AskQuestion, DetectorName, Issue, Tier
+from app.saved_recipe import RecipeOutcome
 from app.steps.apply import (
     OutputColumn,
     StepOutcome,
@@ -44,6 +45,26 @@ class RecipeResponse(BaseModel):
     row_count: int = 0
     set_aside_count: int = 0
     columns: list[OutputColumn] = Field(default_factory=list)
+
+
+class RecipeOutcomeView(BaseModel):
+    """What came of re-using steps saved from another file."""
+
+    applied: bool
+    steps_applied: int = 0
+    source_filename: str | None = None
+    problems: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+def recipe_outcome_view(outcome: RecipeOutcome) -> RecipeOutcomeView:
+    return RecipeOutcomeView(
+        applied=outcome.applied,
+        steps_applied=outcome.steps_applied,
+        source_filename=outcome.source_filename,
+        problems=list(outcome.problems),
+        warnings=list(outcome.warnings),
+    )
 
 
 class IssueView(BaseModel):

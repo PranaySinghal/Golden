@@ -44,7 +44,10 @@ def get_preview(
             raise PreviewTargetError
         if not steps:
             return Preview(columns=[], note="This suggestion doesn't change any values.")
-        step_ids = {step.id for step in steps}
+        # The recipe may already do this work under other ids (replayed from
+        # another file), and those are the steps "before" has to leave out.
+        already = review.matching_step_ids(session, steps)
+        step_ids = {step.id for step in steps} | already
         return preview(
             session.conn,
             session.base_schema,
