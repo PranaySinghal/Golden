@@ -15,6 +15,12 @@ DEFAULT_MODELS: dict[str, str] = {
 # The most rows a model may ever see, whatever the setting says (CLAUDE.md:
 # metadata, not data).
 MAX_SAMPLE_ROWS = 20
+# A saved recipe is text: at most MAX_STEPS steps, each carrying a bounded list
+# of values, so a real one is a few kilobytes. Kept tight because an upload may
+# carry one, and every byte allowed here is a byte the size guard has to let
+# through before it can read anything. Not a setting — it bounds a format, not
+# a user's file.
+MAX_RECIPE_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True)

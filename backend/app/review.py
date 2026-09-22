@@ -1,8 +1,14 @@
 """Reviewing a file: what was found, what's in the recipe, and acting on a card.
 
-The recipe is the single source of truth. An issue is "applied" when its steps
-are in the recipe and "rejected" when the user said no to it; nothing else is
-stored, so the two can't drift apart.
+The recipe is the single source of truth. An issue is "applied" when the recipe
+already does its work and "rejected" when the user said no to it; nothing else
+is stored, so the two can't drift apart.
+
+"Already does its work" is a question about the work, not about step objects
+(`steps/identity.py`): a recipe replayed from another file carries steps that
+mean the same thing under different ids, and sometimes different things under
+the same id. Matching on what a step does is what lets a replayed recipe and a
+freshly detected issue recognise each other.
 
 Issues and their impact are worked out once per dataset (up to a couple of
 seconds on a messy file) and kept on the session until the file is read again.
@@ -22,6 +28,7 @@ from app.detectors.step_order import RANK, chosen_steps
 from app.errors import AppError
 from app.questions.generate import generate_questions
 from app.steps import recipe_ops
+from app.steps.identity import matched_ids, work_key
 from app.steps.models import Recipe, Step
 from app.steps.recipe_ops import RecipeHistory
 from app.store import DatasetSession
@@ -69,6 +76,7 @@ def prepare(session: DatasetSession) -> list[Issue]:
         session.issues = score_issues(
             session.conn, session.profile, issues, session.questions, session.answer_cache
         )
+    _claim_existing_steps(session)
     if not session.safe_applied:
         session.safe_applied = True
         for issue in session.issues:
@@ -77,6 +85,22 @@ def prepare(session: DatasetSession) -> list[Issue]:
         # Applying what's certain isn't a user edit, so there's nothing to undo to.
         session.history = RecipeHistory()
     return session.issues
+
+
+def _claim_existing_steps(session: DatasetSession) -> None:
+    """Point steps the recipe already holds at the cards that explain them.
+
+    A replayed recipe arrives before anything has been detected, so its steps
+    start with no card behind them: the panel would show them with nothing to
+    click through to, and an answered question would look unanswered. Detection
+    has just run, so now we can say which card each one belongs to.
+    """
+    for issue in session.issues or []:
+        state = state_of(session, issue)
+        for step_id in state.step_ids:
+            session.step_origin.setdefault(step_id, issue.id)
+        if state.state == "applied" and state.chosen_choice_id is not None:
+            session.answers.setdefault(issue.id, state.chosen_choice_id)
 
 
 def issues_of(session: DatasetSession) -> list[Issue]:
@@ -151,24 +175,49 @@ def find_issue(session: DatasetSession, issue_id: str) -> Issue:
 
 
 def state_of(session: DatasetSession, issue: Issue) -> IssueState:
-    in_recipe = {step.id for step in session.recipe.steps}
     if issue.tier is Tier.ASK:
         assert issue.ask is not None
-        for choice in issue.ask.choices:
-            ids = [step.id for step in choice.steps]
-            if ids and in_recipe.issuperset(ids):
+        # The answer on record wins. Without this, a choice whose steps are a
+        # subset of another's could match first and show the wrong one picked.
+        answered = session.answers.get(issue.id)
+        ordered = sorted(issue.ask.choices, key=lambda choice: choice.id != answered)
+        for choice in ordered:
+            ids = matched_ids(session.recipe, choice.steps)
+            if ids:
                 return IssueState("applied", choice.id, ids)
             # A choice that means "leave it alone" carries no steps, so the only
             # record that it was answered is the answer itself.
-            if not ids and session.answers.get(issue.id) == choice.id:
+            if ids == [] and answered == choice.id:
                 return IssueState("applied", choice.id, [])
     else:
-        ids = [step.id for step in issue.steps]
-        if ids and in_recipe.issuperset(ids):
+        ids = matched_ids(session.recipe, issue.steps)
+        if ids:
             return IssueState("applied", None, ids)
     if issue.id in session.rejected:
         return IssueState("rejected", None, [])
     return IssueState("available", None, [])
+
+
+def recipe_ids_for(session: DatasetSession, issue: Issue) -> list[str]:
+    """Every recipe step belonging to this issue.
+
+    Steps doing work the issue proposes, plus any carrying one of its own ids: a
+    replayed recipe can hold an older version of a step under the same id, and
+    that step is still this issue's to replace.
+    """
+    found: list[str] = []
+    for steps in _proposals(issue):
+        found.extend(matched_ids(session.recipe, steps) or [])
+    own = set(_all_step_ids(issue))
+    found.extend(step.id for step in session.recipe.steps if step.id in own)
+    return list(dict.fromkeys(found))
+
+
+def _proposals(issue: Issue) -> list[list[Step]]:
+    """Each set of steps this issue could put in the recipe."""
+    if issue.ask is None:
+        return [list(issue.steps)]
+    return [list(issue.steps), *(list(choice.steps) for choice in issue.ask.choices)]
 
 
 def accept(session: DatasetSession, issue_id: str, choice_id: str | None = None) -> None:
@@ -208,6 +257,11 @@ def remove_step(session: DatasetSession, step_id: str) -> None:
     session.recipe, session.history = edit.recipe, edit.history
 
 
+def matching_step_ids(session: DatasetSession, steps: list[Step]) -> set[str]:
+    """Recipe steps already doing the work of `steps`, whatever ids they carry."""
+    return set(matched_ids(session.recipe, steps) or [])
+
+
 def recipe_without(session: DatasetSession, step_ids: set[str]) -> Recipe:
     return Recipe(steps=[step for step in session.recipe.steps if step.id not in step_ids])
 
@@ -215,7 +269,7 @@ def recipe_without(session: DatasetSession, step_ids: set[str]) -> Recipe:
 def recipe_with(session: DatasetSession, steps: list[Step]) -> Recipe:
     recipe = session.recipe
     for step in steps:
-        if any(existing.id == step.id for existing in recipe.steps):
+        if _existing_step_id(recipe, step) is not None:
             continue
         recipe = Recipe(steps=_placed(list(recipe.steps), step))
     return recipe
@@ -233,7 +287,19 @@ def _steps_for(issue: Issue, choice_id: str | None) -> list[Step]:
 
 
 def _add_steps(session: DatasetSession, issue: Issue, steps: list[Step]) -> None:
+    """Put an issue's steps in the recipe, leaving alone what's already there.
+
+    A replayed recipe can already hold the same work (under any id) or the same
+    id (holding different work — a step whose parameters changed since it was
+    saved). In both cases the recipe wins: it is what the user asked to re-use,
+    and adding a near-identical step beside it would change what runs without
+    anyone choosing that.
+    """
     for step in steps:
+        existing = _existing_step_id(session.recipe, step)
+        if existing is not None:
+            session.step_origin.setdefault(existing, issue.id)
+            continue
         position = _position_for(session.recipe, step)
         edit = recipe_ops.add_step(
             session.recipe, session.history, step, session.base_schema, position
@@ -242,8 +308,21 @@ def _add_steps(session: DatasetSession, issue: Issue, steps: list[Step]) -> None
         session.step_origin[step.id] = issue.id
 
 
+def _existing_step_id(recipe: Recipe, step: Step) -> str | None:
+    """The recipe's step doing this work, or holding this id, if there is one."""
+    wanted = work_key(step)
+    for existing in recipe.steps:
+        if existing.id == step.id or work_key(existing) == wanted:
+            return existing.id
+    return None
+
+
 def _remove_steps(session: DatasetSession, issue: Issue) -> None:
-    for step_id in _all_step_ids(issue):
+    """Take this issue's steps back out, leaving another issue's work alone."""
+    for step_id in recipe_ids_for(session, issue):
+        owner = session.step_origin.get(step_id)
+        if owner is not None and owner != issue.id:
+            continue
         if any(step.id == step_id for step in session.recipe.steps):
             remove_step(session, step_id)
         session.step_origin.pop(step_id, None)

@@ -1,13 +1,33 @@
+"""Keeping an upload within its size, before the body is read and while reading it."""
+
+from typing import BinaryIO
+
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from app.api.errors import ErrorResponse
-from app.config import Settings
+from app.config import MAX_RECIPE_BYTES, Settings
 from app.errors import FileTooLargeError
 
-# Room for the multipart envelope around the file itself.
-MULTIPART_OVERHEAD_BYTES = 64 * 1024
+# Room for the multipart envelope, and for saved steps sent alongside the file.
+# Without the second allowance, attaching a recipe to a near-limit file would be
+# turned away for a size the data itself is under.
+MULTIPART_OVERHEAD_BYTES = 64 * 1024 + MAX_RECIPE_BYTES
+
+_CHUNK_BYTES = 1024 * 1024
+
+
+def read_within_limit(stream: BinaryIO, limit: int) -> bytes:
+    """Read an upload, stopping as soon as it goes over `limit`."""
+    chunks: list[bytes] = []
+    size = 0
+    while chunk := stream.read(_CHUNK_BYTES):
+        size += len(chunk)
+        if size > limit:
+            raise FileTooLargeError(size, limit)
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 class UploadSizeMiddleware(BaseHTTPMiddleware):

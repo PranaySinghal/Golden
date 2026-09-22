@@ -111,9 +111,11 @@ def test_file_over_the_limit_is_rejected(client: TestClient) -> None:
 def test_declared_size_over_the_limit_is_rejected_before_reading(client: TestClient) -> None:
     limit_uploads(100)
 
+    # Over the limit plus the room kept for the envelope and any saved steps
+    # sent alongside the file (api/limits.py).
     response = client.post(
         "/api/datasets",
-        content=b"x" * 200_000,
+        content=b"x" * 2_000_000,
         headers={"content-type": "multipart/form-data; boundary=zzz"},
     )
 

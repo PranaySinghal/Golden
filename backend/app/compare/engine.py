@@ -34,6 +34,7 @@ from app.profile.models import DatasetProfile
 from app.questions.generate import generate_questions
 from app.questions.models import Answer, AnswerDiff, Question
 from app.steps.apply import RecipePlan, answer_key, chain_sql, plan_recipe
+from app.steps.identity import work_key
 from app.steps.models import Recipe, Step
 from app.steps.schema import base_schema
 
@@ -56,11 +57,7 @@ def without_steps(recipe: Recipe, step_ids: frozenset[str]) -> Recipe:
 def applied_contents(plan: RecipePlan, recipe: Recipe) -> dict[str, str]:
     """Applied step id → what it does, ignoring its id and enabled flag."""
     running = {stage.compiled.step_id for stage in plan.stages}
-    return {
-        step.id: step.model_dump_json(exclude={"id", "enabled"})
-        for step in recipe.steps
-        if step.id in running
-    }
+    return {step.id: work_key(step) for step in recipe.steps if step.id in running}
 
 
 def differing_steps(old: dict[str, str], new: dict[str, str]) -> tuple[set[str], set[str]]:

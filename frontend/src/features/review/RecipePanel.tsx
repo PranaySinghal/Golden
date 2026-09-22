@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { api, type RecipeResponse, type StepView } from '../../api/client'
 import { rowsKept, stepEffect } from './copy'
@@ -11,6 +11,8 @@ interface RecipePanelProps {
   onToggle: (step: StepView, enabled: boolean) => void
   onRemove: (step: StepView) => void
   onUndo: () => void
+  /** Run steps saved from another file here instead of what's in the panel. */
+  onReplay: (recipe: File) => void
 }
 
 type Format = 'csv' | 'recipe'
@@ -23,10 +25,22 @@ export function RecipePanel({
   onToggle,
   onRemove,
   onUndo,
+  onReplay,
 }: RecipePanelProps) {
   const steps = recipe.steps ?? []
   const [downloading, setDownloading] = useState<Format | null>(null)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  const replayInput = useRef<HTMLInputElement>(null)
+
+  function chooseSaved(file: File) {
+    // Using saved steps replaces what's here, so say so while it can be stopped.
+    const warning =
+      `Using saved steps replaces the ${steps.length} ` +
+      `${steps.length === 1 ? 'step' : 'steps'} here with the ones in that file. ` +
+      'You can undo it. Carry on?'
+    if (steps.length > 0 && !window.confirm(warning)) return
+    onReplay(file)
+  }
 
   function save(format: Format) {
     setDownloading(format)
@@ -121,6 +135,27 @@ export function RecipePanel({
           The cleaned file opens in a spreadsheet. The steps can be used again on next month&apos;s
           file.
         </p>
+        <button
+          type="button"
+          className="link-button"
+          disabled={busy}
+          onClick={() => replayInput.current?.click()}
+        >
+          Use steps from a file
+        </button>
+        <input
+          ref={replayInput}
+          type="file"
+          accept=".json"
+          className="visually-hidden"
+          aria-label="Choose a saved recipe file"
+          disabled={busy}
+          onChange={(event) => {
+            const chosen = event.target.files?.[0]
+            event.target.value = ''
+            if (chosen) chooseSaved(chosen)
+          }}
+        />
         {downloadError && (
           <p className="card__error" role="alert">
             {downloadError}

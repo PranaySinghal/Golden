@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { api, type DatasetSummary } from '../../api/client'
 import { DropZone } from './DropZone'
@@ -11,12 +11,15 @@ interface UploadPanelProps {
 
 export function UploadPanel({ onUploaded }: UploadPanelProps) {
   const [tooLarge, setTooLarge] = useState<string | null>(null)
+  // Picked before the file, because choosing the file starts the upload.
+  const [recipe, setRecipe] = useState<File | null>(null)
+  const recipeInput = useRef<HTMLInputElement>(null)
 
   const limits = useQuery({ queryKey: ['upload-limits'], queryFn: api.getUploadLimits })
   const maxBytes = limits.data?.max_upload_bytes ?? null
 
   const upload = useMutation({
-    mutationFn: (file: File) => api.uploadDataset(file),
+    mutationFn: (file: File) => api.uploadDataset(file, { recipe }),
     onSuccess: onUploaded,
   })
 
@@ -41,6 +44,44 @@ export function UploadPanel({ onUploaded }: UploadPanelProps) {
         Upload a file
       </h2>
       <DropZone onFile={handleFile} maxBytes={maxBytes} disabled={upload.isPending} />
+      <p className="upload__recipe">
+        {recipe ? (
+          <>
+            Using the steps in <strong>{recipe.name}</strong>{' '}
+            <button
+              type="button"
+              className="link-button"
+              disabled={upload.isPending}
+              onClick={() => setRecipe(null)}
+            >
+              Remove
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="link-button"
+            disabled={upload.isPending}
+            onClick={() => recipeInput.current?.click()}
+          >
+            Cleaned a file like this before? Use those steps again
+          </button>
+        )}
+        <input
+          ref={recipeInput}
+          type="file"
+          accept=".json"
+          className="visually-hidden"
+          aria-label="Choose a saved recipe file"
+          disabled={upload.isPending}
+          onChange={(event) => {
+            const chosen = event.target.files?.[0] ?? null
+            // Reset so picking the same file again still counts.
+            event.target.value = ''
+            setRecipe(chosen)
+          }}
+        />
+      </p>
       {upload.isPending && (
         <p className="status" role="status">
           Reading your file…

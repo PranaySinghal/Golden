@@ -94,6 +94,56 @@ describe('UploadPanel', () => {
     expect(fetchMock.mock.calls.some(([url]) => url === '/api/datasets')).toBe(false)
   })
 
+  it('sends saved steps along with the file when some are attached', async () => {
+    const fetchMock = mockApi({
+      ...LIMITS,
+      'POST /api/datasets': () => jsonResponse(201, dataset()),
+    })
+    renderPanel()
+
+    fireEvent.change(screen.getByLabelText('Choose a saved recipe file'), {
+      target: { files: [new File(['{}'], 'last-month.tidylab.json', { type: 'application/json' })] },
+    })
+    expect(screen.getByText('last-month.tidylab.json')).toBeTruthy()
+    chooseFile(new File(['x'], 'people.csv'))
+
+    await vi.waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => url === '/api/datasets')).toBe(true),
+    )
+    const [, init] = fetchMock.mock.calls.find(([url]) => url === '/api/datasets')!
+    const body = init?.body as FormData
+    expect(body.get('file')).toBeInstanceOf(File)
+    expect((body.get('recipe') as File).name).toBe('last-month.tidylab.json')
+  })
+
+  it('sends only the file when no steps are attached', async () => {
+    const fetchMock = mockApi({
+      ...LIMITS,
+      'POST /api/datasets': () => jsonResponse(201, dataset()),
+    })
+    renderPanel()
+
+    chooseFile(new File(['x'], 'people.csv'))
+
+    await vi.waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => url === '/api/datasets')).toBe(true),
+    )
+    const [, init] = fetchMock.mock.calls.find(([url]) => url === '/api/datasets')!
+    expect((init!.body as FormData).get('recipe')).toBeNull()
+  })
+
+  it('lets attached steps be taken off again', async () => {
+    mockApi(LIMITS)
+    renderPanel()
+
+    fireEvent.change(screen.getByLabelText('Choose a saved recipe file'), {
+      target: { files: [new File(['{}'], 'last-month.tidylab.json')] },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    expect(screen.queryByText('last-month.tidylab.json')).toBeNull()
+  })
+
   it('tells the user when the server is unreachable', async () => {
     mockApi({ 'GET /api/upload-limits': () => new Response('', { status: 502 }) })
 

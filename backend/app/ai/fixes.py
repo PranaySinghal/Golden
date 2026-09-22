@@ -24,6 +24,7 @@ from app.preview import preview
 from app.profile.models import DatasetProfile
 from app.steps.compile import compile_step
 from app.steps.errors import StepValidationError
+from app.steps.identity import work_key
 from app.steps.models import (
     EqualsCondition,
     MapValuesStep,
@@ -190,4 +191,4 @@ def _all_steps(issue: Issue) -> list[Step]:
 
 def _signature(step: Step) -> str:
     """What a step does, ignoring which object did it."""
-    return step.model_dump_json(exclude={"id", "enabled"})
+    return work_key(step)

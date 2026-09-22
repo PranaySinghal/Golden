@@ -8,6 +8,7 @@ import type {
   IssueListResponse,
   IssueView,
   Preview,
+  RecipeOutcome,
   RecipeResponse,
   StepView,
 } from '../api/client'
@@ -34,9 +35,21 @@ export function column(overrides: Partial<ColumnProfile> = {}): ColumnProfile {
   }
 }
 
+export function recipeOutcome(overrides: Partial<RecipeOutcome> = {}): RecipeOutcome {
+  return {
+    applied: true,
+    steps_applied: 7,
+    source_filename: 'last-month.csv',
+    problems: [],
+    warnings: [],
+    ...overrides,
+  }
+}
+
 export function dataset(overrides: Partial<DatasetSummary> = {}): DatasetSummary {
   return {
     id: 'abc123',
+    recipe_outcome: null,
     filename: 'people.csv',
     format: 'csv',
     sheet_name: null,

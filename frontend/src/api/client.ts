@@ -13,6 +13,8 @@ export type AskQuestion = components['schemas']['AskQuestion']
 export type Choice = components['schemas']['Choice']
 export type Tier = components['schemas']['Tier']
 export type RecipeResponse = components['schemas']['RecipeResponse']
+export type RecipeOutcome = components['schemas']['RecipeOutcomeView']
+export type RecipeReplayResponse = components['schemas']['RecipeReplayResponse']
 export type StepView = components['schemas']['StepView']
 export type Preview = components['schemas']['Preview']
 export type ComparisonResponse = components['schemas']['ComparisonResponse']
@@ -86,6 +88,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export interface UploadOptions {
   sheet?: string | null
   header?: HeaderMode
+  /** Steps saved from an earlier file, to run again on this one. */
+  recipe?: File | null
 }
 
 function uploadDataset(file: File, options: UploadOptions = {}): Promise<DatasetSummary> {
@@ -93,8 +97,18 @@ function uploadDataset(file: File, options: UploadOptions = {}): Promise<Dataset
   form.append('file', file)
   if (options.sheet) form.append('sheet', options.sheet)
   if (options.header) form.append('header', options.header)
+  if (options.recipe) form.append('recipe', options.recipe)
   // No Content-Type header: the browser sets the multipart boundary itself.
   return request<DatasetSummary>('/api/datasets', { method: 'POST', body: form })
+}
+
+function replayRecipe(id: string, recipe: File): Promise<RecipeReplayResponse> {
+  const form = new FormData()
+  form.append('recipe', recipe)
+  return request<RecipeReplayResponse>(datasetPath(id, '/recipe/replay'), {
+    method: 'POST',
+    body: form,
+  })
 }
 
 function reingestDataset(id: string, body: ReingestRequest): Promise<DatasetSummary> {
@@ -177,6 +191,7 @@ export const api = {
   removeStep: (id: string, stepId: string) =>
     send<RecipeResponse>(datasetPath(id, `/recipe/steps/${encodeURIComponent(stepId)}`), 'DELETE'),
   undoRecipe: (id: string) => send<RecipeResponse>(datasetPath(id, '/recipe/undo'), 'POST'),
+  replayRecipe,
   getPreview,
   getComparison: (id: string) => request<ComparisonResponse>(datasetPath(id, '/compare')),
   getAiSuggestions: (id: string) => request<AiResponse>(datasetPath(id, '/ai')),

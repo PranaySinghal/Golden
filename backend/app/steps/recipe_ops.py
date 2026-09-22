@@ -56,6 +56,16 @@ def update_step(recipe: Recipe, history: RecipeHistory, step: Step, base: StageS
     return _commit(recipe, history, Recipe(steps=steps), base, step)
 
 
+def replace(recipe: Recipe, history: RecipeHistory, replacement: Recipe) -> Edit:
+    """Swap the whole recipe for another one, as a single undoable edit.
+
+    Re-using steps saved from another file replaces everything decided so far,
+    which would be the one action in the app you couldn't take back. One history
+    entry makes "Undo last change" cover it like anything else.
+    """
+    return Edit(replacement, history.push(recipe))
+
+
 def remove_step(recipe: Recipe, history: RecipeHistory, step_id: str) -> Edit:
     index = _index_of(recipe, step_id)
     steps = [step for position, step in enumerate(recipe.steps) if position != index]
