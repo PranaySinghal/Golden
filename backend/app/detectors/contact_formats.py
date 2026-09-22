@@ -11,11 +11,13 @@ from app.profile.models import PatternKind, SemanticRole
 from app.steps.models import (
     ClearValuesStep,
     DigitsFewerThanCondition,
+    NormalizePhoneStep,
     NotMatchingCondition,
     RemoveCharactersStep,
     RowCondition,
     SetAsideRowsStep,
 )
+from app.steps.phone import DEFAULT_REGION, format_phone_or_original
 from app.steps.schema import trimmed
 
 FORMAT_SHARE = 0.8
@@ -23,6 +25,12 @@ FORMAT_SHARE = 0.8
 STRAY_MINUS_SHARE = 0.5
 # "Short" only means something when most numbers share one length.
 USUAL_LENGTH_SHARE = 0.8
+# A cap on how many distinct numbers get run through the phone library per
+# column, purely to bound detection cost on a pathological file; the fix
+# itself (a SQL function call) has no such limit once accepted.
+MAX_PHONE_VALUES = 20_000
+# Shown in the issue as a preview of what would change.
+MAX_REFORMAT_EXAMPLES = 3
 
 
 @dataclass(frozen=True)
@@ -38,6 +46,8 @@ class Evidence:
     usual_length_count: int
     short: int
     short_examples: list[str]
+    reformat_count: int
+    reformat_examples: list[tuple[str, str]]
 
 
 def _kind(column_patterns: list[tuple[PatternKind, float]]) -> str | None:
@@ -47,6 +57,29 @@ def _kind(column_patterns: list[tuple[PatternKind, float]]) -> str | None:
     if rates.get(PatternKind.PHONE, 0.0) >= FORMAT_SHARE:
         return "phone"
     return None
+
+
+def _reformat_evidence(ctx: DetectorContext, t: str) -> tuple[int, list[tuple[str, str]]]:
+    """How many rows would read differently once each number is written consistently.
+
+    Values with a stray leading "-" are left to that check instead (it has its
+    own, narrower fix); counting them here too would raise two issues, with
+    two different proposed steps, for the same rows.
+    """
+    distinct = ctx.query(
+        f"SELECT {t} AS t, count(*) FROM {RAW_REF} WHERE {t} IS NOT NULL "
+        f"AND NOT regexp_full_match({t}, '-[0-9].*') "
+        f"GROUP BY 1 ORDER BY 1 LIMIT {MAX_PHONE_VALUES}"
+    )
+    affected = 0
+    examples: list[tuple[str, str]] = []
+    for value, n in distinct:
+        formatted = format_phone_or_original(value, DEFAULT_REGION)
+        if formatted != value:
+            affected += int(n)
+            if len(examples) < MAX_REFORMAT_EXAMPLES:
+                examples.append((str(value), str(formatted)))
+    return affected, examples
 
 
 def gather(ctx: DetectorContext) -> list[Evidence]:
@@ -80,6 +113,9 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
             "WHERE d < $usual",
             {"usual": usual or 0},
         )[0]
+        reformat_count, reformat_examples = (
+            _reformat_evidence(ctx, t) if kind == "phone" else (0, [])
+        )
         found.append(
             Evidence(
                 column=column.name,
@@ -93,6 +129,8 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
                 usual_length_count=usual_count,
                 short=int(short[0]) if kind == "phone" else 0,
                 short_examples=list(short[1] or [])[:5],
+                reformat_count=reformat_count,
+                reformat_examples=reformat_examples,
             )
         )
     return found
@@ -181,6 +219,21 @@ def decide(evidence: list[Evidence], ctx: DetectorContext) -> list[Issue]:
                     tier=Tier.ASK,
                     ask=_fix_choices(b, item.column, too_short, prompt),
                     examples=item.short_examples,
+                )
+            )
+        if item.reformat_count:
+            b = IssueBuilder(ctx, DetectorName.CONTACT_FORMATS, [item.column], "format")
+            title, explanation = copy.inconsistent_phone_format(
+                item.column, item.reformat_count, item.reformat_examples
+            )
+            issues.append(
+                b.build(
+                    title=title,
+                    explanation=explanation,
+                    affected_rows=item.reformat_count,
+                    tier=Tier.LIKELY,
+                    steps=[b.step(NormalizePhoneStep(columns=[item.column]))],
+                    examples=[before for before, _after in item.reformat_examples],
                 )
             )
     return issues

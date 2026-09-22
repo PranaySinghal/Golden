@@ -10,6 +10,7 @@ from app.steps.models import (
     DedupeStep,
     DigitsFewerThanCondition,
     FillMissingStep,
+    NormalizePhoneStep,
     OutsideRangeCondition,
     RemoveCharactersStep,
     SetAsideRowsStep,
@@ -207,6 +208,46 @@ def test_stray_minus_and_short_phones(make_dataset: MakeDataset) -> None:
 def test_mixed_international_phones_are_not_short(make_dataset: MakeDataset) -> None:
     phones = ["(415) 555-0134", "+44 20 7946 0958", "+61 2 9876 5432", "212-555-0199"]
     ds = make_dataset(csv_file("id,contact", [f"{i},{phones[i % 4]}" for i in range(40)]))
+
+    # Different lengths for different countries isn't corruption.
+    assert not any(issue.tier is Tier.ASK for issue in ds.issues("contact_formats"))
+
+
+def test_inconsistent_phone_format_is_likely_and_fixable(make_dataset: MakeDataset) -> None:
+    rows = (
+        [f"{i},(415) 555-0100" for i in range(20)]
+        + [f"{i},415-555-0100" for i in range(20, 30)]
+        + [f"{i},+44 20 7946 0958" for i in range(30, 40)]
+    )
+    ds = make_dataset(csv_file("id,Phone", rows))
+
+    issue = only(ds.issues("contact_formats"))
+
+    assert issue.tier is Tier.LIKELY
+    # Only the "415-555-0100" rows aren't already written the way the library would.
+    assert issue.affected_rows == 10
+    step = issue.steps[0]
+    assert isinstance(step, NormalizePhoneStep)
+
+    ds.apply(step)
+    assert set(ds.column("Phone")) == {"(415) 555-0100", "+44 20 7946 0958"}
+
+
+def test_a_stray_minus_is_not_also_flagged_as_inconsistent(make_dataset: MakeDataset) -> None:
+    # The stray-minus fix already covers these; flagging both would propose two
+    # different steps for the same rows.
+    rows = [f"{i},-4155550{100 + i}" for i in range(10)]
+    ds = make_dataset(csv_file("id,Phone", rows))
+
+    issues = ds.issues("contact_formats")
+
+    assert len(issues) == 1
+    assert isinstance(issues[0].steps[0], RemoveCharactersStep)
+
+
+def test_already_consistent_phones_raise_nothing(make_dataset: MakeDataset) -> None:
+    rows = [f"{i},(415) 555-01{i:02d}" for i in range(20)]
+    ds = make_dataset(csv_file("id,Phone", rows))
 
     assert ds.issues("contact_formats") == []
 

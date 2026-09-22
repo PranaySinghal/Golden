@@ -28,30 +28,26 @@ export const FEATURES = {
     {
       title: 'It reads your file the way a person would',
       body:
-        'Every column gets a plain description — a date, a number, an ID, a category, a name — ' +
-        'worked out from what is actually in it. Nothing to configure, and no column names it ' +
-        'needs to recognise.',
+        'Every column gets a plain description: a date, a number, an ID, a category, a name. ' +
+        'Nothing to configure, and no column names it needs to recognise.',
     },
     {
       title: 'It says what is wrong, not what it detected',
       body:
-        'Names with stray spaces around them, not "whitespace anomaly detected". The certain ' +
-        'fixes are already applied by the time you arrive. The judgement calls are laid out for ' +
-        'you to take or leave.',
+        'The certain fixes are already applied by the time you arrive. The judgement calls are ' +
+        'laid out for you to take or leave.',
     },
     {
       title: 'You see what a fix does before you take it',
       body:
-        'Every suggestion will show you example rows, before and after. Your original table is ' +
-        'never touched — the clean version is rebuilt from your file plus the list of steps, so ' +
-        'any step can be switched off, pulled out or undone.',
+        'Every suggestion shows example rows, before and after. Your original table is never ' +
+        'touched — any step can be switched off, pulled out or undone.',
     },
     {
       title: 'It shows which answers the mess was changing',
       body:
-        'This is the part a spreadsheet cannot do for you. Tidy Lab asks the same questions of ' +
-        'your file before and after cleaning, and shows you the answers that moved — and which ' +
-        'step moved them.',
+        'This is the part a spreadsheet cannot do. Tidy Lab asks the same questions before and ' +
+        'after cleaning, and shows you the answers that moved — and which step moved them.',
     },
   ],
 }

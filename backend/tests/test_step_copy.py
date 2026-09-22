@@ -13,6 +13,7 @@ from app.steps.models import (
     FillMissingStep,
     MapValuesStep,
     NormalizeCaseStep,
+    NormalizePhoneStep,
     NotMatchingCondition,
     NullPlaceholdersStep,
     OneOfCondition,
@@ -54,6 +55,13 @@ def test_normalize_case() -> None:
     step = NormalizeCaseStep(columns=["Status"], case="title")
 
     assert describe(step) == 'Write "Status" in Capital First Letters'
+
+
+def test_normalize_phone() -> None:
+    step = NormalizePhoneStep(columns=["Phone"])
+
+    assert describe(step) == 'Write "Phone" numbers consistently'
+    assert columns_of(step) == ["Phone"]
 
 
 def test_one_replacement() -> None:
@@ -192,6 +200,7 @@ def test_descriptions_use_no_jargon() -> None:
         TrimStep(columns=["A"]),
         RemoveCharactersStep(columns=["A"], characters="-"),
         NormalizeCaseStep(columns=["A"], case="lower"),
+        NormalizePhoneStep(columns=["A"]),
         MapValuesStep(column="A", mappings=[ValueMapping(from_value="x", to_value=None)]),
         NullPlaceholdersStep(columns=["A"], placeholders=["N/A"]),
         CastNumberStep(column="A"),
