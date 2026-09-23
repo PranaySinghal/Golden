@@ -169,12 +169,15 @@ def extra_spaces(n: int, columns: Sequence[str]) -> tuple[str, str]:
 
 
 def combined_column(
-    column: str, delimiter: str, example: str, parts: Sequence[str]
+    column: str, delimiter: str, example: str, parts: Sequence[str], replaces: bool = False
 ) -> tuple[str, str]:
+    split = f"Splitting them into {quoted(parts, 'and')}"
+    if replaces:
+        split += f', which replace "{column}",'
     return (
         f'"{column}" holds two things in one column',
-        f'Values like "{example}" join two parts with "{delimiter}". Splitting them into '
-        f"{quoted(parts, 'and')} lets you count and compare each one separately.",
+        f'Values like "{example}" join two parts with "{delimiter}". {split} '
+        "lets you count and compare each one separately.",
     )
 
 

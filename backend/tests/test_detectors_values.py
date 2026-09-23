@@ -345,6 +345,29 @@ def test_combined_column_with_an_unhelpful_header(make_dataset: MakeDataset) -> 
     assert step.into == ["combo part 1", "combo part 2"]
 
 
+def test_a_column_that_splits_cleanly_is_replaced(make_dataset: MakeDataset) -> None:
+    rows = [f"{i},{['North', 'South'][i % 2]}/{['Q1', 'Q2', 'Q3'][i % 3]}" for i in range(30)]
+    ds = make_dataset(csv_file("id,Area/Quarter", rows))
+
+    issue = only(ds.issues("combined_columns"))
+
+    step = issue.steps[0]
+    assert isinstance(step, SplitColumnStep)
+    assert step.keep_original is False
+    assert 'which replace "Area/Quarter"' in issue.explanation
+
+
+def test_one_value_that_wont_split_keeps_the_original(make_dataset: MakeDataset) -> None:
+    depts, regions = ["Sales", "HR", "Ops"], ["Texas", "Ohio", "Utah", "Iowa"]
+    rows = [f"{i},{depts[i % 3]}-{regions[i % 4]}" for i in range(59)] + ["59,Unassigned"]
+    ds = make_dataset(csv_file("id,Department_Region", rows))
+
+    step = only(ds.issues("combined_columns")).steps[0]
+
+    assert isinstance(step, SplitColumnStep)
+    assert step.keep_original is True
+
+
 def test_ranges_are_not_combined_columns(make_dataset: MakeDataset) -> None:
     rows = [f"{i},{['3-5', '6-10', '11-20'][i % 3]}" for i in range(30)]
     ds = make_dataset(csv_file("id,tenure", rows))

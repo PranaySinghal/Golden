@@ -110,8 +110,20 @@ def decide(evidence: list[Evidence], ctx: DetectorContext) -> list[Issue]:
             continue
         taken.update(n.casefold() for n in names)
         b = IssueBuilder(ctx, DetectorName.COMBINED_COLUMNS, [item.column], "split")
-        step = b.step(SplitColumnStep(column=item.column, delimiter=item.delimiter, into=names))
-        title, explanation = copy.combined_column(item.column, item.delimiter, item.example, names)
+        # The original goes only when every value splits cleanly; one that
+        # doesn't would otherwise lose the only place its whole text is shown.
+        replaces = item.two_part == item.filled
+        step = b.step(
+            SplitColumnStep(
+                column=item.column,
+                delimiter=item.delimiter,
+                into=names,
+                keep_original=not replaces,
+            )
+        )
+        title, explanation = copy.combined_column(
+            item.column, item.delimiter, item.example, names, replaces
+        )
         issues.append(
             b.build(
                 title=title,
