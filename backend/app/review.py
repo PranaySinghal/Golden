@@ -128,9 +128,7 @@ def ai_enhancement(
         if result.added:
             known = {issue.id for issue in issues}
             session.issues = [*issues, *(i for i in result.added if i.id not in known)]
-    return session.enhancement.model_copy(
-        update={"story": ai_story(session, settings, provider)}
-    )
+    return session.enhancement.model_copy(update={"story": ai_story(session, settings, provider)})
 
 
 def ai_story(

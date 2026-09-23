@@ -1,12 +1,15 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI
 
+from app.ai.limiter import CallBudget
 from app.api import ai, compare, datasets, health, issues, preview, recipe
 from app.api.errors import ErrorResponse, register_error_handlers
+from app.api.frontend import frontend_router
 from app.api.limits import UploadSizeMiddleware
 from app.config import get_settings
 from app.store import DatasetStore
@@ -33,6 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     _setup_logging()
     app.state.settings = get_settings()
     app.state.store = DatasetStore(app.state.settings)
+    app.state.llm_budget = CallBudget(app.state.settings.llm_max_calls_per_minute)
     try:
         yield
     finally:
@@ -50,3 +54,8 @@ app.include_router(recipe.router)
 app.include_router(preview.router)
 app.include_router(compare.router)
 app.include_router(ai.router)
+
+# Last, so it only answers what no API route did.
+_static_dir = get_settings().static_dir
+if _static_dir:
+    app.include_router(frontend_router(Path(_static_dir)))

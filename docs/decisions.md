@@ -762,3 +762,39 @@ file has and the recipe's output doesn't", not anything about splits or names.
 
 Saved recipes from before this carry an explicit `keep_original: true`, so they
 replay exactly as they were.
+
+---
+
+## M10: one container, a live link, and a ceiling on model calls
+
+**The reviewer's ways in, easiest first:** a live link (Render), one `docker run`,
+or `./run.sh` with `uv` and Node. All three run the same thing: FastAPI serving
+the built page beside the API on one port.
+
+**FastAPI serves the frontend** when `STATIC_DIR` points at a build
+(`api/frontend.py`). A catch-all registered after every API router answers with
+the file if there is one and the page otherwise, so reloading any screen works.
+`/api/…` paths nothing answers stay JSON 404s rather than becoming the page. It
+is left out of the OpenAPI schema, so the generated types don't change. Unset in
+development, where Vite serves the page and proxies `/api`.
+
+**Render, free tier** (owner's choice for a take-home link). Vercel doesn't fit:
+each file lives in one process's memory for a whole review, uploads go to 50 MB,
+and comparisons can run long — serverless functions are stateless between
+requests, cap request bodies at a few MB, and time out. The free instance sleeps
+when idle (first load ~30–60 s) and has 512 MB, so `render.yaml` lowers
+`MAX_UPLOAD_MB` to 25 and `MAX_DATASETS` to 4. The Dockerfile is host-neutral;
+moving hosts is one config file.
+
+**Model calls have a per-server ceiling** (`LLM_MAX_CALLS_PER_MINUTE`, default
+20; `ai/limiter.py`). Past it the call fails as `RateLimitedError`, a kind of
+`ProviderError`, so the existing fallback serves the rule-based wording and the
+AI panel shows its usual "couldn't answer" note — quiet, by owner decision. It is
+not retried (a retry would only spend more of the budget) and is logged as
+`outcome=rate_limited`. One bucket on `app.state`, so every request draws from
+the same budget; with no service configured there is nothing to limit.
+
+**Upload edge cases were audited, not changed.** Empty file, header only, one
+column, no header, Latin-1, UTF-16, an all-blank column, a PDF, binary named
+.csv, a broken .xlsx and an over-limit file all either open and review cleanly
+or answer with a plain-language message.

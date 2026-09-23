@@ -39,6 +39,12 @@ class Settings:
     llm_model: str = ""
     llm_timeout_ms: int = 8000
     llm_sample_rows: int = MAX_SAMPLE_ROWS
+    # Model calls allowed per minute across the whole server. Past it, the
+    # rule-based wording is used, as it is when no service is configured.
+    llm_max_calls_per_minute: int = 20
+    # A built frontend to serve alongside the API (the one-container deploy).
+    # Empty in development, where Vite serves the page.
+    static_dir: str = ""
 
     @property
     def llm_enabled(self) -> bool:
@@ -102,4 +108,8 @@ def get_settings() -> Settings:
         llm_model=_env_str("LLM_MODEL"),
         llm_timeout_ms=_env_int("LLM_TIMEOUT_MS", defaults.llm_timeout_ms),
         llm_sample_rows=min(_env_int("LLM_SAMPLE_ROWS", defaults.llm_sample_rows), MAX_SAMPLE_ROWS),
+        llm_max_calls_per_minute=_env_int(
+            "LLM_MAX_CALLS_PER_MINUTE", defaults.llm_max_calls_per_minute
+        ),
+        static_dir=_env_str("STATIC_DIR"),
     )

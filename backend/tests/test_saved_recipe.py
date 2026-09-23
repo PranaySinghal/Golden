@@ -101,9 +101,7 @@ def test_a_card_reads_as_done_when_the_recipe_already_does_its_work(
     safe = next(issue for issue in review.issues_of(first) if issue.steps)
     # The same work under ids of its own — a model's fix, or a recipe hand-built
     # elsewhere, arrives looking like this.
-    fresh = Recipe(
-        steps=[step.model_copy(update={"id": new_step_id()}) for step in safe.steps]
-    )
+    fresh = Recipe(steps=[step.model_copy(update={"id": new_step_id()}) for step in safe.steps])
     assert {step.id for step in fresh.steps}.isdisjoint(step.id for step in safe.steps)
 
     second = store.create("employees-later.csv", EMPLOYEE)

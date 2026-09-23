@@ -76,9 +76,9 @@ def test_the_cards_whose_work_is_already_done_say_so(client: TestClient) -> None
 
     applied = [issue for issue in issues if issue["state"] == "applied"]
     assert applied
-    panel_ids = {step["id"] for step in client.get(
-        f"/api/datasets/{body['id']}/recipe"
-    ).json()["steps"]}
+    panel_ids = {
+        step["id"] for step in client.get(f"/api/datasets/{body['id']}/recipe").json()["steps"]
+    }
     # The ids a card hands back point at steps really in the panel.
     for issue in applied:
         assert set(issue["step_ids"]) <= panel_ids

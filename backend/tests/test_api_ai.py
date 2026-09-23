@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.ai.enhance import FAILED_NOTE
+from app.ai.limiter import BudgetedProvider, CallBudget
 from app.ai.provider import Provider, ProviderError
 from app.api.deps import get_provider
 from app.config import Settings
@@ -316,3 +317,22 @@ def test_an_unknown_file_is_a_clear_404(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json()["code"] == "dataset_not_found"
+
+
+# --- past the rate limit --------------------------------------------------------------------
+
+
+def test_past_the_limit_the_review_still_loads_with_its_own_wording(client: TestClient) -> None:
+    dataset = upload(client, NAMES)
+    before = client.get(f"/api/datasets/{dataset}/issues").json()
+    spent = CallBudget(1)
+    spent.take()
+    use_provider(BudgetedProvider(ScriptedProvider({"fix": json.dumps(SUGGESTED)}), spent))
+
+    body = ai(client, dataset)
+
+    assert body["status"] == "failed"
+    assert body["note"] == FAILED_NOTE
+    assert body["added"] == []
+    after = client.get(f"/api/datasets/{dataset}/issues").json()
+    assert [i["id"] for i in after["issues"]] == [i["id"] for i in before["issues"]]
