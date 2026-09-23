@@ -27,6 +27,7 @@ from app.compare.impact import rank, score
 from app.compare.influence import Influence, influence_of
 from app.compare.models import Comparison
 from app.compare.reading import Reading, RowSource
+from app.compare.retired import still_asked
 from app.compare.unlocked import MAX_UNLOCKED, candidates, changed_columns
 from app.config import Settings, get_settings
 from app.db import work_ref
@@ -189,7 +190,8 @@ class ComparisonEngine:
 
         try:
             after = self._rows(plan, CLEANED_ROWS)
-            questions = [*self._questions, *self._unlocked_questions(plan, key, after)]
+            asked = still_asked(self._questions, plan)
+            questions = [*asked, *self._unlocked_questions(plan, key, after)]
             diffs = [
                 score(diff_answers(q, self._before_answer(q), self._answer(q, after, key)))
                 for q in questions

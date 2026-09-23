@@ -14,6 +14,7 @@ import duckdb
 
 from app.compare.after import AfterReading
 from app.compare.compare import AnswerCache, compare
+from app.compare.retired import still_asked
 from app.detectors.models import Issue, Tier
 from app.detectors.registry import rank_issues
 from app.detectors.step_order import recipe_for
@@ -70,7 +71,7 @@ def score_issues(
                 continue  # e.g. "Keep them": nothing to compare
             diffs = compare(
                 conn,
-                relevant,
+                still_asked(relevant, plan),
                 baseline,
                 AfterReading.from_plan(plan),
                 key,

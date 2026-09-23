@@ -738,3 +738,27 @@ stays: the upload path still replaces the safe-seeded recipe in one undoable edi
 dozen under a chart and buried it. The short summaries (new groups, emptied
 groups, hidden groups) stay visible; the per-spelling lines sit behind
 "Show the N spellings now counted together", styled like "Why?".
+
+---
+
+## A split replaces its column only when every value splits
+
+A split used to keep the original next to its parts (`keep_original` defaulted to
+`True` and the detector never set it), so the cleaned file carried
+`Department_Region` beside `Department` and `Region`. The detector now sets
+`keep_original=False` when *every* filled value splits into exactly two parts —
+the count it already takes (`two_part == filled`). If even one value doesn't, the
+original stays: that row's parts would be partial, and the original is the only
+place its whole text is shown. The raw table is untouched either way, and the
+step undoes like any other.
+
+**Questions about a replaced column drop out** (`compare/retired.py`), in both the
+answer cards and issue ranking. Otherwise a question like "rows per
+Department_Region" reads "Couldn't be answered" after cleaning, which diff scoring
+treats as the biggest change there is — so the split would also have jumped to the
+top of the review list for removing a column, not for changing an answer. The
+parts' own questions still arrive as unlocked ones. The rule is "a column the raw
+file has and the recipe's output doesn't", not anything about splits or names.
+
+Saved recipes from before this carry an explicit `keep_original: true`, so they
+replay exactly as they were.
