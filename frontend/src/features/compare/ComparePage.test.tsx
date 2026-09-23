@@ -143,6 +143,9 @@ describe('ComparePage', () => {
     await screen.findByRole('heading', { name: /each "team"/ })
     const team = answerCard(/each "team"/)
 
+    // Folded away at first, so a long list doesn't bury the chart.
+    expect(within(team).queryByText(/is now counted with/)).toBeNull()
+    fireEvent.click(within(team).getByRole('button', { name: /now counted together/ }))
     expect(within(team).getByText(/is now counted with/)).toBeTruthy()
     expect(within(team).getByText(/“Sales ”/)).toBeTruthy()
   })

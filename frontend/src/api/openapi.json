@@ -508,59 +508,6 @@
         }
       }
     },
-    "/api/datasets/{dataset_id}/recipe/replay": {
-      "post": {
-        "tags": [
-          "recipe"
-        ],
-        "summary": "Replay Recipe File",
-        "description": "Re-use steps saved from another file, replacing whatever is in the panel.\n\nSteps that can't be read or don't fit this file are reported rather than\nraised: the answer to \"can I re-use these?\" is no and here's why, which is a\nresult the reader needs, not a failed request.",
-        "operationId": "replayRecipe",
-        "parameters": [
-          {
-            "name": "dataset_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Dataset Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_replayRecipe"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecipeReplayResponse"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "A problem the user can fix",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/datasets/{dataset_id}/recipe/undo": {
       "post": {
         "tags": [
@@ -1061,21 +1008,6 @@
           "column"
         ],
         "title": "BlankCondition"
-      },
-      "Body_replayRecipe": {
-        "properties": {
-          "recipe": {
-            "type": "string",
-            "contentMediaType": "application/octet-stream",
-            "title": "Recipe",
-            "description": "Steps saved from an earlier file."
-          }
-        },
-        "type": "object",
-        "required": [
-          "recipe"
-        ],
-        "title": "Body_replayRecipe"
       },
       "Body_uploadDataset": {
         "properties": {
@@ -2723,22 +2655,6 @@
         ],
         "title": "RecipeOutcomeView",
         "description": "What came of re-using steps saved from another file."
-      },
-      "RecipeReplayResponse": {
-        "properties": {
-          "outcome": {
-            "$ref": "#/components/schemas/RecipeOutcomeView"
-          },
-          "recipe": {
-            "$ref": "#/components/schemas/RecipeResponse"
-          }
-        },
-        "type": "object",
-        "required": [
-          "outcome",
-          "recipe"
-        ],
-        "title": "RecipeReplayResponse"
       },
       "RecipeResponse": {
         "properties": {

@@ -14,7 +14,6 @@ export type Choice = components['schemas']['Choice']
 export type Tier = components['schemas']['Tier']
 export type RecipeResponse = components['schemas']['RecipeResponse']
 export type RecipeOutcome = components['schemas']['RecipeOutcomeView']
-export type RecipeReplayResponse = components['schemas']['RecipeReplayResponse']
 export type StepView = components['schemas']['StepView']
 export type Preview = components['schemas']['Preview']
 export type ComparisonResponse = components['schemas']['ComparisonResponse']
@@ -102,15 +101,6 @@ function uploadDataset(file: File, options: UploadOptions = {}): Promise<Dataset
   return request<DatasetSummary>('/api/datasets', { method: 'POST', body: form })
 }
 
-function replayRecipe(id: string, recipe: File): Promise<RecipeReplayResponse> {
-  const form = new FormData()
-  form.append('recipe', recipe)
-  return request<RecipeReplayResponse>(datasetPath(id, '/recipe/replay'), {
-    method: 'POST',
-    body: form,
-  })
-}
-
 function reingestDataset(id: string, body: ReingestRequest): Promise<DatasetSummary> {
   return request<DatasetSummary>(`/api/datasets/${encodeURIComponent(id)}/reingest`, {
     method: 'POST',
@@ -191,7 +181,6 @@ export const api = {
   removeStep: (id: string, stepId: string) =>
     send<RecipeResponse>(datasetPath(id, `/recipe/steps/${encodeURIComponent(stepId)}`), 'DELETE'),
   undoRecipe: (id: string) => send<RecipeResponse>(datasetPath(id, '/recipe/undo'), 'POST'),
-  replayRecipe,
   getPreview,
   getComparison: (id: string) => request<ComparisonResponse>(datasetPath(id, '/compare')),
   getAiSuggestions: (id: string) => request<AiResponse>(datasetPath(id, '/ai')),

@@ -1181,12 +1181,28 @@ select {
 }
 
 .chart__notes {
-  list-style: none;
   margin: 0.4rem 0 0;
+}
+
+.chart__summary,
+.chart__merged-list {
+  list-style: none;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+.chart__merged {
+  margin-top: 0.3rem;
+}
+
+/* Same left rule as the "Why?" reasons, so both disclosures read alike. */
+.chart__merged-list {
+  border-left: 2px solid var(--accent-soft);
+  padding-left: 0.75rem;
+  margin-top: 0.4rem;
 }
 
 /* Decisions and the "before" explainer ------------------------------------ */
