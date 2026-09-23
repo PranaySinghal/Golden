@@ -1,0 +1,25 @@
+# Render blueprint: New → Blueprint → pick this repo. One free web service from the Dockerfile.
+# Datasets live in memory for the life of the process; nothing needs a disk or a database.
+services:
+  - type: web
+    name: tidylab
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    branch: main
+    envVars:
+      # Rule-based by default. To turn the model on, set LLM_PROVIDER=anthropic and
+      # paste the key into ANTHROPIC_API_KEY in the dashboard (never in this file).
+      - key: LLM_PROVIDER
+        value: none
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_MAX_CALLS_PER_MINUTE
+        value: "20"
+      # The free instance has 512 MB; each open file costs about its size and more.
+      - key: MAX_UPLOAD_MB
+        value: "25"
+      - key: MAX_DATASETS
+        value: "4"

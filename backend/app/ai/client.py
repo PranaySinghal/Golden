@@ -13,6 +13,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
+from app.ai.limiter import RateLimitedError
 from app.ai.provider import Provider, ProviderError
 
 logger = logging.getLogger("tidylab.ai")
@@ -64,6 +65,10 @@ def ask[Reply: BaseModel](
     for attempt in range(1, ATTEMPTS + 1):
         try:
             text = provider.complete(prompt.system, user, timeout_ms)
+        except RateLimitedError:
+            # Asking again at once would only spend another call of the budget.
+            _log(prompt, provider, started, "rate_limited")
+            return None
         except ProviderError as error:
             outcome = "unreachable"
             if attempt == ATTEMPTS:

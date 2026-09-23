@@ -158,22 +158,32 @@ These are the typed spine of the system. Changing them requires owner approval.
 
 ## Commands
 
-(Fill in once the scaffold exists.)
+Needs Python 3.12 via `uv`, and Node 22+. Settings are env vars; see `.env.example`.
 
 ```
-# backend
+# run the whole app on one port (no Docker): builds the page, serves it with the API
+./run.sh                          # http://localhost:8000
+
+# or as one container
+docker build -t tidylab . && docker run -p 8000:8000 tidylab
+
+# backend (dev)
 cd backend && uv sync
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload            # API on :8000
 uv run pytest
-uv run ruff check . && uv run mypy app
+uv run ruff check . && uv run ruff format --check . && uv run mypy app
 
-# frontend
+# frontend (dev; proxies /api to BACKEND_URL, default http://127.0.0.1:8000)
 cd frontend && npm install
-npm run dev
-npm run gen:api     # regenerate API types from backend OpenAPI
-npm test
-npx playwright test
+npm run dev                                      # http://localhost:5173
+npm run lint && npm test && npm run build
+npm run gen:api     # regenerate API types from backend OpenAPI (needs uv)
+npx playwright install chromium                  # once, before the first e2e run
+npx playwright test                              # starts its own backend and frontend
 ```
+
+CI (`.github/workflows/ci.yml`) runs all of the above plus a Docker build on every
+pull request. The live deploy is `render.yaml` (Render free tier, from `main`).
 
 ## How to work with me
 
