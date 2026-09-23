@@ -175,30 +175,6 @@ export interface paths {
         patch: operations["updateStep"];
         trace?: never;
     };
-    "/api/datasets/{dataset_id}/recipe/replay": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Replay Recipe File
-         * @description Re-use steps saved from another file, replacing whatever is in the panel.
-         *
-         *     Steps that can't be read or don't fit this file are reported rather than
-         *     raised: the answer to "can I re-use these?" is no and here's why, which is a
-         *     result the reader needs, not a failed request.
-         */
-        post: operations["replayRecipe"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/datasets/{dataset_id}/recipe/undo": {
         parameters: {
             query?: never;
@@ -360,14 +336,6 @@ export interface components {
             kind: "blank";
             /** Column */
             column: string;
-        };
-        /** Body_replayRecipe */
-        Body_replayRecipe: {
-            /**
-             * Recipe
-             * @description Steps saved from an earlier file.
-             */
-            recipe: string;
         };
         /** Body_uploadDataset */
         Body_uploadDataset: {
@@ -1016,11 +984,6 @@ export interface components {
             problems?: string[];
             /** Warnings */
             warnings?: string[];
-        };
-        /** RecipeReplayResponse */
-        RecipeReplayResponse: {
-            outcome: components["schemas"]["RecipeOutcomeView"];
-            recipe: components["schemas"]["RecipeResponse"];
         };
         /** RecipeResponse */
         RecipeResponse: {
@@ -1671,41 +1634,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecipeResponse"];
-                };
-            };
-            /** @description A problem the user can fix */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    replayRecipe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                dataset_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_replayRecipe"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecipeReplayResponse"];
                 };
             };
             /** @description A problem the user can fix */

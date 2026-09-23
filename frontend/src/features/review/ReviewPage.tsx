@@ -7,7 +7,6 @@ import {
   type DatasetSummary,
   type IssueListResponse,
   type IssueView,
-  type RecipeOutcome as RecipeOutcomeView,
   type RecipeResponse,
   type ReingestRequest,
   type StepView,
@@ -55,10 +54,8 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
   const [acting, setActing] = useState<string | null>(null)
   const [actionError, setActionError] = useState<ActionError | null>(null)
   const [highlighted, setHighlighted] = useState<string[]>([])
-  // What came of steps saved from another file: reported once, by whichever
-  // way they arrived — attached to the upload, or picked from the panel.
-  const [replayed, setReplayed] = useState<RecipeOutcomeView | null>(null)
-  const outcome = replayed ?? dataset.recipe_outcome ?? null
+  // What came of steps saved from another file and attached to the upload.
+  const outcome = dataset.recipe_outcome ?? null
 
   const issuesKey = ['issues', dataset.id]
   const issues = useQuery({
@@ -132,20 +129,6 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
     },
   })
 
-  const replay = useMutation({
-    mutationFn: (file: File) => api.replayRecipe(dataset.id, file),
-    onSuccess: (response) => {
-      setReplayed(response.outcome)
-      if (!response.outcome.applied) return
-      // The recipe was replaced wholesale, so every card's state and every
-      // answer worked out from it has to be asked for again.
-      applyRecipe(response.recipe)
-      void queryClient.invalidateQueries({ queryKey: ['ai', dataset.id] })
-      setTab('review')
-      setHighlighted([])
-    },
-  })
-
   const decisions = issues.data?.needs_decision ?? 0
   const list = withAiHelp(issues.data?.issues ?? [], ai.data)
   const steps = issues.data?.recipe.steps ?? []
@@ -186,11 +169,6 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
       </header>
 
       {outcome && <RecipeOutcome outcome={outcome} />}
-      {replay.error && (
-        <p className="alert" role="alert">
-          {replay.error.message}
-        </p>
-      )}
 
       {showColumns && (
         <FileOptionsPanel
@@ -294,7 +272,6 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
             runAction(step.id, 'panel', () => api.removeStep(dataset.id, step.id))
           }
           onUndo={() => undo.mutate()}
-          onReplay={(file) => replay.mutate(file)}
         />
       </div>
         </>

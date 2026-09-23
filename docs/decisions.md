@@ -726,3 +726,15 @@ Not carried: a recipe records accepted steps, not decisions. A suggestion
 turned down last month, and an ask-tier answer meaning "leave it alone", leave
 no trace in the file and come back as fresh questions. Carrying them needs a
 format v2 and is in `docs/ideas.md`.
+
+**Update — saved steps are attached at upload only** (owner decision). The
+panel's "Use steps from a file" and `POST /recipe/replay` are gone. The panel
+sits on the Review and Compare tabs, so it offered to throw away reviewed work
+for a file's worth of someone else's; the one honest use, "I forgot to attach
+them", is served by uploading again with the steps attached. `recipe_ops.replace`
+stays: the upload path still replaces the safe-seeded recipe in one undoable edit.
+
+**Merged-spelling notes fold behind a toggle.** One line per spelling ran to a
+dozen under a chart and buried it. The short summaries (new groups, emptied
+groups, hidden groups) stay visible; the per-spelling lines sit behind
+"Show the N spellings now counted together", styled like "Why?".

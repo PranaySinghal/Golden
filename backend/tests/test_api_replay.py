@@ -117,65 +117,8 @@ def test_reading_the_dataset_again_does_not_repeat_the_message(client: TestClien
     assert again["recipe_outcome"] is None
 
 
-def test_saved_steps_can_be_used_on_a_file_already_open(client: TestClient) -> None:
-    recipe = cleaned_once(client, "Messy_Employee_dataset.csv", EMPLOYEE)
-    body = upload(client, "next-month.csv", MESSIER)
-    client.get(f"/api/datasets/{body['id']}/issues")
-
-    response = client.post(
-        f"/api/datasets/{body['id']}/recipe/replay",
-        files={"recipe": ("saved.tidylab.json", recipe, "application/json")},
-    )
-
-    assert response.status_code == 200
-    replayed = response.json()
-    assert replayed["outcome"]["applied"] is True
-    assert replayed["recipe"]["steps"]
-    assert replayed["recipe"]["can_undo"] is True
-
-
-def test_using_saved_steps_can_be_undone(client: TestClient) -> None:
-    recipe = cleaned_once(client, "Messy_Employee_dataset.csv", EMPLOYEE)
-    body = upload(client, "next-month.csv", MESSIER)
-    before = client.get(f"/api/datasets/{body['id']}/recipe").json()["steps"]
-
-    client.post(
-        f"/api/datasets/{body['id']}/recipe/replay",
-        files={"recipe": ("saved.tidylab.json", recipe, "application/json")},
-    )
-    undone = client.post(f"/api/datasets/{body['id']}/recipe/undo")
-
-    assert undone.status_code == 200
-    assert [step["id"] for step in undone.json()["steps"]] == [step["id"] for step in before]
-
-
-def test_refused_steps_leave_the_open_file_as_it_was(client: TestClient) -> None:
-    recipe = cleaned_once(client, "Messy_Employee_dataset.csv", EMPLOYEE)
-    body = upload(client, "store_orders.csv", ORDERS)
-    before = client.get(f"/api/datasets/{body['id']}/recipe").json()["steps"]
-
-    response = client.post(
-        f"/api/datasets/{body['id']}/recipe/replay",
-        files={"recipe": ("saved.tidylab.json", recipe, "application/json")},
-    )
-
-    assert response.status_code == 200
-    assert response.json()["outcome"]["applied"] is False
-    assert response.json()["recipe"]["steps"] == before
-
-
-def test_replaying_onto_an_unknown_file_is_still_an_error(client: TestClient) -> None:
-    response = client.post(
-        "/api/datasets/nope/recipe/replay",
-        files={"recipe": ("saved.tidylab.json", b"{}", "application/json")},
-    )
-
-    assert response.status_code == 404
-
-
-def test_openapi_describes_replay(client: TestClient) -> None:
+def test_saved_steps_are_attached_at_upload_only(client: TestClient) -> None:
     schema = client.get("/openapi.json").json()
 
-    replay = schema["paths"]["/api/datasets/{dataset_id}/recipe/replay"]["post"]
-    assert replay["operationId"] == "replayRecipe"
+    assert "/api/datasets/{dataset_id}/recipe/replay" not in schema["paths"]
     assert "RecipeOutcomeView" in schema["components"]["schemas"]

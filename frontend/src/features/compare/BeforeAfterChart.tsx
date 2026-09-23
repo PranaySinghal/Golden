@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 import type { AnswerCardView } from '../../api/client'
@@ -82,18 +83,47 @@ function ChartNotes({ card, rows }: { card: AnswerCardView; rows: ChartRow[] }) 
   const allNew = appeared.length === rows.length && rows.length > 0
 
   return (
-    <ul className="chart__notes muted small">
-      {merged.map((note) => (
-        <li key={note.label}>
-          “{note.label}” is now counted with “{note.into}”.
-        </li>
-      ))}
-      {/* Naming every group is noise when the whole breakdown is new. */}
-      {allNew && <li>None of these groups existed before cleaning.</li>}
-      {!allNew && appeared.length > 0 && <li>{newGroups(appeared)}</li>}
-      {gone.length > 0 && <li>{emptyGroups(gone)}</li>}
-      {hidden > 0 && <li>{hidden} smaller groups aren’t shown.</li>}
-    </ul>
+    <div className="chart__notes muted small">
+      <ul className="chart__summary">
+        {/* Naming every group is noise when the whole breakdown is new. */}
+        {allNew && <li>None of these groups existed before cleaning.</li>}
+        {!allNew && appeared.length > 0 && <li>{newGroups(appeared)}</li>}
+        {gone.length > 0 && <li>{emptyGroups(gone)}</li>}
+        {hidden > 0 && <li>{hidden} smaller groups aren’t shown.</li>}
+      </ul>
+      {merged.length > 0 && <MergedNotes merged={merged} />}
+    </div>
+  )
+}
+
+/** One line per merged spelling can run to a dozen, so they wait behind a toggle. */
+function MergedNotes({ merged }: { merged: NonNullable<AnswerCardView['merged']> }) {
+  const [open, setOpen] = useState(false)
+  const one = merged.length === 1
+  return (
+    <div className="chart__merged">
+      <button
+        type="button"
+        className="link-button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        {open
+          ? `Hide the ${one ? 'spelling' : 'spellings'}`
+          : one
+            ? 'Show the spelling now counted together'
+            : `Show the ${merged.length} spellings now counted together`}
+      </button>
+      {open && (
+        <ul className="chart__merged-list">
+          {merged.map((note) => (
+            <li key={note.label}>
+              “{note.label}” is now counted with “{note.into}”.
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
