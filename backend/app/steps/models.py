@@ -136,9 +136,9 @@ class NormalizePhoneStep(_StepBase):
     columns: Columns
     # Used only for a number with no country code of its own to go by. An
     # ISO 3166-1 alpha-2 code, e.g. "US", "GB".
-    default_region: Annotated[
-        str, StringConstraints(min_length=2, max_length=2, to_upper=True)
-    ] = DEFAULT_REGION
+    default_region: Annotated[str, StringConstraints(min_length=2, max_length=2, to_upper=True)] = (
+        DEFAULT_REGION
+    )
 
 
 class ValueMapping(_Model):
