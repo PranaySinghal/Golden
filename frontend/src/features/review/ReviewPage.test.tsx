@@ -95,6 +95,35 @@ describe('ReviewPage', () => {
     expect(await screen.findByText(/already tidy/)).toBeTruthy()
   })
 
+  it('says what each row holds, in plain words', () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+
+    renderPage()
+
+    expect(screen.getByText('Each row has an ID (“Employee_ID”) and a number.')).toBeTruthy()
+  })
+
+  it('lists the main problems in the order they matter, each a way to its card', async () => {
+    const scrolled: string[] = []
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this.id)
+    }
+    vi.stubGlobal('requestAnimationFrame', (run: FrameRequestCallback) => {
+      run(0)
+      return 0
+    })
+    const list = issueList()
+    mockApi({ [ISSUES]: () => jsonResponse(200, list) })
+
+    renderPage()
+    await screen.findByText('Main problems')
+    const links = within(screen.getByText('Main problems').parentElement!).getAllByRole('button')
+
+    expect(links.map((link) => link.textContent)).toEqual(list.issues.map((i) => i.title))
+    fireEvent.click(links[0])
+    expect(scrolled).toEqual([`issue-${list.issues[0].id}`])
+  })
+
   it('groups what it found and counts what needs deciding', async () => {
     mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
 
@@ -467,7 +496,9 @@ describe('ReviewPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Some names have stray spaces around them')).toBeTruthy()
+    expect(
+      await screen.findByRole('heading', { name: 'Some names have stray spaces around them' }),
+    ).toBeTruthy()
     expect(screen.queryByText(/38 names have extra spaces/)).toBeNull()
   })
 

@@ -34,6 +34,7 @@ def test_upload_csv_returns_a_summary(client: TestClient) -> None:
     email = next(c for c in body["columns"] if c["name"] == "Email")
     assert email["semantic_role"] == "contact"
     assert "role_note" in email
+    assert body["description"].startswith("Each row has an ID (“Employee_ID”)")
 
     again = client.get(f"/api/datasets/{body['id']}")
     assert again.status_code == 200

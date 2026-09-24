@@ -16,6 +16,8 @@ import { ComparePage } from '../compare/ComparePage'
 import { FileOptionsPanel } from '../upload/FileOptionsPanel'
 import { describeRows } from '../upload/format'
 import { IssueList } from './IssueList'
+import { issueAnchor } from './anchors'
+import { MainProblems } from './MainProblems'
 import { RecipeOutcome } from './RecipeOutcome'
 import { RecipePanel } from './RecipePanel'
 
@@ -137,6 +139,19 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
   const errorFor = (id: string) =>
     actionError?.where === 'card' && actionError.id === id ? actionError.message : null
   const panelError = actionError?.where === 'panel' ? actionError.message : null
+  /** Take the reader to a problem's card, from the tab it lives on. */
+  function showIssue(issue: IssueView) {
+    setTab('review')
+    // The card may only be drawn once the review tab is showing again.
+    window.requestAnimationFrame(() => {
+      const card = document.getElementById(issueAnchor(issue.id))
+      if (!card) return
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      card.classList.add('card--lit')
+      window.setTimeout(() => card.classList.remove('card--lit'), 1600)
+    })
+  }
+
   const accept = (issue: IssueView, choiceId?: string) =>
     runAction(issue.id, 'card', () => api.acceptIssue(dataset.id, issue.id, choiceId))
 
@@ -152,6 +167,8 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
             {dataset.sheet_name && <> · sheet “{dataset.sheet_name}”</>}
             {decisions > 0 && <> · {decisions} to decide</>}
           </p>
+          <p className="review__about">{dataset.description}</p>
+          {issues.data && <MainProblems issues={list} onShow={showIssue} />}
         </div>
         <div className="review__head-actions">
           <button

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { IssueView } from '../../api/client'
 import { PreviewTable } from './PreviewTable'
 import { affected } from './copy'
+import { issueAnchor } from './anchors'
 
 interface IssueCardProps {
   datasetId: string
@@ -31,6 +32,7 @@ export function IssueCard({
 
   return (
     <article
+      id={issueAnchor(issue.id)}
       className={`card${applied ? ' card--applied' : ''}${
         issue.tier === 'ask' && !applied ? ' card--ask' : ''
       }`}

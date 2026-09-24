@@ -48,7 +48,7 @@ export function PreviewTable({ datasetId, query }: PreviewTableProps) {
               <th scope="col" aria-hidden="true" />
               {columns.flatMap((column) => [
                 <th key={`${column}-before`} scope="col" className="small muted">
-                  Now
+                  Before
                 </th>,
                 <th key={`${column}-after`} scope="col" className="small muted">
                   After

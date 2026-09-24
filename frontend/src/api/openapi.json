@@ -1512,6 +1512,10 @@
             "type": "integer",
             "title": "Column Count"
           },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
           "empty_rows_skipped": {
             "type": "integer",
             "title": "Empty Rows Skipped"
@@ -1545,6 +1549,7 @@
           "header_detected",
           "row_count",
           "column_count",
+          "description",
           "empty_rows_skipped",
           "columns"
         ],

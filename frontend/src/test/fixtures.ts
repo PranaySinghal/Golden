@@ -58,6 +58,7 @@ export function dataset(overrides: Partial<DatasetSummary> = {}): DatasetSummary
     header_detected: true,
     row_count: 1020,
     column_count: 2,
+    description: 'Each row has an ID (“Employee_ID”) and a number.',
     empty_rows_skipped: 0,
     columns: [
       column(),
