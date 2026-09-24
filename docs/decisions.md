@@ -798,3 +798,33 @@ the same budget; with no service configured there is nothing to limit.
 column, no header, Latin-1, UTF-16, an all-blank column, a PDF, binary named
 .csv, a broken .xlsx and an over-limit file all either open and review cleanly
 or answer with a plain-language message.
+
+---
+
+## A summary of the file before any cards (demo step 2)
+
+The demo promised "what the data is about, its size, and the main problems" right
+after upload; the page showed only a name and "1,020 rows · 12 columns".
+
+**What each row holds** is one sentence from the column roles
+(`profile/describe.py`): "Each row has an ID ("Employee_ID"), a date, 2 numbers,
+6 categories and 2 kinds of contact info." Same words as the column table (ID,
+category, number, date, contact info, text). It **never guesses a subject** —
+"a list of employees" would be read off the column names, which is exactly the
+dataset-specific inference principle 1 rules out, and would read differently if
+the same file had other headers. A test holds every word outside the quoted ID
+name to a fixed vocabulary, so a leaked column name fails it. Rule-based, so it
+is complete with no key. On the cross-tab file it says "an ID and 15 numbers",
+which is honest about what that file is.
+
+**Main problems** are the first three cards of the list the server already
+ranked by impact (`rank_issues`), each a link that scrolls to and lights its
+card. No second ranking: the header and the list can't disagree.
+
+**The second dataset now runs the whole flow in Playwright** (`store_orders.csv`:
+upload → summary → main problem link → accept → What changed → download),
+asserting on page structure only, never its column names.
+
+The example-rows table said "Now / After"; it says "Before / After", like the
+rest of the app. Inside "Why?" on the What-changed tab, "Now" read as the cleaned
+value.

@@ -11,6 +11,7 @@ from app.api.views import RecipeOutcomeView, recipe_outcome_view
 from app.config import MAX_RECIPE_BYTES
 from app.errors import FileTooLargeError
 from app.ingest.models import HeaderMode, IngestOptions, SourceFormat
+from app.profile.describe import describe_rows
 from app.profile.models import ColumnProfile
 from app.saved_recipe import RecipeOutcome, apply_saved_recipe
 from app.store import DatasetSession
@@ -32,6 +33,8 @@ class DatasetSummary(BaseModel):
     header_detected: bool
     row_count: int
     column_count: int
+    # One plain sentence on what each row holds, from the column roles alone.
+    description: str
     empty_rows_skipped: int
     columns: list[ColumnProfile]
     # Only ever set on the upload that carried saved steps: a one-time report on
@@ -116,6 +119,7 @@ def _summary(session: DatasetSession, outcome: RecipeOutcome | None = None) -> D
         header_detected=ingest.header_detected,
         row_count=session.profile.row_count,
         column_count=session.profile.column_count,
+        description=describe_rows(session.profile),
         empty_rows_skipped=ingest.empty_rows_skipped,
         columns=session.profile.columns,
     )

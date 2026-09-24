@@ -773,6 +773,33 @@ select {
   font-size: 1.25rem;
 }
 
+.review__about {
+  margin: 0.35rem 0 0;
+  max-width: 44rem;
+}
+
+.main-problems {
+  margin-top: 0.6rem;
+}
+
+.main-problems__label {
+  margin: 0 0 0.2rem;
+  font-weight: 600;
+}
+
+.main-problems__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.main-problems__list .link-button {
+  text-align: left;
+}
+
 .review__head-actions {
   display: flex;
   align-items: center;
@@ -1348,6 +1375,7 @@ select {
   background: var(--accent-soft);
 }
 
+.card--lit,
 .answer--lit {
   outline: 2px solid var(--accent);
   outline-offset: 3px;

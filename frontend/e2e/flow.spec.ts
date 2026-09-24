@@ -90,6 +90,44 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
   expect(new URL(page.url()).searchParams.get('dataset')).toBeNull()
 })
 
+// The same flow on a file shaped nothing like the employee list. Every check is
+// on the page's structure, never on this file's column names: if it only passed
+// because of what the columns are called, it wouldn't prove "any table".
+test('a differently shaped file goes through the same flow', async ({ page }) => {
+  await page.goto('/')
+  await page.getByLabel('Choose a file to upload').setInputFiles(ORDERS)
+
+  // --- what the file is, and what matters most in it ---------------------------------
+  await expect(page.getByRole('heading', { name: 'store_orders.csv' })).toBeVisible()
+  await expect(page.locator('.review__about')).toHaveText(/^Each row has .+\.$/)
+  const problems = page.locator('.main-problems').getByRole('button')
+  await expect(problems.first()).toBeVisible()
+  await problems.first().click()
+  await expect(page.locator('.card--lit')).toHaveCount(1)
+
+  // --- accept the first suggestion ------------------------------------------------
+  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const stepsBefore = await panel.getByRole('listitem').count()
+  await page.getByRole('button', { name: 'Accept', exact: true }).first().click()
+  await expect(panel.getByRole('listitem')).toHaveCount(stepsBefore + 1)
+
+  // --- what changed: either answers moved, or it says they didn't ---------------------
+  await page.getByRole('tab', { name: 'What changed' }).click()
+  await expect(
+    page.locator('article.answer').first().or(page.getByText('came out the same either way')),
+  ).toBeVisible()
+
+  // --- download ----------------------------------------------------------------
+  const saving = page.waitForEvent('download')
+  await panel.getByRole('button', { name: 'Download cleaned file' }).click()
+  const file = await saving
+  expect(file.suggestedFilename()).toBe('store_orders (tidied).csv')
+  const cleaned = readFileSync(await file.path(), 'utf8').trim().split('\n')
+  const raw = readFileSync(ORDERS, 'utf8').trim().split('\n')
+  expect(cleaned.length).toBeGreaterThan(1)
+  expect(cleaned.length).toBeLessThanOrEqual(raw.length)
+})
+
 test('steps saved from one file clean the next one', async ({ page }) => {
   await page.goto('/')
 

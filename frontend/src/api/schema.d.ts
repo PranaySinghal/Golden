@@ -529,6 +529,8 @@ export interface components {
             row_count: number;
             /** Column Count */
             column_count: number;
+            /** Description */
+            description: string;
             /** Empty Rows Skipped */
             empty_rows_skipped: number;
             /** Columns */
