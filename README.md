@@ -1,4 +1,4 @@
-  TidyLab ~ Pranay Singhal
+TidyLab ~ Pranay Singhal
  
 TidyLab is a web application which assists any non-technical-but-motivated to get some value from the data. I chose the application of cleaning as my fundamental mantra for this app. Any user can upload up a messy or untidy file (Csv/Excel), review the issues in simple terms and explore how the cleaning changes the answer along with a summary of how much the incorrect issues were costing them. All in plain language – no technical jargon. 
 
@@ -172,9 +172,6 @@ The quickest demo upload `Messy_Employee_dataset.csv`, accept "holds two things 
 
  
 
-
-
-
 What's out of scope
 Non-goals for this build:
 1.	Chat bot interface 
@@ -185,31 +182,3 @@ Non-goals for this build:
 6.	Features based on business requirements. Added ideas in /ideas.md 
 
  
-
-Appendix
-
-Version 1 design (first design spec)
-
-
-A. Landing page 1.0
- 
-
-
-
-
-
-
-
-
-B. Summary page 1.0
- 
-
-
-c. Story page 1.0
- 
-
-D. Review page 1.0 
-
-E. What changed page 1.0
- 
-<img width="469" height="636" alt="image" src="https://github.com/user-attachments/assets/6488236d-ece8-4c70-a392-6d32f43e1102" />
