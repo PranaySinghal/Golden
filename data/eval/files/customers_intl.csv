@@ -1,0 +1,301 @@
+customer_id,full_name,email,phone,postcode,ship_postcode,country,signup_date
+C0088,Eve Evans,eve.evans88@example.com,4165550088,BS1 4DJ,CR2 6XH,United Kingdom,2024-05-02
+C0230,Lena Novak,lena.novak230@example.com,(416) 555-0230,EH1 1YZ,T2P 2M5,UK,2024-01-07
+C0195,Gus Singh,gus.singh195@example.com,020-7946-0195,EC1A 1BB,EC1A 1BB,United Kingdom,2024-09-09
+C0009,Jude Chen,jude.chen9@example.com,020-7946-0009,B33 8TH,EH1 1YZ,United Kingdom,2024-02-26
+C0165,Hana Okafor,hana.okafor165@example.com,4165550165,SW1A 1AA,B33 8TH,United Kingdom,2024-03-29
+C0016,Ann Diaz,ann.diaz16@example.com,020-7946-0016,LS1 4AP,B33 8TH,United Kingdom,2023-03-11
+C0164,Finn Lee,finn.lee164@example.com,020-7946-0164,LS1 4AP,M5V 3L9,United Kingdom,2023-11-19
+C0185,Finn Singh,finn.singh185@example.com,+44 20 7946 0185,M1 1AE,T2P 2M5,United Kingdom,2023-11-01
+C0178,Kit Diaz,kit.diaz178@example.com,4165550178,M1 1AE,BS1 4DJ,United Kingdom,2023-09-06
+C0202,Jude Reyes,jude.reyes202@example.com,4165550202,EH1 1YZ,T2P 2M5,United Kingdom,2024-09-10
+C0171,Kit Reyes,kit.reyes171@example.com,0207,SW1A 1AA,EC1A 1BB,United Kingdom,2024-03-31
+C0069,Finn Walsh,finn.walsh69@example.com,+44 20 7946 0069,EC1A 1BB,EH1 1YZ,United Kingdom,2023-01-31
+C0180,Finn Singh,finn.singh180@example.com,(416) 555-0180,EH1 1YZ,H2Y 1C6,UK,2024-06-27
+C0235,Jude Evans,jude.evans235@example.com,(416) 555-0235,CR2 6XH,SW1A 1AA,United Kingdom,2024-09-10
+C0032,Hana Yilmaz,hana.yilmaz32@example.com,4165550032,M1 1AE,LS1 4AP,United Kingdom,2023-09-27
+C0213,Hana Novak,hana.novak213@example.com,+44 20 7946 0213,CR2 6XH,BS1 4DJ,United Kingdom,2024-02-07
+C0033,Lena Yilmaz,lena.yilmaz33@example.com,(416) 555-0033,EH1 1YZ,SW1A 1AA,uk ,2023-09-02
+C0039,Hana Yilmaz,hana.yilmaz39@example.com,4165550039,LS1 4AP,EC1A 1BB,United Kingdom,2023-11-01
+C0014,Kit Evans,kit.evans14@example.com,+44 20 7946 0014,EH1 1YZ,SW1A 1AA,United Kingdom,2023-11-23
+C0019,Eve Novak,eve.novak19@example.com,+44 20 7946 0019,SW1A 1AA,V6B 4Y8,United Kingdom,2023-10-10
+C0242,Bo Yilmaz,bo.yilmaz242@example.com,4165550242,SW1A 1AA,CR2 6XH,United Kingdom,2024-10-18
+C0141,Kit Chen,kit.chen141@example.com,(416) 555-0141,BS1 4DJ,B33 8TH,United Kingdom,2023-11-29
+C0245,Bo Singh,bo.singh245@example.com,+44 20 7946 0245,sw1a 1aa,M1 1AE,United Kingdom,2023-04-10
+C0268,Bo Reyes,bo.reyes268@example.com,+44 20 7946 0268,BS1 4DJ,H2Y 1C6,United Kingdom,2023-04-25
+C0068,Ivo Reyes,ivo.reyes68@example.com,020-7946-0068,EC1A 1BB,M5V 3L9,United Kingdom,2023-03-19
+C0193,Finn Lee,finn.lee193@example.com,+44 20 7946 0193,cr2 6xh,EH1 1YZ,United Kingdom,2023-09-28
+C0169,Di Okafor,di.okafor169@example.com,4165550169,BS1 4DJ,CR2 6XH,United Kingdom,2024-09-14
+C0047,Jude Novak,jude.novak47@example.com,(416) 555-0047,EH1 1YZ,EC1A 1BB,United Kingdom,2023-01-04
+C0129,Eve Evans,eve.evans129@example.com,4165550129,CR2 6XH,M5V 3L9,United Kingdom,2024-06-16
+C0119,Bo Chen,bo.chen119 at example.com,(416) 555-0119,M1 1AE,V6B 4Y8,United Kingdom,2023-01-28
+C0172,Finn Yilmaz,finn.yilmaz172@example.com,+44 20 7946 0172,B33 8TH,V6B 4Y8,United Kingdom,2023-10-08
+C0008,Hana Evans,hana.evans8@example.com,(416) 555-0008,BS1 4DJ,K1A 0B1,United Kingdom,2023-04-01
+C0176, LENA OKAFOR,lena.okafor176@example.com,020-7946-0176,LS1 4AP,EC1A 1BB,United Kingdom,2023-12-05
+C0187,Gus Reyes,gus.reyes187@example.com,4165550187,B33 8TH,BS1 4DJ,United Kingdom,2023-11-17
+C0189,Ann Singh,ann.singh189@example.com,020-7946-0189,EH1 1YZ,SW1A 1AA,United Kingdom,2024-05-25
+C0027,Hana Evans,hana.evans27@example.com,(416) 555-0027,SW1A 1AA,EH1 1YZ,United Kingdom,2023-09-12
+C0132,Cy Lee,cy.lee132@example.com,+44 20 7946 0132,CR2 6XH,H2Y 1C6,United Kingdom,2023-02-07
+C0124,Bo Diaz,bo.diaz124@example.com,4165550124,LS1 4AP,H2Y 1C6,U.K.,2023-08-08
+C0237,Gus Singh,gus.singh237@example.com,4165550237,LS1 4AP,K1A 0B1,United Kingdom,2023-02-20
+C0170,Bo Yilmaz,bo.yilmaz170@example.com,020-7946-0170,m1 1ae,T2P 2M5,United Kingdom,2024-01-19
+C0012,Ann Evans,ann.evans12@example.com,020-7946-0012,CR2 6XH,BS1 4DJ,United Kingdom,2024-01-23
+C0048,Eve Walsh,eve.walsh48@example.com,0207,B33 8TH,V6B 4Y8,United Kingdom,2024-06-25
+C0128,Jude Lee,jude.lee128@example.com,4165550128,EC1A 1BB,M1 1AE,United Kingdom,2023-10-12
+C0192,Ivo Okafor,ivo.okafor192@example.com,020-7946-0192,EH1 1YZ,BS1 4DJ,United Kingdom,2024-08-09
+C0232,Ann Yilmaz,ann.yilmaz232@example.com,(416) 555-0232,LS1 4AP,T2P 2M5,United Kingdom,2023-10-08
+C0018,Ivo Singh,ivo.singh18@example.com,(416) 555-0018,m1 1ae,SW1A 1AA,United Kingdom,2024-07-24
+C0029,Ann Okafor,ann.okafor29 at example.com,+44 20 7946 0029,SW1A 1AA,K1A 0B1,United Kingdom,2024-02-29
+C0239,Lena Yilmaz,lena.yilmaz239@example.com,(416) 555-0239,EH1 1YZ,M1 1AE,United Kingdom,2023-05-21
+C0124,Bo Diaz,bo.diaz124@example.com,4165550124,LS1 4AP,H2Y 1C6,U.K.,2023-08-08
+C0154,Ivo Novak,ivo.novak154@example.com,4165550154,EC1A 1BB,B33 8TH,United Kingdom,2023-01-23
+C0046,Jude Walsh,jude.walsh46@example.com,020-7946-0046,B33 8TH,H2Y 1C6,United Kingdom,2023-04-09
+C0252,Finn Chen,finn.chen252@example.com,4165550252,B33 8TH,M5V 3L9,United Kingdom,2023-04-30
+C0109,Cy Walsh,cy.walsh109@example.com,020-7946-0109,CR2 6XH,EH1 1YZ,United Kingdom,2024-04-03
+C0256,Bo Okafor,bo.okafor256@example.com,020-7946-0256,EC1A 1BB,CR2 6XH,United Kingdom,2024-02-02
+C0064,Di Yilmaz,di.yilmaz64@example.com,0207,bs1 4dj,EH1 1YZ,U.K.,2023-09-11
+C0030,Eve Diaz,eve.diaz30@example.com,020-7946-0030,CR2 6XH,EH1 1YZ,uk ,2024-07-01
+C0093,Jude Evans,jude.evans93@example.com,4165550093,LS1 4AP,B33 8TH,United Kingdom,2023-05-08
+C0143,Finn Lee,finn.lee143@example.com,+44 20 7946 0143,b33 8th,CR2 6XH,united kingdom,2024-09-28
+C0186,Cy Yilmaz,cy.yilmaz186@example.com,+44 20 7946 0186,CR2 6XH,BS1 4DJ,United Kingdom,2024-08-11
+C0114,Kit Walsh,kit.walsh114@example.com,020-7946-0114,LS1 4AP,BS1 4DJ,UK,2024-04-11
+C0238,Lena Lee,lena.lee238@example.com,(416) 555-0238,ls1 4ap,H2Y 1C6,United Kingdom,2024-07-24
+C0260,Hana Reyes,hana.reyes260@example.com,+44 20 7946 0260,B33 8TH,LS1 4AP,United Kingdom,2023-02-03
+C0120,Ann Yilmaz,ann.yilmaz120@example.com,4165550120,EH1 1YZ,B33 8TH,United Kingdom,2023-03-18
+C0028,Gus Reyes,gus.reyes28@example.com,(416) 555-0028,SW1A 1AA,SW1A 1AA,uk ,2023-05-30
+C0215,Ivo Walsh,ivo.walsh215@example.com,(416) 555-0215,M1 1AE,EH1 1YZ,uk ,2023-01-02
+C0248,Bo Chen,bo.chen248@example.com,(416) 555-0248,B33 8TH,CR2 6XH,United Kingdom,2024-01-22
+C0103,Bo Walsh,bo.walsh103@example.com,020-7946-0103,M1 1AE,T2P 2M5,United Kingdom,2024-08-18
+C0043,Ivo Lee,ivo.lee43@example.com,(416) 555-0043,CR2 6XH,V6B 4Y8,united kingdom,2023-10-15
+C0075,Eve Singh,eve.singh75@example.com,+44 20 7946 0075,LS1 4AP,EH1 1YZ,United Kingdom,2023-01-16
+C0253,Finn Evans,finn.evans253@example.com,+44 20 7946 0253,B33 8TH,H2Y 1C6,UK,2023-04-07
+C0057,Lena Diaz,lena.diaz57@example.com,(416) 555-0057,M1 1AE,BS1 4DJ,U.K.,2024-11-13
+C0226,Di Singh,di.singh226@example.com,020-7946-0226,M1 1AE,LS1 4AP,United Kingdom,2023-01-28
+C0210,Eve Reyes,eve.reyes210 at example.com,+44 20 7946 0210,B33 8TH,BS1 4DJ,united kingdom,2023-12-05
+C0059,Eve Walsh,eve.walsh59@example.com,020-7946-0059,EH1 1YZ,LS1 4AP,U.K.,2023-04-21
+C0241,Cy Novak,cy.novak241@example.com,(416) 555-0241,CR2 6XH,EC1A 1BB,U.K.,2024-06-29
+C0150,Ann Singh,ann.singh150@example.com,4165550150,BS1 4DJ,BS1 4DJ,United Kingdom,2023-04-28
+C0267,Kit Okafor,kit.okafor267@example.com,020-7946-0267,b33 8th,K1A 0B1,United Kingdom,2023-07-09
+C0131,Lena Lee,lena.lee131@example.com,020-7946-0131,B33 8TH,BS1 4DJ,United Kingdom,2024-06-16
+C0071,Bo Reyes,bo.reyes71@example.com,(416) 555-0071,LS1 4AP,M1 1AE,United Kingdom,2023-06-16
+C0153, LENA DIAZ,lena.diaz153@example.com,4165550153,BS1 4DJ,B33 8TH,United Kingdom,2024-05-30
+C0106,Gus Walsh,gus.walsh106@example.com,020-7946-0106,EC1A 1BB,M1 1AE,uk ,2024-08-17
+C0191,Finn Evans,finn.evans191@example.com,+44 20 7946 0191,EH1 1YZ,B33 8TH,United Kingdom,2023-03-07
+C0197,Hana Diaz,hana.diaz197@example.com,4165550197,BS1 4DJ,SW1A 1AA,UK,2023-11-15
+C0042,Finn Reyes,finn.reyes42@example.com,4165550042,LS1 4AP,SW1A 1AA,United Kingdom,2024-05-10
+C0094,Cy Singh,cy.singh94@example.com,(416) 555-0094,LS1 4AP,EC1A 1BB,United Kingdom,2024-10-08
+C0173,Eve Diaz,eve.diaz173@example.com,4165550173,M1 1AE,CR2 6XH,U.K.,2024-01-27
+C0011,Bo Chen,bo.chen11@example.com,4165550011,LS1 4AP,SW1A 1AA,United Kingdom,2023-02-04
+C0034,Eve Evans,eve.evans34@example.com,(416) 555-0034,LS1 4AP,EC1A 1BB,United Kingdom,2023-11-28
+C0111,Di Diaz,di.diaz111@example.com,0207,B33 8TH,LS1 4AP,United Kingdom,2023-11-21
+C0273,Bo Evans,bo.evans273@example.com,0207,LS1 4AP,CR2 6XH,United Kingdom,2024-05-03
+C0134,Gus Reyes,gus.reyes134@example.com,(416) 555-0134,LS1 4AP,LS1 4AP,United Kingdom,2024-04-12
+C0007,Lena Evans,lena.evans7@example.com,(416) 555-0007,B33 8TH,K1A 0B1,United Kingdom,2023-12-25
+C0022,Di Reyes,di.reyes22@example.com,(416) 555-0022,M1 1AE,T2P 2M5,United Kingdom,2023-08-23
+C0077,Eve Diaz,eve.diaz77@example.com,(416) 555-0077,B33 8TH,V6B 4Y8,United Kingdom,2024-10-10
+C0060,Gus Reyes,gus.reyes60@example.com,+44 20 7946 0060,BS1 4DJ,V6B 4Y8,united kingdom,2024-06-05
+C0221,Ann Evans,ann.evans221@example.com,4165550221,LS1 4AP,EH1 1YZ,United Kingdom,2023-04-19
+C0228,Eve Reyes,eve.reyes228@example.com,(416) 555-0228,cr2 6xh,B33 8TH,U.K.,2023-06-19
+C0249,Jude Chen,jude.chen249@example.com,020-7946-0249,M1 1AE,M1 1AE,UK,2024-06-01
+C0062,Lena Chen,lena.chen62@example.com,(416) 555-0062,SW1A 1AA,K1A 0B1,united kingdom,2023-09-22
+C0147,Kit Novak,kit.novak147@example.com,+44 20 7946 0147,EH1 1YZ,EH1 1YZ,United Kingdom,2023-06-15
+C0087,Eve Evans,eve.evans87@example.com,(416) 555-0087,EH1 1YZ,LS1 4AP,United Kingdom,2023-05-11
+C0049,Ivo Evans,ivo.evans49@example.com,(416) 555-0049,EH1 1YZ,M5V 3L9,United Kingdom,2024-10-22
+C0251,Hana Singh,hana.singh251@example.com,(416) 555-0251,CR2 6XH,BS1 4DJ,United Kingdom,2023-12-18
+C0272,Gus Chen,gus.chen272@example.com,+44 20 7946 0272,B33 8TH,CR2 6XH,United Kingdom,2023-03-02
+C0116,Ivo Evans,ivo.evans116@example.com,+44 20 7946 0116,M1 1AE,EC1A 1BB,United Kingdom,2023-05-04
+C0160,Hana Chen,hana.chen160@example.com,4165550160,BS1 4DJ,SW1A 1AA,United Kingdom,2024-11-16
+C0238,Lena Lee,lena.lee238@example.com,(416) 555-0238,ls1 4ap,H2Y 1C6,United Kingdom,2024-07-24
+C0199,Cy Novak,cy.novak199 at example.com,(416) 555-0199,LS1 4AP,T2P 2M5,uk ,2024-08-14
+C0269,Eve Okafor,eve.okafor269@example.com,+44 20 7946 0269,BS1 4DJ,LS1 4AP,United Kingdom,2024-06-06
+C0139,Cy Yilmaz,cy.yilmaz139@example.com,020-7946-0139,eh1 1yz,B33 8TH,United Kingdom,2023-10-14
+C0035,Eve Lee,eve.lee35 at example.com,+44 20 7946 0035,CR2 6XH,K1A 0B1,United Kingdom,2024-09-05
+C0138,Finn Walsh,finn.walsh138 at example.com,(416) 555-0138,BS1 4DJ,B33 8TH,U.K.,2023-02-13
+C0183,Eve Novak,eve.novak183@example.com,020-7946-0183,B33 8TH,EC1A 1BB,United Kingdom,2024-04-06
+C0017,Ann Reyes,ann.reyes17@example.com,020-7946-0017,LS1 4AP,BS1 4DJ,United Kingdom,2024-02-05
+C0118,Di Novak,di.novak118 at example.com,+44 20 7946 0118,EH1 1YZ,T2P 2M5,united kingdom,2023-01-27
+C0136,Jude Novak,jude.novak136@example.com,(416) 555-0136,B33 8TH,M1 1AE,united kingdom,2024-09-10
+C0201,Eve Walsh,eve.walsh201@example.com,4165550201,B33 8TH,B33 8TH,United Kingdom,2023-09-17
+C0004,Di Reyes,di.reyes4@example.com,+44 20 7946 0004,BS1 4DJ,T2P 2M5,United Kingdom,2024-10-05
+C0142,Hana Lee,hana.lee142@example.com,+44 20 7946 0142,CR2 6XH,EH1 1YZ,uk ,2024-01-28
+C0114,Kit Walsh,kit.walsh114@example.com,020-7946-0114,LS1 4AP,BS1 4DJ,UK,2024-04-11
+C0050,Ivo Lee,ivo.lee50@example.com,(416) 555-0050,CR2 6XH,CR2 6XH,United Kingdom,2024-09-23
+C0217,Di Diaz,di.diaz217@example.com,020-7946-0217,BS1 4DJ,CR2 6XH,United Kingdom,2024-03-18
+C0229,Cy Evans,cy.evans229@example.com,020-7946-0229,EH1 1YZ,LS1 4AP,United Kingdom,2023-05-06
+C0271,Di Lee,di.lee271@example.com,020-7946-0271,EC1A 1BB,EC1A 1BB,United Kingdom,2023-03-06
+C0140, IVO WALSH,ivo.walsh140@example.com,020-7946-0140,EH1 1YZ,LS1 4AP,United Kingdom,2023-04-02
+C0055,Finn Okafor,finn.okafor55@example.com,4165550055,LS1 4AP,K1A 0B1,United Kingdom,2023-04-13
+C0045,Kit Walsh,kit.walsh45@example.com,4165550045,LS1 4AP,LS1 4AP,United Kingdom,2024-06-18
+C0265,Di Lee,di.lee265@example.com,4165550265,B33 8TH,BS1 4DJ,United Kingdom,2023-06-29
+C0181,Eve Reyes,eve.reyes181@example.com,020-7946-0181,SW1A 1AA,LS1 4AP,United Kingdom,2024-10-09
+C0243,Ivo Reyes,ivo.reyes243@example.com,4165550243,B33 8TH,SW1A 1AA,uk ,2023-06-09
+C0122,Eve Diaz,eve.diaz122@example.com,(416) 555-0122,cr2 6xh,K1A 0B1,United Kingdom,2023-07-12
+C0061,Lena Okafor,lena.okafor61@example.com,(416) 555-0061,CR2 6XH,H2Y 1C6,uk ,2023-12-05
+C0159,Finn Singh,finn.singh159@example.com,020-7946-0159,LS1 4AP,SW1A 1AA,United Kingdom,2023-02-23
+C0115,Cy Novak,cy.novak115@example.com,4165550115,SW1A 1AA,SW1A 1AA,United Kingdom,2024-06-15
+C0086,Cy Walsh,cy.walsh86@example.com,020-7946-0086,EH1 1YZ,V6B 4Y8,United Kingdom,2023-06-20
+C0174,Lena Yilmaz,lena.yilmaz174@example.com,(416) 555-0174,LS1 4AP,LS1 4AP,United Kingdom,2024-11-09
+C0130,Eve Chen,eve.chen130@example.com,(416) 555-0130,CR2 6XH,K1A 0B1,United Kingdom,2023-07-27
+C0184,Lena Lee,lena.lee184@example.com,020-7946-0184,EH1 1YZ,BS1 4DJ,United Kingdom,2023-08-02
+C0250,Ivo Lee,ivo.lee250@example.com,4165550250,SW1A 1AA,SW1A 1AA,United Kingdom,2023-08-27
+C0051,Ann Novak,ann.novak51@example.com,4165550051,SW1A 1AA,M1 1AE,United Kingdom,2023-03-07
+C0218,Finn Yilmaz,finn.yilmaz218@example.com,020-7946-0218,M1 1AE,M5V 3L9,United Kingdom,2024-10-01
+C0161,Hana Okafor,hana.okafor161@example.com,(416) 555-0161,CR2 6XH,EC1A 1BB,United Kingdom,2023-08-06
+C0102,Hana Reyes,hana.reyes102@example.com,+44 20 7946 0102,LS1 4AP,CR2 6XH,United Kingdom,2023-11-12
+C0212,Eve Novak,eve.novak212@example.com,020-7946-0212,B33 8TH,EH1 1YZ,United Kingdom,2023-07-22
+C0099,Hana Reyes,hana.reyes99@example.com,+44 20 7946 0099,LS1 4AP,BS1 4DJ,uk ,2023-08-21
+C0078,Jude Yilmaz,jude.yilmaz78@example.com,4165550078,ls1 4ap,K1A 0B1,United Kingdom,2023-09-11
+C0081,Bo Evans,bo.evans81@example.com,+44 20 7946 0081,LS1 4AP,BS1 4DJ,United Kingdom,2024-03-10
+C0107,Di Yilmaz,di.yilmaz107@example.com,0207,CR2 6XH,V6B 4Y8,United Kingdom,2024-10-20
+C0163,Jude Walsh,jude.walsh163@example.com,+44 20 7946 0163,m1 1ae,H2Y 1C6,United Kingdom,2024-06-30
+C0240,Hana Yilmaz,hana.yilmaz240@example.com,020-7946-0240,SW1A 1AA,BS1 4DJ,United Kingdom,2024-09-10
+C0276,Cy Evans,cy.evans276@example.com,4165550276,CR2 6XH,M1 1AE,United Kingdom,2023-02-02
+C0167,Di Chen,di.chen167@example.com,+44 20 7946 0167,BS1 4DJ,LS1 4AP,United Kingdom,2024-07-23
+C0224,Eve Novak,eve.novak224@example.com,020-7946-0224,EH1 1YZ,EH1 1YZ,UK,2024-03-23
+C0188,Kit Singh,kit.singh188@example.com,+44 20 7946 0188,CR2 6XH,EH1 1YZ,United Kingdom,2023-10-04
+C0246,Ivo Reyes,ivo.reyes246@example.com,(416) 555-0246,B33 8TH,V6B 4Y8,United Kingdom,2023-04-09
+C0037,Finn Lee,finn.lee37@example.com,4165550037,M1 1AE,M1 1AE,United Kingdom,2023-03-05
+C0176,Lena Okafor,lena.okafor176@example.com,020-7946-0176,LS1 4AP,EC1A 1BB,United Kingdom,2023-12-05
+C0076,Di Singh,di.singh76@example.com,4165550076,cr2 6xh,EC1A 1BB,United Kingdom,2024-07-17
+C0067,Gus Diaz,gus.diaz67@example.com,020-7946-0067,EH1 1YZ,BS1 4DJ,United Kingdom,2023-06-25
+C0031,Hana Evans,hana.evans31@example.com,4165550031,BS1 4DJ,EH1 1YZ,United Kingdom,2023-01-05
+C0219,Jude Singh,jude.singh219@example.com,+44 20 7946 0219,SW1A 1AA,EH1 1YZ,United Kingdom,2024-11-09
+C0117, HANA NOVAK,hana.novak117@example.com,4165550117,EC1A 1BB,B33 8TH,U.K.,2023-03-04
+C0162,Ivo Lee,ivo.lee162@example.com,020-7946-0162,BS1 4DJ,LS1 4AP,UK,2023-06-18
+C0044,Jude Diaz,jude.diaz44@example.com,(416) 555-0044,BS1 4DJ,BS1 4DJ,United Kingdom,2023-07-25
+C0089, GUS CHEN,gus.chen89@example.com,+44 20 7946 0089,BS1 4DJ,LS1 4AP,United Kingdom,2024-03-14
+C0279,Finn Singh,finn.singh279 at example.com,4165550279,B33 8TH,EH1 1YZ,United Kingdom,2023-03-24
+C0259,Gus Chen,gus.chen259@example.com,+44 20 7946 0259,M1 1AE,M5V 3L9,United Kingdom,2024-09-28
+C0021,Cy Okafor,cy.okafor21@example.com,4165550021,B33 8TH,EC1A 1BB,United Kingdom,2024-09-08
+C0144,Ivo Singh,ivo.singh144@example.com,4165550144,bs1 4dj,EC1A 1BB,United Kingdom,2024-08-04
+C0006,Di Evans,di.evans6@example.com,+44 20 7946 0006,EC1A 1BB,T2P 2M5,United Kingdom,2023-03-25
+C0126,Ann Yilmaz,ann.yilmaz126@example.com,+44 20 7946 0126,CR2 6XH,CR2 6XH,uk ,2024-04-05
+C0220,Bo Lee,bo.lee220@example.com,020-7946-0220,BS1 4DJ,B33 8TH,united kingdom,2024-07-25
+C0013,Lena Reyes,lena.reyes13@example.com,+44 20 7946 0013,EH1 1YZ,EC1A 1BB,United Kingdom,2023-07-31
+C0052,Hana Reyes,hana.reyes52@example.com,020-7946-0052,LS1 4AP,K1A 0B1,uk ,2024-05-28
+C0225,Di Reyes,di.reyes225@example.com,4165550225,B33 8TH,H2Y 1C6,United Kingdom,2024-02-09
+C0171,Kit Reyes,kit.reyes171@example.com,0207,SW1A 1AA,EC1A 1BB,United Kingdom,2024-03-31
+C0070,Jude Evans,jude.evans70@example.com,4165550070,SW1A 1AA,LS1 4AP,United Kingdom,2023-04-25
+C0002,Eve Chen,eve.chen2@example.com,(416) 555-0002,CR2 6XH,BS1 4DJ,United Kingdom,2023-02-19
+C0274,Gus Chen,gus.chen274@example.com,4165550274,M1 1AE,M1 1AE,United Kingdom,2024-12-01
+C0023,Bo Novak,bo.novak23@example.com,020-7946-0023,ec1a 1bb,B33 8TH,United Kingdom,2023-11-04
+C0112,Cy Walsh,cy.walsh112@example.com,+44 20 7946 0112,EC1A 1BB,CR2 6XH,United Kingdom,2024-09-21
+C0280,Ann Reyes,ann.reyes280@example.com,4165550280,B33 8TH,M1 1AE,United Kingdom,2023-03-02
+C0264,Finn Okafor,finn.okafor264@example.com,+44 20 7946 0264,BS1 4DJ,LS1 4AP,United Kingdom,2024-10-11
+C0137,Bo Evans,bo.evans137@example.com,+44 20 7946 0137,B33 8TH,EH1 1YZ,United Kingdom,2023-03-07
+C0151,Finn Lee,finn.lee151@example.com,020-7946-0151,BS1 4DJ,SW1A 1AA,United Kingdom,2023-11-05
+C0040,Ivo Chen,ivo.chen40@example.com,020-7946-0040,EH1 1YZ,T2P 2M5,United Kingdom,2023-07-21
+C0140,Ivo Walsh,ivo.walsh140@example.com,020-7946-0140,EH1 1YZ,LS1 4AP,United Kingdom,2023-04-02
+C0236,Ann Evans,ann.evans236@example.com,(416) 555-0236,B33 8TH,EC1A 1BB,uk ,2024-04-26
+C0024,Cy Singh,cy.singh24@example.com,(416) 555-0024,B33 8TH,CR2 6XH,United Kingdom,2024-08-10
+C0263,Di Walsh,di.walsh263@example.com,(416) 555-0263,sw1a 1aa,M5V 3L9,United Kingdom,2023-03-13
+C0155,Cy Novak,cy.novak155 at example.com,+44 20 7946 0155,EC1A 1BB,B33 8TH,United Kingdom,2023-07-02
+C0261,Cy Novak,cy.novak261@example.com,(416) 555-0261,CR2 6XH,LS1 4AP,United Kingdom,2024-09-14
+C0208,Eve Walsh,eve.walsh208@example.com,+44 20 7946 0208,CR2 6XH,LS1 4AP,United Kingdom,2024-10-12
+C0234,Finn Okafor,finn.okafor234@example.com,+44 20 7946 0234,BS1 4DJ,M5V 3L9,United Kingdom,2023-03-30
+C0197,Hana Diaz,hana.diaz197@example.com,4165550197,BS1 4DJ,SW1A 1AA,UK,2023-11-15
+C0231,Eve Novak,eve.novak231@example.com,020-7946-0231,BS1 4DJ,EC1A 1BB,United Kingdom,2024-01-08
+C0117,Hana Novak,hana.novak117@example.com,4165550117,EC1A 1BB,B33 8TH,U.K.,2023-03-04
+C0206,Cy Diaz,cy.diaz206@example.com,020-7946-0206,B33 8TH,BS1 4DJ,United Kingdom,2023-01-10
+C0223,Ivo Lee,ivo.lee223@example.com,020-7946-0223,CR2 6XH,SW1A 1AA,united kingdom,2023-03-12
+C0203,Bo Novak,bo.novak203@example.com,(416) 555-0203,SW1A 1AA,LS1 4AP,United Kingdom,2023-09-24
+C0105,Ivo Walsh,ivo.walsh105@example.com,(416) 555-0105,B33 8TH,BS1 4DJ,United Kingdom,2023-06-23
+C0090,Hana Novak,hana.novak90@example.com,(416) 555-0090,B33 8TH,EC1A 1BB,United Kingdom,2024-05-23
+C0214,Eve Okafor,eve.okafor214@example.com,020-7946-0214,BS1 4DJ,B33 8TH,United Kingdom,2024-08-27
+C0092,Ivo Diaz,ivo.diaz92@example.com,+44 20 7946 0092,SW1A 1AA,EC1A 1BB,U.K.,2024-01-25
+C0278,Finn Diaz,finn.diaz278@example.com,+44 20 7946 0278,SW1A 1AA,T2P 2M5,United Kingdom,2024-01-14
+C0235, JUDE EVANS,jude.evans235@example.com,(416) 555-0235,CR2 6XH,SW1A 1AA,United Kingdom,2024-09-10
+C0084,Ivo Chen,ivo.chen84@example.com,0207,M1 1AE,M5V 3L9,United Kingdom,2023-05-15
+C0270,Kit Reyes,kit.reyes270@example.com,+44 20 7946 0270,EC1A 1BB,T2P 2M5,UK,2024-03-14
+C0142, HANA LEE,hana.lee142@example.com,+44 20 7946 0142,CR2 6XH,EH1 1YZ,uk ,2024-01-28
+C0277,Ivo Chen,ivo.chen277@example.com,(416) 555-0277,B33 8TH,EH1 1YZ,United Kingdom,2023-02-28
+C0038,Gus Singh,gus.singh38@example.com,+44 20 7946 0038,LS1 4AP,EC1A 1BB,united kingdom,2023-05-22
+C0125,Ivo Okafor,ivo.okafor125@example.com,(416) 555-0125,EH1 1YZ,LS1 4AP,U.K.,2024-02-28
+C0036,Ann Novak,ann.novak36@example.com,020-7946-0036,SW1A 1AA,BS1 4DJ,United Kingdom,2023-03-10
+C0123,Eve Evans,eve.evans123@example.com,4165550123,SW1A 1AA,H2Y 1C6,United Kingdom,2023-08-11
+C0121,Gus Diaz,gus.diaz121@example.com,4165550121,M1 1AE,EH1 1YZ,United Kingdom,2023-11-11
+C0148,Ivo Lee,ivo.lee148@example.com,0207,B33 8TH,H2Y 1C6,United Kingdom,2024-05-30
+C0083,Ann Walsh,ann.walsh83@example.com,(416) 555-0083,EH1 1YZ,EC1A 1BB,United Kingdom,2023-10-18
+C0072,Di Yilmaz,di.yilmaz72@example.com,4165550072,SW1A 1AA,B33 8TH,UK,2024-09-18
+C0254,Eve Singh,eve.singh254@example.com,+44 20 7946 0254,EC1A 1BB,SW1A 1AA,United Kingdom,2023-05-16
+C0113,Kit Singh,kit.singh113@example.com,(416) 555-0113,B33 8TH,SW1A 1AA,United Kingdom,2024-09-09
+C0204,Ivo Evans,ivo.evans204@example.com,(416) 555-0204,ec1a 1bb,M5V 3L9,United Kingdom,2023-02-19
+C0244,Ann Okafor,ann.okafor244@example.com,(416) 555-0244,eh1 1yz,LS1 4AP,United Kingdom,2023-08-30
+C0074,Lena Okafor,lena.okafor74@example.com,020-7946-0074,SW1A 1AA,T2P 2M5,United Kingdom,2024-08-20
+C0079,Hana Singh,hana.singh79@example.com,+44 20 7946 0079,BS1 4DJ,EH1 1YZ,United Kingdom,2024-09-28
+C0121,Gus Diaz,gus.diaz121@example.com,4165550121,M1 1AE,EH1 1YZ,United Kingdom,2023-11-11
+C0119, BO CHEN,bo.chen119 at example.com,(416) 555-0119,M1 1AE,V6B 4Y8,United Kingdom,2023-01-28
+C0211,Hana Singh,hana.singh211@example.com,+44 20 7946 0211,CR2 6XH,EC1A 1BB,United Kingdom,2024-06-06
+C0110,Cy Okafor,cy.okafor110@example.com,+44 20 7946 0110,EH1 1YZ,V6B 4Y8,United Kingdom,2024-02-01
+C0053,Jude Evans,jude.evans53@example.com,4165550053,M1 1AE,B33 8TH,United Kingdom,2024-06-26
+C0153,Lena Diaz,lena.diaz153@example.com,4165550153,BS1 4DJ,B33 8TH,United Kingdom,2024-05-30
+C0233,Di Singh,di.singh233@example.com,+44 20 7946 0233,BS1 4DJ,EC1A 1BB,United Kingdom,2023-09-15
+C0227,Cy Lee,cy.lee227@example.com,020-7946-0227,BS1 4DJ,M1 1AE,United Kingdom,2024-08-29
+C0262,Cy Chen,cy.chen262@example.com,(416) 555-0262,EC1A 1BB,V6B 4Y8,United Kingdom,2024-09-30
+C0033,Lena Yilmaz,lena.yilmaz33@example.com,(416) 555-0033,EH1 1YZ,SW1A 1AA,uk ,2023-09-02
+C0063,Cy Lee,cy.lee63@example.com,020-7946-0063,LS1 4AP,M5V 3L9,United Kingdom,2023-11-11
+C0015,Lena Okafor,lena.okafor15@example.com,4165550015,B33 8TH,LS1 4AP,United Kingdom,2024-06-19
+C0127,Bo Novak,bo.novak127@example.com,4165550127,M1 1AE,CR2 6XH,UK,2023-05-29
+C0054,Finn Chen,finn.chen54@example.com,4165550054,CR2 6XH,BS1 4DJ,United Kingdom,2023-01-23
+C0168,Cy Evans,cy.evans168@example.com,4165550168,B33 8TH,EH1 1YZ,UK,2023-08-23
+C0179,Ann Singh,ann.singh179@example.com,(416) 555-0179,LS1 4AP,EH1 1YZ,United Kingdom,2024-11-26
+C0247,Cy Chen,cy.chen247@example.com,+44 20 7946 0247,EH1 1YZ,K1A 0B1,uk ,2023-11-06
+C0257,Jude Yilmaz,jude.yilmaz257@example.com,020-7946-0257,EC1A 1BB,B33 8TH,United Kingdom,2024-06-20
+C0065,Finn Diaz,finn.diaz65@example.com,(416) 555-0065,BS1 4DJ,BS1 4DJ,United Kingdom,2024-11-27
+C0157,Eve Lee,eve.lee157 at example.com,020-7946-0157,BS1 4DJ,EH1 1YZ,United Kingdom,2023-07-22
+C0194,Gus Lee,gus.lee194@example.com,4165550194,b33 8th,V6B 4Y8,United Kingdom,2024-05-26
+C0152,Eve Singh,eve.singh152@example.com,+44 20 7946 0152,BS1 4DJ,EH1 1YZ,United Kingdom,2024-06-20
+C0182,Eve Walsh,eve.walsh182@example.com,(416) 555-0182,sw1a 1aa,CR2 6XH,United Kingdom,2024-09-17
+C0177,Bo Evans,bo.evans177@example.com,4165550177,m1 1ae,H2Y 1C6,United Kingdom,2023-02-27
+C0001,Lena Okafor,lena.okafor1@example.com,020-7946-0001,LS1 4AP,M1 1AE,UK,2023-09-27
+C0098,Eve Walsh,eve.walsh98 at example.com,(416) 555-0098,SW1A 1AA,H2Y 1C6,United Kingdom,2023-06-29
+C0209,Ann Okafor,ann.okafor209@example.com,4165550209,EH1 1YZ,H2Y 1C6,United Kingdom,2023-11-20
+C0146,Bo Walsh,bo.walsh146@example.com,(416) 555-0146,LS1 4AP,SW1A 1AA,United Kingdom,2023-12-26
+C0190,Eve Lee,eve.lee190@example.com,(416) 555-0190,SW1A 1AA,BS1 4DJ,United Kingdom,2023-01-04
+C0230,Lena Novak,lena.novak230@example.com,(416) 555-0230,EH1 1YZ,T2P 2M5,UK,2024-01-07
+C0104,Eve Lee,eve.lee104@example.com,4165550104,BS1 4DJ,M1 1AE,United Kingdom,2023-08-06
+C0058,Eve Novak,eve.novak58@example.com,4165550058,M1 1AE,EC1A 1BB,United Kingdom,2023-04-21
+C0108,Hana Singh,hana.singh108@example.com,4165550108,EH1 1YZ,V6B 4Y8,United Kingdom,2023-01-13
+C0100,Ivo Evans,ivo.evans100@example.com,(416) 555-0100,EC1A 1BB,CR2 6XH,united kingdom,2023-08-01
+C0198,Gus Novak,gus.novak198@example.com,020-7946-0198,SW1A 1AA,V6B 4Y8,United Kingdom,2023-12-06
+C0091,Jude Okafor,jude.okafor91@example.com,(416) 555-0091,SW1A 1AA,LS1 4AP,United Kingdom,2024-09-25
+C0160,Hana Chen,hana.chen160@example.com,4165550160,BS1 4DJ,SW1A 1AA,United Kingdom,2024-11-16
+C0135,Eve Walsh,eve.walsh135@example.com,4165550135,CR2 6XH,LS1 4AP,U.K.,2024-09-09
+C0066,Bo Singh,bo.singh66@example.com,4165550066,SW1A 1AA,CR2 6XH,uk ,2024-09-23
+C0025,Bo Okafor,bo.okafor25 at example.com,+44 20 7946 0025,CR2 6XH,LS1 4AP,United Kingdom,2024-03-04
+C0085,Jude Reyes,jude.reyes85@example.com,(416) 555-0085,LS1 4AP,EH1 1YZ,United Kingdom,2024-10-13
+C0089,Gus Chen,gus.chen89@example.com,+44 20 7946 0089,BS1 4DJ,LS1 4AP,United Kingdom,2024-03-14
+C0020,Kit Okafor,kit.okafor20@example.com,020-7946-0020,BS1 4DJ,T2P 2M5,United Kingdom,2023-10-20
+C0276,Cy Evans,cy.evans276@example.com,4165550276,CR2 6XH,M1 1AE,United Kingdom,2023-02-02
+C0156,Finn Walsh,finn.walsh156@example.com,4165550156,SW1A 1AA,EH1 1YZ,UK,2024-02-28
+C0255,Lena Okafor,lena.okafor255@example.com,4165550255,EH1 1YZ,V6B 4Y8,United Kingdom,2023-05-11
+C0196,Cy Diaz,cy.diaz196@example.com,4165550196,B33 8TH,EC1A 1BB,united kingdom,2023-03-22
+C0073,Finn Singh,finn.singh73@example.com,+44 20 7946 0073,EH1 1YZ,M5V 3L9,United Kingdom,2024-02-05
+C0205,Hana Yilmaz,hana.yilmaz205@example.com,020-7946-0205,LS1 4AP,M5V 3L9,United Kingdom,2023-06-20
+C0056,Cy Singh,cy.singh56@example.com,+44 20 7946 0056,CR2 6XH,K1A 0B1,U.K.,2024-10-23
+C0158,Jude Yilmaz,jude.yilmaz158@example.com,020-7946-0158,M1 1AE,SW1A 1AA,United Kingdom,2023-03-19
+C0026,Ivo Reyes,ivo.reyes26@example.com,+44 20 7946 0026,EC1A 1BB,M5V 3L9,United Kingdom,2023-05-14
+C0216,Kit Chen,kit.chen216@example.com,+44 20 7946 0216,sw1a 1aa,EC1A 1BB,United Kingdom,2023-07-27
+C0003,Gus Walsh,gus.walsh3@example.com,+44 20 7946 0003,b33 8th,BS1 4DJ,United Kingdom,2023-05-04
+C0082,Lena Lee,lena.lee82@example.com,4165550082,ls1 4ap,M5V 3L9,uk ,2024-11-07
+C0041,Ivo Yilmaz,ivo.yilmaz41@example.com,+44 20 7946 0041,EC1A 1BB,EH1 1YZ,United Kingdom,2023-05-05
+C0101,Kit Singh,kit.singh101@example.com,020-7946-0101,EH1 1YZ,T2P 2M5,United Kingdom,2023-02-13
+C0175,Bo Okafor,bo.okafor175@example.com,(416) 555-0175,EH1 1YZ,BS1 4DJ,United Kingdom,2023-03-29
+C0097,Di Singh,di.singh97@example.com,4165550097,SW1A 1AA,LS1 4AP,United Kingdom,2023-03-28
+C0166,Gus Chen,gus.chen166@example.com,(416) 555-0166,CR2 6XH,CR2 6XH,United Kingdom,2024-01-05
+C0145,Ann Okafor,ann.okafor145@example.com,0207,M1 1AE,EC1A 1BB,United Kingdom,2024-01-03
+C0275,Jude Lee,jude.lee275@example.com,+44 20 7946 0275,EC1A 1BB,B33 8TH,uk ,2024-04-24
+C0207,Finn Singh,finn.singh207@example.com,(416) 555-0207,M1 1AE,H2Y 1C6,United Kingdom,2023-07-31
+C0149,Hana Lee,hana.lee149@example.com,4165550149,EC1A 1BB,BS1 4DJ,United Kingdom,2023-09-30
+C0266,Jude Yilmaz,jude.yilmaz266 at example.com,(416) 555-0266,SW1A 1AA,H2Y 1C6,united kingdom,2023-07-16
+C0200,Hana Evans,hana.evans200@example.com,4165550200,EC1A 1BB,M1 1AE,united kingdom,2023-02-08
+C0096,Jude Novak,jude.novak96@example.com,+44 20 7946 0096,EH1 1YZ,EH1 1YZ,United Kingdom,2024-04-12
+C0080,Cy Okafor,cy.okafor80@example.com,4165550080,CR2 6XH,EH1 1YZ,United Kingdom,2023-12-15
+C0095,Eve Walsh,eve.walsh95 at example.com,(416) 555-0095,CR2 6XH,CR2 6XH,United Kingdom,2024-09-16
+C0010,Finn Reyes,finn.reyes10@example.com,4165550010,LS1 4AP,M5V 3L9,united kingdom,2024-03-26
+C0133,Kit Reyes,kit.reyes133@example.com,(416) 555-0133,EC1A 1BB,LS1 4AP,United Kingdom,2023-10-23
+C0236,Ann Evans,ann.evans236@example.com,(416) 555-0236,B33 8TH,EC1A 1BB,uk ,2024-04-26
+C0222,Di Novak,di.novak222@example.com,+44 20 7946 0222,M1 1AE,EC1A 1BB,United Kingdom,2024-06-01
+C0258,Finn Lee,finn.lee258@example.com,+44 20 7946 0258,BS1 4DJ,CR2 6XH,united kingdom,2024-10-17
+C0008,Hana Evans,hana.evans8@example.com,(416) 555-0008,BS1 4DJ,K1A 0B1,United Kingdom,2023-04-01
+C0005,Kit Chen,kit.chen5@example.com,(416) 555-0005,B33 8TH,EH1 1YZ,United Kingdom,2024-04-06

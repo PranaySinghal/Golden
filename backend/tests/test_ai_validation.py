@@ -17,6 +17,7 @@ from app.ai.wording import (
 )
 from app.config import MAX_SAMPLE_ROWS
 from app.detectors.models import DetectorName, Issue, Tier
+from app.detectors.registry import detect_issues
 from app.questions.models import Question
 from app.steps.models import TrimStep
 from tests.conftest import Dataset
@@ -115,6 +116,29 @@ def test_a_step_type_we_do_not_have_is_dropped(make_dataset: MakeDataset) -> Non
     assert accept(ds, invented) == []
 
 
+def test_a_fix_that_adds_a_column_is_dropped(make_dataset: MakeDataset) -> None:
+    ds = make_dataset(MESSY)
+    extra = fix(steps=[{"type": "add_column", "arguments": {"name": "Bonus", "value": "10"}}])
+
+    assert accept(ds, extra) == []
+
+
+def test_a_fix_that_sends_values_to_an_outside_service_is_dropped(
+    make_dataset: MakeDataset,
+) -> None:
+    ds = make_dataset(MESSY)
+    lookup = fix(
+        steps=[
+            {
+                "type": "enrich_column",
+                "arguments": {"connector": "company_ticker", "column": "Full_Name", "into": ["T"]},
+            }
+        ]
+    )
+
+    assert accept(ds, lookup) == []
+
+
 def test_arguments_that_do_not_fit_the_step_are_dropped(make_dataset: MakeDataset) -> None:
     ds = make_dataset(MESSY)
     wrong = fix(steps=[{"type": "split_column", "arguments": {"column": "Notes"}}])
@@ -166,6 +190,42 @@ def test_a_fix_the_detectors_already_found_is_dropped(make_dataset: MakeDataset)
     again = accept(ds, fix(title="Something else entirely"), known=[first])
 
     assert again == []
+
+
+def test_a_fix_that_only_repeats_what_the_certain_fixes_did_is_dropped(
+    make_dataset: MakeDataset,
+) -> None:
+    ds = make_dataset("Name,Team\n Ann ,Sales\nBo ,Sales\n Cy,Support\nDi,Support\n")
+    known = detect_issues(ds.conn, ds.profile)
+    assert any(issue.tier is Tier.SAFE for issue in known)
+    tidy = fix(
+        columns=["Name"],
+        title="Names have stray spaces around them",
+        steps=[{"type": "map_values", "arguments": {
+            "column": "Name", "match": "ignore_case_and_spaces",
+            "mappings": [{"from_value": "Ann", "to_value": "Ann"}]}}],
+    )  # fmt: skip
+
+    # On the file as uploaded this would change a row. The spaces are already
+    # trimmed by the time anyone would read it, so it changes nothing.
+    assert accept(ds, tidy) != []
+    assert accept(ds, tidy, known=known) == []
+
+
+def test_a_fix_is_checked_against_columns_as_the_certain_fixes_leave_them(
+    make_dataset: MakeDataset,
+) -> None:
+    ds = make_dataset("Item,Price\nPen,$1.50\nPad,$3.00\nInk,$12.00\nCap,$0.75\n")
+    known = detect_issues(ds.conn, ds.profile)
+    strip = fix(
+        columns=["Price"],
+        title="Dollar signs are stuck to the prices",
+        steps=[{"type": "remove_characters", "arguments": {
+            "columns": ["Price"], "characters": "$", "where": "leading"}}],
+    )  # fmt: skip
+
+    # "Price" is already read as numbers, so there are no characters left to remove.
+    assert accept(ds, strip, known=known) == []
 
 
 def test_the_number_of_fixes_is_capped() -> None:

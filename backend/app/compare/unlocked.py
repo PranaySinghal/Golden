@@ -24,7 +24,7 @@ from app.profile.profiler import profile_column
 from app.profile.stats import compute_column_stats, count_rows
 from app.questions.generate import generate_questions
 from app.questions.models import Question
-from app.steps.apply import RecipePlan, chain_sql
+from app.steps.apply import RecipePlan, chain_sql, volatile_columns
 from app.steps.schema import ValueKind, text_of
 
 # Cleaned rows as text, so the profiler and generator can read them like a file.
@@ -36,12 +36,18 @@ MAX_CANDIDATES = 24
 
 
 def changed_columns(plan: RecipePlan) -> list[str]:
-    """Columns the recipe created, or gave a kind other than text."""
+    """Columns the recipe created, or gave a kind other than text.
+
+    Looked-up columns are left out: their values can change from day to day, so
+    a question about them would have no one answer to compare.
+    """
     before = {column.name for column in plan.base.columns}
+    volatile, _ = volatile_columns(plan)
     return [
         column.name
         for column in plan.output.columns
-        if column.name not in before or column.kind is not ValueKind.TEXT
+        if column.name not in volatile
+        and (column.name not in before or column.kind is not ValueKind.TEXT)
     ]
 
 

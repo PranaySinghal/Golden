@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { api, type DatasetSummary } from './api/client'
 import { SiteNav } from './components/SiteNav'
 import { ErrorState, Spinner } from './components/states'
+import { ConnectorsPanel } from './features/connectors/ConnectorsPanel'
 import { LandingPage } from './features/landing/LandingPage'
 import { ReviewPage } from './features/review/ReviewPage'
 
@@ -22,6 +23,7 @@ function rememberInUrl(id: string | null) {
 export default function App() {
   const [chosen, setChosen] = useState<DatasetSummary | null>(null)
   const [wantedId, setWantedId] = useState<string | null>(datasetFromUrl)
+  const [connectorsOpen, setConnectorsOpen] = useState(false)
 
   // Only runs when the page was opened with a file already in the address.
   const restored = useQuery({
@@ -53,7 +55,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <SiteNav variant={onLanding ? 'landing' : 'analysis'} onHome={goHome} />
+      <SiteNav
+        variant={onLanding ? 'landing' : 'analysis'}
+        onHome={goHome}
+        onConnectors={() => setConnectorsOpen((open) => !open)}
+        connectorsOpen={connectorsOpen}
+      />
       <main className="page">
         {restored.isError ? (
           <ErrorState message={restored.error.message} onRetry={goHome} />
@@ -65,6 +72,9 @@ export default function App() {
           <LandingPage onUploaded={openDataset} />
         )}
       </main>
+      {connectorsOpen && (
+        <ConnectorsPanel datasetId={dataset?.id ?? null} onClose={() => setConnectorsOpen(false)} />
+      )}
     </div>
   )
 }

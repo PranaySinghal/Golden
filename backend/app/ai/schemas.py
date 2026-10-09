@@ -16,6 +16,11 @@ MAX_EXPLANATION_CHARS = 400
 MAX_LABEL_CHARS = 100
 MAX_STORY_SENTENCES = 4
 MAX_SENTENCE_CHARS = 200
+MAX_COLUMN_IDEAS = 5
+MAX_COLUMN_NAME_CHARS = 60
+MAX_COLUMN_CHOICES = 20
+# One reply answers one batch of values; a longer one answered something we didn't ask.
+MAX_FILL_ANSWERS = 100
 
 Title = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_TITLE_CHARS)
@@ -81,3 +86,48 @@ class RewordedQuestion(_Reply):
 
 class RewordQuestionsReply(_Reply):
     items: list[RewordedQuestion] = Field(default_factory=list)
+
+
+ShortText = Annotated[
+    str, StringConstraints(strip_whitespace=True, max_length=MAX_COLUMN_NAME_CHARS)
+]
+
+
+class ProposedColumn(_Reply):
+    name: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_COLUMN_NAME_CHARS),
+    ]
+    reason: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_SENTENCE_CHARS)
+    ]
+    # Empty means "leave it blank" and "nothing to look it up from".
+    placeholder: ShortText = ""
+    live_source: ShortText = ""
+    # Whether a model could fill this column in afterwards, and from which column.
+    kind: Literal["label", "text", "website", "none"] = "none"
+    based_on: Annotated[str, StringConstraints(strip_whitespace=True, max_length=255)] = ""
+    choices: Annotated[list[ShortText], Field(max_length=MAX_COLUMN_CHOICES)] = Field(
+        default_factory=list
+    )
+
+
+class SuggestColumnsReply(_Reply):
+    about: Annotated[
+        str, StringConstraints(strip_whitespace=True, max_length=MAX_SENTENCE_CHARS)
+    ] = ""
+    columns: Annotated[list[ProposedColumn], Field(max_length=MAX_COLUMN_IDEAS)] = Field(
+        default_factory=list
+    )
+
+
+class FillAnswer(_Reply):
+    id: int
+    # None is the model saying it isn't sure, which is always allowed.
+    answer: Annotated[str, StringConstraints(max_length=500)] | None = None
+
+
+class FillReply(_Reply):
+    answers: Annotated[list[FillAnswer], Field(max_length=MAX_FILL_ANSWERS)] = Field(
+        default_factory=list
+    )

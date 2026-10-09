@@ -97,7 +97,7 @@ def fixes_payload(
         "already_found": [issue.title for issue in known],
         "sample_rows": sample_rows(conn, profile, sample_limit),
     }
-    return _within_limit(payload)
+    return within_limit(payload)
 
 
 def issue_wording_payload(issues: list[Issue]) -> dict[str, Any]:
@@ -123,7 +123,7 @@ def _short(value: str) -> str:
     return value if len(value) <= MAX_VALUE_CHARS else value[: MAX_VALUE_CHARS - 1] + "…"
 
 
-def _within_limit(payload: dict[str, Any]) -> dict[str, Any]:
+def within_limit(payload: dict[str, Any]) -> dict[str, Any]:
     """Trim the sample until the payload is a reasonable size: rows first, then examples."""
     while _size(payload) > MAX_PAYLOAD_CHARS and payload["sample_rows"]:
         payload["sample_rows"] = payload["sample_rows"][: len(payload["sample_rows"]) // 2]

@@ -36,6 +36,8 @@ class DatasetSummary(BaseModel):
     # One plain sentence on what each row holds, from the column roles alone.
     description: str
     empty_rows_skipped: int
+    # Lines above the column names that were a title or a note, as written.
+    title_rows_skipped: list[str] = Field(default_factory=list)
     columns: list[ColumnProfile]
     # Only ever set on the upload that carried saved steps: a one-time report on
     # what came of them, not a property of the file. Reading the dataset again
@@ -121,5 +123,6 @@ def _summary(session: DatasetSession, outcome: RecipeOutcome | None = None) -> D
         column_count=session.profile.column_count,
         description=describe_rows(session.profile),
         empty_rows_skipped=ingest.empty_rows_skipped,
+        title_rows_skipped=ingest.title_rows_skipped,
         columns=session.profile.columns,
     )

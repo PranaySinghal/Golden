@@ -27,6 +27,7 @@ from app.ingest.models import IngestOptions, IngestResult
 from app.profile.models import DatasetProfile
 from app.profile.profiler import profile_table
 from app.questions.models import Question
+from app.semantic.models import ColumnIdeas
 from app.steps.apply import ApplyResult
 from app.steps.models import Recipe
 from app.steps.recipe_ops import RecipeHistory
@@ -72,6 +73,12 @@ class DatasetSession:
     # offers, this describes the answers, so it's asked again when they move.
     # A key that's present with no story means "asked, nothing worth showing".
     stories: dict[str, Story | None] = field(default_factory=dict)
+    # A model's ideas for new columns. They describe the file, so asked once.
+    column_ideas: ColumnIdeas | None = None
+    # Connectors the user has agreed to send this file's values to. Asked per file.
+    connector_consent: set[str] = field(default_factory=set)
+    # Connectors the user has switched on for this file. All start off.
+    connectors_on: set[str] = field(default_factory=set)
     # One DuckDB connection isn't safe to use from two threads at once.
     lock: threading.RLock = field(default_factory=threading.RLock)
 

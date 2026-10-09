@@ -20,17 +20,22 @@ from app.ai.schemas import ProposedFix, SuggestFixesReply
 from app.db import RAW_REF, quote_ident
 from app.detectors.base import DetectorContext, IssueBuilder
 from app.detectors.models import DetectorName, Issue, Tier
+from app.detectors.step_order import recipe_for
 from app.preview import preview
 from app.profile.models import DatasetProfile
+from app.steps.apply import plan_recipe
 from app.steps.compile import compile_step
 from app.steps.errors import StepValidationError
 from app.steps.identity import work_key
 from app.steps.models import (
+    AddColumnStep,
+    EnrichColumnStep,
     EqualsCondition,
     MapValuesStep,
     NullPlaceholdersStep,
     OneOfCondition,
     Recipe,
+    ResolveMatchStep,
     SplitColumnStep,
     Step,
 )
@@ -60,11 +65,16 @@ def accepted_fixes(
     ctx = DetectorContext(conn=conn, profile=profile, today=today or date.today())
     base = base_schema(profile)
     seen = {_signature(step) for issue in known for step in _all_steps(issue)}
+    # A model looks at the file as uploaded, but the certain fixes have already
+    # run by the time anyone reads its suggestion. So a suggestion is judged on
+    # the table as it stands after them: one that only repeats their work
+    # changes nothing there, and is dropped.
+    already = recipe_for(known, accepted={issue.id for issue in known if issue.tier is Tier.SAFE})
     issues: list[Issue] = []
 
     for position, fix in enumerate(reply.fixes):
         try:
-            issues.append(_to_issue(ctx, base, fix, position, seen))
+            issues.append(_to_issue(ctx, base, already, fix, position, seen))
         except RejectedError as rejection:
             logger.info("ai fix rejected reason=%s", rejection.reason)
     return issues
@@ -73,18 +83,19 @@ def accepted_fixes(
 def _to_issue(
     ctx: DetectorContext,
     base: StageSchema,
+    already: Recipe,
     fix: ProposedFix,
     position: int,
     seen: set[str],
 ) -> Issue:
     _check_columns(ctx.profile, fix)
-    steps = _check_steps(base, fix)
+    steps = _check_steps(plan_recipe(already, base).output, fix)
     if any(_signature(step) in seen for step in steps):
         raise RejectedError("already suggested by a detector")
     for step in steps:
         _check_values_exist(ctx.conn, step)
 
-    affected, examples = _count_affected(ctx.conn, base, steps)
+    affected, examples = _count_affected(ctx.conn, base, already, steps)
     if affected == 0:
         raise RejectedError("changes nothing")
 
@@ -117,6 +128,10 @@ def _check_steps(base: StageSchema, fix: ProposedFix) -> list[Step]:
             step = _STEP.validate_python({**proposed.arguments, "type": proposed.type})
         except ValidationError as error:
             raise RejectedError(f"step {index} isn't a step we can run") from error
+        if isinstance(step, AddColumnStep | EnrichColumnStep | ResolveMatchStep):
+            # A fix repairs what's there. New columns, and anything that sends
+            # values to an outside service, are the user's to ask for.
+            raise RejectedError(f"step {index} adds a column, which isn't a fix")
         try:
             schema = compile_step(step, schema, index=index, source="s").output
         except StepValidationError as error:
@@ -169,10 +184,11 @@ def _referenced_values(step: Step) -> list[tuple[str, str]]:
 
 
 def _count_affected(
-    conn: duckdb.DuckDBPyConnection, base: StageSchema, steps: list[Step]
+    conn: duckdb.DuckDBPyConnection, base: StageSchema, already: Recipe, steps: list[Step]
 ) -> tuple[int, list[str]]:
     """Our own count of what a fix touches, with an example or two from the rows."""
-    shown = preview(conn, base, Recipe(), Recipe(steps=steps), {step.id for step in steps}, limit=2)
+    with_fix = Recipe(steps=[*already.steps, *steps])
+    shown = preview(conn, base, already, with_fix, {step.id for step in steps}, limit=2)
     examples = [
         cell.before
         for row in shown.rows

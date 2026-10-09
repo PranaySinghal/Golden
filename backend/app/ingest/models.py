@@ -44,6 +44,10 @@ class IngestResult(BaseModel):
     columns: list[str] = Field(description="Unique column names used in the table, in file order.")
     row_count: int
     empty_rows_skipped: int = Field(description="Rows with no values at all that were not loaded.")
+    title_rows_skipped: list[str] = Field(
+        default_factory=list,
+        description="Title or note lines found above the column names, kept here, not loaded.",
+    )
 
 
 @dataclass

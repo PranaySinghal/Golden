@@ -22,14 +22,18 @@ from app.compare.engine import ComparisonEngine
 from app.compare.issue_impact import score_issues
 from app.compare.models import Comparison
 from app.config import Settings
-from app.detectors.models import Issue, Tier
+from app.detectors.models import DetectorName, Issue, Tier
 from app.detectors.registry import detect_issues, rank_issues
 from app.detectors.step_order import RANK, chosen_steps
 from app.errors import AppError
 from app.questions.generate import generate_questions
+from app.semantic.concepts import CONNECTOR_CONCEPTS, concept_of
+from app.semantic.engine import ask_for_ideas, suggestions_for
+from app.semantic.models import Suggestions
 from app.steps import recipe_ops
+from app.steps.apply import plan_recipe
 from app.steps.identity import matched_ids, work_key
-from app.steps.models import Recipe, Step
+from app.steps.models import AddColumnStep, EnrichColumnStep, Recipe, ResolveMatchStep, Step
 from app.steps.recipe_ops import RecipeHistory
 from app.store import DatasetSession
 from app.story import Story
@@ -51,6 +55,14 @@ class ChoiceNotFoundError(AppError):
     def __init__(self, choice_id: str) -> None:
         self.choice_id = choice_id
         super().__init__("That answer isn't one of the options. Try reloading the page.")
+
+
+class AlreadyLookedUpError(AppError):
+    code = "already_looked_up"
+    http_status = 409
+
+    def __init__(self, what: str, column: str) -> None:
+        super().__init__(f'{what} are already in "{column}", so nothing was added.')
 
 
 class ChoiceRequiredError(AppError):
@@ -255,6 +267,57 @@ def remove_step(session: DatasetSession, step_id: str) -> None:
     session.recipe, session.history = edit.recipe, edit.history
 
 
+def add_column(
+    session: DatasetSession, name: str, value: str | None, insert_after: str | None
+) -> None:
+    """Put a new column in the recipe, as a step like any other: it can be undone."""
+    prepare(session)
+    # The same thing a connector already looked up, under another name, would be
+    # a second copy of it. Nothing is added; the user is told where it already is.
+    for existing in session.recipe.steps:
+        if (
+            isinstance(existing, EnrichColumnStep)
+            and CONNECTOR_CONCEPTS.get(existing.connector) is not None
+            and CONNECTOR_CONCEPTS[existing.connector] == concept_of(name)
+        ):
+            raise AlreadyLookedUpError(CONNECTOR_CONCEPTS[existing.connector], existing.into[0])
+    step = AddColumnStep(name=name, value=value or None, insert_after=insert_after)
+    edit = recipe_ops.add_step(
+        session.recipe,
+        session.history,
+        step,
+        session.base_schema,
+        _position_for(session.recipe, step),
+    )
+    session.recipe, session.history = edit.recipe, edit.history
+
+
+def column_suggestions(
+    session: DatasetSession,
+    settings: Settings,
+    provider: Provider | None = None,
+    smart: bool = True,
+) -> Suggestions:
+    """Columns worth adding that the table doesn't have yet.
+
+    With `smart` off only the built-in ideas answer, which takes no time, so
+    the screen has something to show while a model is still thinking.
+    """
+    prepare(session)
+    if smart and session.column_ideas is None:
+        session.column_ideas = ask_for_ideas(session.conn, session.profile, settings, provider)
+    taken = plan_recipe(session.recipe, session.base_schema).output.names()
+    # A column that's switched off still owns its name: turning it back on must work.
+    taken += [step.name for step in session.recipe.steps if isinstance(step, AddColumnStep)]
+    covered = {
+        CONNECTOR_CONCEPTS[step.connector]
+        for step in session.recipe.steps
+        if isinstance(step, EnrichColumnStep) and step.connector in CONNECTOR_CONCEPTS
+    }
+    ideas = session.column_ideas if smart else None
+    return suggestions_for(session.profile, taken, ideas, covered)
+
+
 def matching_step_ids(session: DatasetSession, steps: list[Step]) -> set[str]:
     """Recipe steps already doing the work of `steps`, whatever ids they carry."""
     return set(matched_ids(session.recipe, steps) or [])
@@ -335,6 +398,15 @@ def _all_step_ids(issue: Issue) -> list[str]:
 
 def _position_for(recipe: Recipe, step: Step) -> int:
     """Keep the recipe in the order steps have to run in (see step_order.RANK)."""
+    if isinstance(step, ResolveMatchStep):
+        # A pick has to land before anything that reads the picked column, such
+        # as a price lookup, so it goes straight after the lookup it answers.
+        for index in range(len(recipe.steps) - 1, -1, -1):
+            earlier = recipe.steps[index]
+            made_it = isinstance(earlier, EnrichColumnStep) and step.into in earlier.into
+            same_column = isinstance(earlier, ResolveMatchStep) and earlier.into == step.into
+            if made_it or same_column:
+                return index + 1
     rank = RANK[step.type]
     for index, existing in enumerate(recipe.steps):
         if RANK[existing.type] > rank:
@@ -348,4 +420,16 @@ def _placed(steps: list[Step], step: Step) -> list[Step]:
 
 
 def ranked(session: DatasetSession) -> list[Issue]:
-    return rank_issues(list(issues_of(session)), session.profile)
+    return rank_issues([i for i in issues_of(session) if _still_asked(session, i)], session.profile)
+
+
+def _still_asked(session: DatasetSession, issue: Issue) -> bool:
+    """A question about a lookup's matches only makes sense while the lookup is there."""
+    if issue.detector is not DetectorName.CONNECTOR_MATCH:
+        return True
+    return any(
+        isinstance(step, EnrichColumnStep)
+        and step.enabled
+        and [step.column, step.into[0]] == issue.columns
+        for step in session.recipe.steps
+    )

@@ -24,6 +24,10 @@ ROW_ID_COLUMN = "_row_id"
 SOURCE_CATALOG = "source"
 WORK_SCHEMA = "work"
 RAW_DB_FILENAME = "raw.duckdb"
+# Answers looked up from outside services, one row per value and lookup run.
+# In a schema of its own: `work` holds only what is derived from the raw file.
+LOOKUP_SCHEMA = "lookups"
+ENRICHMENTS_TABLE = "enrichments"
 
 
 def quote_ident(name: str) -> str:
@@ -47,6 +51,9 @@ RAW_REF = f"{quote_ident(SOURCE_CATALOG)}.{quote_ident(RAW_TABLE)}"
 
 def work_ref(table: str) -> str:
     return f"{quote_ident(WORK_SCHEMA)}.{quote_ident(table)}"
+
+
+ENRICHMENTS_REF = f"{quote_ident(LOOKUP_SCHEMA)}.{quote_ident(ENRICHMENTS_TABLE)}"
 
 
 def create_workspace() -> Path:
@@ -88,6 +95,14 @@ def attach_raw(conn: duckdb.DuckDBPyConnection, raw_path: Path) -> None:
         f"ATTACH {quote_literal(str(raw_path))} AS {quote_ident(SOURCE_CATALOG)} (READ_ONLY)"
     )
     conn.execute(f"CREATE SCHEMA IF NOT EXISTS {quote_ident(WORK_SCHEMA)}")
+    # Always there, even when nothing was ever looked up, so a step that joins
+    # to it never meets a missing table.
+    conn.execute(f"CREATE SCHEMA IF NOT EXISTS {quote_ident(LOOKUP_SCHEMA)}")
+    conn.execute(
+        f"CREATE TABLE IF NOT EXISTS {ENRICHMENTS_REF} ("
+        "snapshot VARCHAR, key VARCHAR, shown VARCHAR, value1 VARCHAR, value2 VARCHAR, "
+        "status VARCHAR, fetched_at VARCHAR, PRIMARY KEY (snapshot, key))"
+    )
 
 
 def open_dataset_connection(raw_path: Path) -> duckdb.DuckDBPyConnection:

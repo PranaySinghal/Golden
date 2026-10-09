@@ -27,6 +27,11 @@ ROW_REMOVING_STEPS = {"dedupe", "set_aside_rows"}
 # Issues that move no answer still sort by how many rows they touch, below any
 # issue that does move one.
 ROWS_ONLY_WEIGHT = 0.01
+# Questions impact scoring may ask across all issues. A file with a hundred
+# sparse columns raises a hundred cards, each of which could re-ask every
+# question; past this the remaining cards are ranked by the rows they touch.
+# Cards touching the most rows are scored first, so what's skipped matters least.
+MAX_SCORING_QUESTIONS = 600
 
 
 def _touches(question: Question, issue: Issue) -> bool:
@@ -49,8 +54,13 @@ def score_issues(
     cache = {} if cache is None else cache
     order = {q.id: index for index, q in enumerate(questions)}
     scored = []
-    for issue in issues:
+    budget = MAX_SCORING_QUESTIONS
+    for issue in sorted(issues, key=lambda issue: -issue.affected_rows):
         relevant = [q for q in questions if _touches(q, issue)]
+        choice_count = len(issue.ask.choices) if issue.ask is not None else 1
+        if budget < len(relevant) * choice_count:
+            relevant = []
+        budget -= len(relevant) * choice_count
         baseline_recipe = recipe_for(issues, accepted=set(issue.requires))
         baseline_plan = plan_recipe(baseline_recipe, base)
         baseline_key = fingerprint(baseline_plan, baseline_recipe)

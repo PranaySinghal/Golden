@@ -788,6 +788,401 @@
           }
         }
       }
+    },
+    "/api/datasets/{dataset_id}/canvas": {
+      "get": {
+        "tags": [
+          "canvas"
+        ],
+        "summary": "Get Canvas",
+        "operationId": "getCanvas",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvasResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/canvas/columns": {
+      "post": {
+        "tags": [
+          "canvas"
+        ],
+        "summary": "Add Canvas Column",
+        "operationId": "addCanvasColumn",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewColumn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvasResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/canvas/suggestions": {
+      "get": {
+        "tags": [
+          "canvas"
+        ],
+        "summary": "Get Canvas Suggestions",
+        "operationId": "getCanvasSuggestions",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "smart",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Smart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Suggestions"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors": {
+      "get": {
+        "tags": [
+          "connectors"
+        ],
+        "summary": "Get Connectors",
+        "operationId": "getConnectors",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConnectorView"
+                  },
+                  "type": "array",
+                  "title": "Response Getconnectors"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/connectors": {
+      "get": {
+        "tags": [
+          "connectors"
+        ],
+        "summary": "Get Dataset Connectors",
+        "operationId": "getDatasetConnectors",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetConnectors"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/connectors/{connector}": {
+      "put": {
+        "tags": [
+          "connectors"
+        ],
+        "summary": "Set Connector Active",
+        "operationId": "setConnectorActive",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          },
+          {
+            "name": "connector",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "postal_geocode",
+                "company_ticker",
+                "stock_price",
+                "ai_fill"
+              ],
+              "type": "string",
+              "title": "Connector"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectorSwitch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetConnectors"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/connectors/lookups": {
+      "post": {
+        "tags": [
+          "connectors"
+        ],
+        "summary": "Run Lookup",
+        "operationId": "runConnectorLookup",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LookupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetConnectors"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasets/{dataset_id}/connectors/ai-fill/preview": {
+      "post": {
+        "tags": [
+          "connectors"
+        ],
+        "summary": "Preview Ai Fill",
+        "description": "A few example answers for a column a model would fill in. Changes nothing.",
+        "operationId": "previewAiFill",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dataset Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FillPreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FillPreview"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A problem the user can fix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -808,6 +1203,64 @@
         },
         "type": "object",
         "title": "AcceptRequest"
+      },
+      "AddColumnStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "add_column",
+            "title": "Type",
+            "default": "add_column"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "insert_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insert After"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AddColumnStep",
+        "description": "A new column the user asked for: blank, or the same text in every row."
       },
       "AiResponse": {
         "properties": {
@@ -1052,6 +1505,103 @@
         ],
         "title": "Body_uploadDataset"
       },
+      "CanvasColumn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ValueKind"
+          },
+          "step_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Id"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "CanvasColumn"
+      },
+      "CanvasResponse": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasColumn"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "reasons": {
+            "additionalProperties": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Reasons"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count",
+            "default": 0
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe"
+        ],
+        "title": "CanvasResponse"
+      },
       "CastNumberStep": {
         "properties": {
           "id": {
@@ -1152,6 +1702,15 @@
                   "$ref": "#/components/schemas/SplitColumnStep"
                 },
                 {
+                  "$ref": "#/components/schemas/AddColumnStep"
+                },
+                {
+                  "$ref": "#/components/schemas/EnrichColumnStep"
+                },
+                {
+                  "$ref": "#/components/schemas/ResolveMatchStep"
+                },
+                {
                   "$ref": "#/components/schemas/DedupeStep"
                 },
                 {
@@ -1167,9 +1726,11 @@
               "discriminator": {
                 "propertyName": "type",
                 "mapping": {
+                  "add_column": "#/components/schemas/AddColumnStep",
                   "cast_number": "#/components/schemas/CastNumberStep",
                   "clear_values": "#/components/schemas/ClearValuesStep",
                   "dedupe": "#/components/schemas/DedupeStep",
+                  "enrich_column": "#/components/schemas/EnrichColumnStep",
                   "fill_missing": "#/components/schemas/FillMissingStep",
                   "map_values": "#/components/schemas/MapValuesStep",
                   "normalize_case": "#/components/schemas/NormalizeCaseStep",
@@ -1177,6 +1738,7 @@
                   "null_placeholders": "#/components/schemas/NullPlaceholdersStep",
                   "parse_date": "#/components/schemas/ParseDateStep",
                   "remove_characters": "#/components/schemas/RemoveCharactersStep",
+                  "resolve_match": "#/components/schemas/ResolveMatchStep",
                   "set_aside_rows": "#/components/schemas/SetAsideRowsStep",
                   "split_column": "#/components/schemas/SplitColumnStep",
                   "trim": "#/components/schemas/TrimStep"
@@ -1400,6 +1962,65 @@
         ],
         "title": "ColumnProfile"
       },
+      "ColumnSuggestion": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Placeholder"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rules",
+              "ai"
+            ],
+            "title": "Source",
+            "default": "rules"
+          },
+          "live_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Live Source"
+          },
+          "fill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FillPlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "reason"
+        ],
+        "title": "ColumnSuggestion"
+      },
       "ComparisonResponse": {
         "properties": {
           "cards": {
@@ -1466,6 +2087,133 @@
         ],
         "title": "ComparisonResponse"
       },
+      "ConnectorSwitch": {
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "active"
+        ],
+        "title": "ConnectorSwitch"
+      },
+      "ConnectorView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "postal_geocode",
+              "company_ticker",
+              "stock_price",
+              "ai_fill"
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "adds": {
+            "type": "string",
+            "title": "Adds"
+          },
+          "sends": {
+            "type": "string",
+            "title": "Sends"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "adds",
+          "sends",
+          "service",
+          "enabled"
+        ],
+        "title": "ConnectorView"
+      },
+      "CountryOption": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "CountryOption"
+      },
+      "DatasetConnectors": {
+        "properties": {
+          "connectors": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectorView"
+            },
+            "type": "array",
+            "title": "Connectors"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferView"
+            },
+            "type": "array",
+            "title": "Offers"
+          },
+          "enrichments": {
+            "items": {
+              "$ref": "#/components/schemas/EnrichmentView"
+            },
+            "type": "array",
+            "title": "Enrichments"
+          },
+          "consented": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "postal_geocode",
+                "company_ticker",
+                "stock_price",
+                "ai_fill"
+              ]
+            },
+            "type": "array",
+            "title": "Consented"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connectors",
+          "recipe"
+        ],
+        "title": "DatasetConnectors"
+      },
       "DatasetSummary": {
         "properties": {
           "id": {
@@ -1519,6 +2267,13 @@
           "empty_rows_skipped": {
             "type": "integer",
             "title": "Empty Rows Skipped"
+          },
+          "title_rows_skipped": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Title Rows Skipped"
           },
           "columns": {
             "items": {
@@ -1671,7 +2426,8 @@
           "out_of_range",
           "contact_formats",
           "missing_values",
-          "ai_suggestion"
+          "ai_suggestion",
+          "connector_match"
         ],
         "title": "DetectorName"
       },
@@ -1704,6 +2460,221 @@
         ],
         "title": "DigitsFewerThanCondition",
         "description": "Filled values with fewer digits than `count`, e.g. phone numbers that are too short."
+      },
+      "EnrichColumnStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "enrich_column",
+            "title": "Type",
+            "default": "enrich_column"
+          },
+          "connector": {
+            "type": "string",
+            "enum": [
+              "postal_geocode",
+              "company_ticker",
+              "stock_price",
+              "ai_fill"
+            ],
+            "title": "Connector"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "into": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Into"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "label",
+                  "text",
+                  "website"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "choices": {
+            "items": {
+              "type": "string",
+              "maxLength": 60,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Choices"
+          },
+          "context": {
+            "items": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Context"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "connector",
+          "column",
+          "into"
+        ],
+        "title": "EnrichColumnStep",
+        "description": "New columns looked up from an outside service, one answer per different value.\n\nThe step never fetches anything. A lookup run stores its answers under a\n`snapshot` id, and the step joins the table to that snapshot, so the same\nrecipe always gives the same rows. Looking up again makes a new snapshot."
+      },
+      "EnrichmentView": {
+        "properties": {
+          "step_id": {
+            "type": "string",
+            "title": "Step Id"
+          },
+          "connector": {
+            "type": "string",
+            "enum": [
+              "postal_geocode",
+              "company_ticker",
+              "stock_price",
+              "ai_fill"
+            ],
+            "title": "Connector"
+          },
+          "column": {
+            "type": "string",
+            "title": "Column"
+          },
+          "into": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Into"
+          },
+          "looked_up": {
+            "type": "boolean",
+            "title": "Looked Up"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "examples": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Examples"
+          },
+          "remaining": {
+            "type": "integer",
+            "title": "Remaining",
+            "default": 0
+          },
+          "as_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of"
+          },
+          "out_of_date": {
+            "type": "boolean",
+            "title": "Out Of Date",
+            "default": false
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step_id",
+          "connector",
+          "column",
+          "into",
+          "looked_up",
+          "enabled"
+        ],
+        "title": "EnrichmentView"
       },
       "EqualsCondition": {
         "properties": {
@@ -1823,6 +2794,163 @@
           "strategy"
         ],
         "title": "FillMissingStep"
+      },
+      "FillPlan": {
+        "properties": {
+          "based_on": {
+            "type": "string",
+            "title": "Based On"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "label",
+              "text",
+              "website"
+            ],
+            "title": "Kind"
+          },
+          "choices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Choices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "based_on",
+          "kind"
+        ],
+        "title": "FillPlan"
+      },
+      "FillPreview": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/FillPreviewRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "total_values": {
+            "type": "integer",
+            "title": "Total Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows",
+          "total_values"
+        ],
+        "title": "FillPreview"
+      },
+      "FillPreviewRequest": {
+        "properties": {
+          "fill": {
+            "$ref": "#/components/schemas/FillRequest"
+          },
+          "consent": {
+            "type": "boolean",
+            "title": "Consent",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "fill"
+        ],
+        "title": "FillPreviewRequest"
+      },
+      "FillPreviewRow": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "FillPreviewRow"
+      },
+      "FillRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "based_on": {
+            "type": "string",
+            "title": "Based On"
+          },
+          "instruction": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Instruction"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "label",
+              "text",
+              "website"
+            ],
+            "title": "Kind"
+          },
+          "choices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Choices"
+          },
+          "context": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "based_on",
+          "instruction",
+          "kind"
+        ],
+        "title": "FillRequest",
+        "description": "A new column for a model to fill in: what it's called, what it means, what it's based on."
       },
       "GroupChangeView": {
         "properties": {
@@ -2033,6 +3161,77 @@
         ],
         "title": "IssueView"
       },
+      "LookupRequest": {
+        "properties": {
+          "connector": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "postal_geocode",
+                  "company_ticker",
+                  "stock_price",
+                  "ai_fill"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Connector"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "step_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Id"
+          },
+          "consent": {
+            "type": "boolean",
+            "title": "Consent",
+            "default": false
+          },
+          "fill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FillRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "LookupRequest"
+      },
       "MapValuesStep": {
         "properties": {
           "id": {
@@ -2112,6 +3311,44 @@
         ],
         "title": "MergedNote",
         "description": "A spelling that now counts as another: \"sales\" folded into \"Sales\"."
+      },
+      "NewColumn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "insert_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insert After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "NewColumn"
       },
       "NormalizeCaseStep": {
         "properties": {
@@ -2285,6 +3522,52 @@
           "placeholders"
         ],
         "title": "NullPlaceholdersStep"
+      },
+      "OfferView": {
+        "properties": {
+          "connector": {
+            "type": "string",
+            "enum": [
+              "postal_geocode",
+              "company_ticker",
+              "stock_price",
+              "ai_fill"
+            ],
+            "title": "Connector"
+          },
+          "column": {
+            "type": "string",
+            "title": "Column"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "distinct_values": {
+            "type": "integer",
+            "title": "Distinct Values"
+          },
+          "countries": {
+            "items": {
+              "$ref": "#/components/schemas/CountryOption"
+            },
+            "type": "array",
+            "title": "Countries"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connector",
+          "column",
+          "title",
+          "distinct_values",
+          "enabled"
+        ],
+        "title": "OfferView"
       },
       "OneOfCondition": {
         "properties": {
@@ -2777,6 +4060,60 @@
         ],
         "title": "RemoveCharactersStep"
       },
+      "ResolveMatchStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$",
+            "title": "Id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "type": {
+            "type": "string",
+            "const": "resolve_match",
+            "title": "Type",
+            "default": "resolve_match"
+          },
+          "column": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Column"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Value"
+          },
+          "into": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Into"
+          },
+          "chosen": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Chosen"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "column",
+          "value",
+          "into",
+          "chosen"
+        ],
+        "title": "ResolveMatchStep",
+        "description": "The user's pick where a lookup found several answers for one value."
+      },
       "RewordedCopy": {
         "properties": {
           "title": {
@@ -3175,6 +4512,40 @@
         },
         "type": "object",
         "title": "StorySentence"
+      },
+      "Suggestions": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "off",
+              "ready",
+              "failed"
+            ],
+            "title": "Status",
+            "default": "off"
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnSuggestion"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          }
+        },
+        "type": "object",
+        "title": "Suggestions"
       },
       "Tier": {
         "type": "string",

@@ -297,7 +297,7 @@ describe('ReviewPage', () => {
 
     renderPage()
 
-    const panel = await screen.findByRole('complementary', { name: "What we're doing" })
+    const panel = await screen.findByRole('complementary', { name: 'Recipe: steps performed' })
     expect(within(panel).getByText('Read "Salary" as numbers')).toBeTruthy()
     expect(within(panel).getByText('24 values changed')).toBeTruthy()
     expect(within(panel).getByText('1,020 rows kept')).toBeTruthy()
@@ -381,6 +381,50 @@ describe('ReviewPage', () => {
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/compare'))).toBe(false)
   })
 
+  it('hides and shows the recipe steps, keeping the downloads in reach', async () => {
+    mockApi({ [ISSUES]: () => jsonResponse(200, issueList()) })
+
+    renderPage()
+    const panel = await screen.findByRole('complementary', { name: 'Recipe: steps performed' })
+    const opener = within(panel).getByRole('button', { name: /Recipe: steps performed/ })
+    const steps = panel.querySelector('#recipe-steps') as HTMLElement
+
+    expect(opener.getAttribute('aria-expanded')).toBe('true')
+    expect(steps.hidden).toBe(false)
+
+    fireEvent.click(opener)
+
+    expect(opener.getAttribute('aria-expanded')).toBe('false')
+    expect(steps.hidden).toBe(true)
+    expect(within(panel).getByText(/^\d+ steps?$/)).toBeTruthy()
+    expect(within(panel).getByRole('button', { name: 'Download cleaned file' })).toBeTruthy()
+
+    fireEvent.click(opener)
+    expect(steps.hidden).toBe(false)
+  })
+
+  it('opens the canvas on a third tab, with the recipe still in view', async () => {
+    const none = { status: 'off', about: null, suggestions: [] }
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [`GET /api/datasets/${FILE.id}/canvas`]: () =>
+        jsonResponse(200, {
+          columns: [{ name: 'Employee_ID', kind: 'text', step_id: null }],
+          rows: [['E-1']],
+          row_count: 1,
+          recipe: recipe(),
+        }),
+      [`GET /api/datasets/${FILE.id}/canvas/suggestions`]: () => jsonResponse(200, none),
+    })
+
+    renderPage()
+    fireEvent.click(await screen.findByRole('tab', { name: 'Canvas' }))
+
+    expect(await screen.findByRole('button', { name: 'Add column' })).toBeTruthy()
+    expect(screen.getByRole('tabpanel').id).toBe('panel-canvas')
+    expect(screen.getByRole('complementary', { name: 'Recipe: steps performed' })).toBeTruthy()
+  })
+
   it('shows what changed on the other tab, with the recipe still in view', async () => {
     mockApi({
       [ISSUES]: () => jsonResponse(200, issueList()),
@@ -392,9 +436,28 @@ describe('ReviewPage', () => {
 
     // The figure is on the card and in the story over it; either proves the tab switched.
     expect(await screen.findAllByText('83,151.41')).not.toHaveLength(0)
-    const panel = screen.getByRole('complementary', { name: "What we're doing" })
+    const panel = screen.getByRole('complementary', { name: 'Recipe: steps performed' })
     expect(within(panel).getByText('Read "Salary" as numbers')).toBeTruthy()
     expect(screen.queryByRole('heading', { name: /Suggested/ })).toBeNull()
+  })
+
+  it('shows the recipe again when a reader asks why an answer moved', async () => {
+    mockApi({
+      [ISSUES]: () => jsonResponse(200, issueList()),
+      [COMPARE]: () => jsonResponse(200, comparison()),
+    })
+
+    renderPage()
+    const panel = await screen.findByRole('complementary', { name: 'Recipe: steps performed' })
+    const steps = panel.querySelector('#recipe-steps') as HTMLElement
+    fireEvent.click(within(panel).getByRole('button', { name: /Recipe: steps performed/ }))
+    expect(steps.hidden).toBe(true)
+
+    fireEvent.click(screen.getByRole('tab', { name: 'What changed' }))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Why?' }))[0])
+
+    // "Why?" points at steps in the recipe, so they have to be on screen.
+    await waitFor(() => expect(steps.hidden).toBe(false))
   })
 
   it('offers both downloads', async () => {

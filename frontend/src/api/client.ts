@@ -28,6 +28,18 @@ export type Story = components['schemas']['Story']
 export type StorySentence = components['schemas']['StorySentence']
 export type StoryPart = components['schemas']['StoryPart']
 export type PreviewRow = components['schemas']['PreviewRow']
+export type CanvasResponse = components['schemas']['CanvasResponse']
+export type CanvasColumn = components['schemas']['CanvasColumn']
+export type NewColumn = components['schemas']['NewColumn']
+export type ColumnSuggestion = components['schemas']['ColumnSuggestion']
+export type Suggestions = components['schemas']['Suggestions']
+export type ConnectorView = components['schemas']['ConnectorView']
+export type DatasetConnectors = components['schemas']['DatasetConnectors']
+export type OfferView = components['schemas']['OfferView']
+export type EnrichmentView = components['schemas']['EnrichmentView']
+export type LookupRequest = components['schemas']['LookupRequest']
+export type FillRequest = components['schemas']['FillRequest']
+export type FillPreview = components['schemas']['FillPreview']
 type ErrorResponse = components['schemas']['ErrorResponse']
 
 export class ApiError extends Error {
@@ -184,5 +196,22 @@ export const api = {
   getPreview,
   getComparison: (id: string) => request<ComparisonResponse>(datasetPath(id, '/compare')),
   getAiSuggestions: (id: string) => request<AiResponse>(datasetPath(id, '/ai')),
+  getCanvas: (id: string) => request<CanvasResponse>(datasetPath(id, '/canvas')),
+  addCanvasColumn: (id: string, column: NewColumn) =>
+    send<CanvasResponse>(datasetPath(id, '/canvas/columns'), 'POST', column),
+  getCanvasSuggestions: (id: string, smart: boolean) =>
+    request<Suggestions>(datasetPath(id, `/canvas/suggestions?smart=${smart}`)),
+  getConnectors: () => request<ConnectorView[]>('/api/connectors'),
+  getDatasetConnectors: (id: string) => request<DatasetConnectors>(datasetPath(id, '/connectors')),
+  setConnectorActive: (id: string, connector: ConnectorView['id'], active: boolean) =>
+    send<DatasetConnectors>(
+      datasetPath(id, `/connectors/${encodeURIComponent(connector)}`),
+      'PUT',
+      { active },
+    ),
+  previewAiFill: (id: string, fill: FillRequest, consent: boolean) =>
+    send<FillPreview>(datasetPath(id, '/connectors/ai-fill/preview'), 'POST', { fill, consent }),
+  runConnectorLookup: (id: string, lookup: LookupRequest) =>
+    send<DatasetConnectors>(datasetPath(id, '/connectors/lookups'), 'POST', lookup),
   exportDataset: (id: string, format: 'csv' | 'recipe') => download(datasetPath(id, `/export?format=${format}`)),
 }

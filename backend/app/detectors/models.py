@@ -31,6 +31,8 @@ class DetectorName(StrEnum):
     MISSING_VALUES = "missing_values"
     # Not a detector: a fix a model proposed, which passed every check.
     AI_SUGGESTION = "ai_suggestion"
+    # Not a detector: a lookup that found several answers and needs the user to pick.
+    CONNECTOR_MATCH = "connector_match"
 
 
 class Choice(BaseModel):

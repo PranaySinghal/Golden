@@ -21,8 +21,8 @@ from app.db import RAW_TABLE, ROW_ID_COLUMN, quote_ident
 from app.errors import EmptyFileError, FileTooLargeError
 from app.ingest.base import FileAdapter, detect_format
 from app.ingest.csv_adapter import CsvAdapter
-from app.ingest.header import clean_column_names, resolve_header
-from app.ingest.models import IngestOptions, IngestResult, SourceFormat
+from app.ingest.header import clean_column_names, count_title_rows, resolve_header
+from app.ingest.models import HeaderMode, IngestOptions, IngestResult, SourceFormat
 from app.ingest.xlsx_adapter import XlsxAdapter
 
 _ADAPTERS: dict[SourceFormat, FileAdapter] = {
@@ -70,6 +70,12 @@ def ingest(
     if not head:
         raise EmptyFileError()
 
+    # Title lines above the column names are set aside, unless the user has
+    # said the first row is data and so told us to take the file as it is.
+    title_count = 0 if options.header is HeaderMode.FIRST_ROW_IS_DATA else count_title_rows(head)
+    titles = [" ".join(value for value in row if value) for row in head[:title_count]]
+    head = head[title_count:]
+
     has_header = resolve_header(options.header, head)
     original_headers = [value or "" for value in head[0]] if has_header else []
     data_rows = itertools.chain(head[1:] if has_header else head, rows)
@@ -94,6 +100,7 @@ def ingest(
         columns=columns,
         row_count=row_count,
         empty_rows_skipped=skip_empty.skipped,
+        title_rows_skipped=titles,
     )
 
 

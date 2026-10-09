@@ -16,8 +16,13 @@ ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 MAX_OUTPUT_TOKENS = 2000
-# Wording and fixes are judgement, not invention; a low temperature keeps the
-# model close to the words and values it was given.
+# Claude counts its own working-out against the limit, so it needs more room
+# than the reply alone would take.
+ANTHROPIC_MAX_TOKENS = 8000
+# Wording, fixes and labels are small, well-specified jobs. Low effort keeps
+# them quick and cheap; the checks on every reply are what keep them right.
+ANTHROPIC_EFFORT = "low"
+# Gemini only. Current Claude models refuse a request that sets a temperature.
 TEMPERATURE = 0.2
 
 
@@ -56,8 +61,8 @@ class AnthropicProvider:
         }
         body = {
             "model": self._model,
-            "max_tokens": MAX_OUTPUT_TOKENS,
-            "temperature": TEMPERATURE,
+            "max_tokens": ANTHROPIC_MAX_TOKENS,
+            "output_config": {"effort": ANTHROPIC_EFFORT},
             "system": system,
             "messages": [{"role": "user", "content": user}],
         }
