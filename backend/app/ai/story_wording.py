@@ -11,7 +11,7 @@ import logging
 import re
 
 from app.ai.schemas import StoryReply
-from app.ai.wording import JARGON, MARKDOWN
+from app.ai.wording import MARKDOWN, uses_jargon
 from app.questions.models import AnswerDiff
 from app.story import Story, StoryPart, StorySentence, say_number
 
@@ -76,7 +76,7 @@ def accepted_story(
     names = _names_with_digits(diffs)
     sentences: list[StorySentence] = []
     for text in reply.sentences:
-        if any(word in text.lower() for word in JARGON) or any(m in text for m in MARKDOWN):
+        if uses_jargon(text) or any(m in text for m in MARKDOWN):
             logger.info("ai story rejected reason=wording")
             return None
         sentence = _as_parts(text, figures, names)

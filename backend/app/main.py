@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import FastAPI
 
 from app.ai.limiter import CallBudget
-from app.api import ai, compare, datasets, health, issues, preview, recipe
+from app.api import ai, canvas, compare, connectors, datasets, health, issues, preview, recipe
 from app.api.errors import ErrorResponse, register_error_handlers
 from app.api.frontend import frontend_router
 from app.api.limits import UploadSizeMiddleware
@@ -54,6 +54,8 @@ app.include_router(recipe.router)
 app.include_router(preview.router)
 app.include_router(compare.router)
 app.include_router(ai.router)
+app.include_router(canvas.router)
+app.include_router(connectors.router)
 
 # Last, so it only answers what no API route did.
 _static_dir = get_settings().static_dir

@@ -25,6 +25,10 @@ RANK: dict[str, int] = {
     "dedupe": 6,
     "set_aside_rows": 7,
     "fill_missing": 8,
+    # Last: a column the user adds must not change what the steps above compare.
+    "add_column": 9,
+    "enrich_column": 9,
+    "resolve_match": 9,
 }
 
 

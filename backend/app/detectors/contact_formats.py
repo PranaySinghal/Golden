@@ -21,6 +21,7 @@ from app.steps.phone import DEFAULT_REGION, format_phone_or_original
 from app.steps.schema import trimmed
 
 FORMAT_SHARE = 0.8
+MIXED_FORMAT_SHARE = 0.5
 # A stray "-" is only a pattern worth fixing when it's common in the column.
 STRAY_MINUS_SHARE = 0.5
 # "Short" only means something when most numbers share one length.
@@ -45,6 +46,10 @@ class Evidence:
     usual_length: int | None
     usual_length_count: int
     short: int
+    # Numbers with fewer digits than this count as short.
+    short_below: int
+    # True when "short" is measured against the column's own usual length.
+    against_usual: bool
     short_examples: list[str]
     reformat_count: int
     reformat_examples: list[tuple[str, str]]
@@ -54,7 +59,10 @@ def _kind(column_patterns: list[tuple[PatternKind, float]]) -> str | None:
     rates = dict(column_patterns)
     if rates.get(PatternKind.EMAIL, 0.0) >= FORMAT_SHARE:
         return "email"
-    if rates.get(PatternKind.PHONE, 0.0) >= FORMAT_SHARE:
+    # The profile only calls a column contact info when it is emails or phone
+    # numbers, so a column that isn't emails and is half formatted numbers is a
+    # phone column written several ways (some with spacing, some bare digits).
+    if rates.get(PatternKind.PHONE, 0.0) >= MIXED_FORMAT_SHARE:
         return "phone"
     return None
 
@@ -107,11 +115,16 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
             "GROUP BY d ORDER BY count(*) DESC, d DESC LIMIT 1"
         )
         usual, usual_count = (int(lengths[0][0]), int(lengths[0][1])) if lengths else (None, 0)
+        # Against the column's own usual length when it has one. Numbers from
+        # several countries have none, and then only what is too short to be a
+        # phone number anywhere counts.
+        against_usual = usual is not None and usual_count >= USUAL_LENGTH_SHARE * int(row[0])
+        short_below = usual if against_usual and usual else patterns.PHONE_MIN_DIGITS
         short = ctx.query(
             f"SELECT count(*), list(t ORDER BY d, t) FROM "
             f"(SELECT {t} AS t, {digits} AS d FROM {RAW_REF} WHERE {t} IS NOT NULL) "
-            "WHERE d < $usual",
-            {"usual": usual or 0},
+            "WHERE d < $least",
+            {"least": short_below},
         )[0]
         reformat_count, reformat_examples = (
             _reformat_evidence(ctx, t) if kind == "phone" else (0, [])
@@ -128,6 +141,8 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
                 usual_length=usual,
                 usual_length_count=usual_count,
                 short=int(short[0]) if kind == "phone" else 0,
+                short_below=short_below,
+                against_usual=against_usual,
                 short_examples=list(short[1] or [])[:5],
                 reformat_count=reformat_count,
                 reformat_examples=reformat_examples,
@@ -201,16 +216,13 @@ def decide(evidence: list[Evidence], ctx: DetectorContext) -> list[Issue]:
                     examples=item.minus_examples,
                 )
             )
-        if (
-            item.usual_length is not None
-            and item.short
-            and item.usual_length_count >= USUAL_LENGTH_SHARE * item.filled
-        ):
+        if item.short:
             b = IssueBuilder(ctx, DetectorName.CONTACT_FORMATS, [item.column], "short")
-            title, explanation, prompt = copy.short_phones(
-                item.column, item.short, item.usual_length, item.short_examples
+            describe = copy.short_phones if item.against_usual else copy.too_short_for_a_phone
+            title, explanation, prompt = describe(
+                item.column, item.short, item.short_below, item.short_examples
             )
-            too_short = DigitsFewerThanCondition(column=item.column, count=item.usual_length)
+            too_short = DigitsFewerThanCondition(column=item.column, count=item.short_below)
             issues.append(
                 b.build(
                     title=title,

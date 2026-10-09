@@ -35,6 +35,17 @@ JARGON = (
     "aggregate",
     "distinct count",
 )
+# Whole words only, with their common endings ("parsed", "nulls"): "Finance"
+# contains "nan" and "forecast" contains "cast", and neither is jargon.
+_JARGON_WORDS = re.compile(
+    r"\b(" + "|".join(re.escape(word) for word in JARGON) + r")(s|d|ed|ing)?\b", re.IGNORECASE
+)
+
+
+def uses_jargon(text: str) -> bool:
+    return _JARGON_WORDS.search(text) is not None
+
+
 MARKDOWN = ("**", "##", "```", "- ", "* ")
 _NUMBER = re.compile(r"\d[\d,._]*")
 
@@ -70,8 +81,7 @@ def invents_numbers(source: str, rewrite: str) -> bool:
 def is_acceptable(source: str, rewrite: str) -> tuple[bool, str]:
     if invents_numbers(source, rewrite):
         return False, "invented a number"
-    lowered = rewrite.lower()
-    if any(word in lowered for word in JARGON):
+    if uses_jargon(rewrite):
         return False, "used jargon"
     if any(mark in rewrite for mark in MARKDOWN):
         return False, "used markdown"

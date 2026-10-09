@@ -129,6 +129,32 @@ def fingerprint(plan: RecipePlan, recipe: Recipe) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+def volatile_columns(plan: RecipePlan) -> tuple[frozenset[str], bool]:
+    """Columns holding looked-up values, and whether they leak into the rest.
+
+    A looked-up column can hold different values tomorrow, and so can anything
+    made from it. "Leaks" means a step that sets rows aside depends on one: from
+    then on, which rows remain is no longer decided by the file alone.
+    """
+    volatile: set[str] = set()
+    leaks = False
+    for stage in plan.stages:
+        compiled = stage.compiled
+        if compiled.volatile:
+            volatile |= set(compiled.creates)
+            continue
+        if not volatile:
+            continue
+        removes = compiled.removed is not None
+        # A step that sets rows aside without naming columns compares all of them.
+        touches = bool(set(compiled.reads) & volatile) or (removes and not compiled.reads)
+        if not touches:
+            continue
+        volatile |= {spec.output_column for spec in compiled.changes} | set(compiled.creates)
+        leaks = leaks or removes
+    return frozenset(volatile), leaks
+
+
 def answer_key(plan: RecipePlan, recipe: Recipe) -> str:
     """What the rows will look like, ignoring which step objects produced them.
 
@@ -138,10 +164,15 @@ def answer_key(plan: RecipePlan, recipe: Recipe) -> str:
     leave-one-out variant that matches another variant.
     """
     applied = {stage.compiled.step_id for stage in plan.stages}
+    # Which lookup run filled a column doesn't move any answer, because looked-up
+    # columns are kept out of the questions; so looking up again keeps the key.
+    # The exception is a recipe that sets rows aside based on one.
+    _, leaks = volatile_columns(plan)
+    ignored = {"id", "enabled"} if leaks else {"id", "enabled", "snapshot"}
     payload = {
         "base": plan.base.names(),
         "steps": [
-            step.model_dump(mode="json", exclude={"id", "enabled"})
+            step.model_dump(mode="json", exclude=ignored)
             for step in recipe.steps
             if step.id in applied
         ],
@@ -270,7 +301,11 @@ def _build_changes(conn: duckdb.DuckDBPyConnection, plan: RecipePlan) -> None:
 def _change_select(
     stage: PlannedStep, spec: ChangeSpec, prefix: str, params: dict[str, object]
 ) -> str:
-    before = f"b.{quote_ident(spec.source_column)}"
+    before = (
+        "CAST(NULL AS VARCHAR)"
+        if spec.source_column is None
+        else f"b.{quote_ident(spec.source_column)}"
+    )
     after = f"a.{quote_ident(spec.output_column)}"
     before_text = text_of(before, spec.source_kind)
     after_text = text_of(after, spec.output_kind)

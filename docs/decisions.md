@@ -828,3 +828,337 @@ asserting on page structure only, never its column names.
 The example-rows table said "Now / After"; it says "Before / After", like the
 rest of the app. Inside "Why?" on the What-changed tab, "Now" read as the cleaned
 value.
+
+---
+
+## Canvas: adding columns, and ideas for which ones (after M10, owner-requested)
+
+A third tab beside Review and What changed. The owner asked for it after the
+feature freeze, so it sits outside M1–M10; `PLAN.md` is the owner's to update.
+
+**A new column is a recipe step, `add_column`** (owner-approved change to the
+Step union). It holds a name, optional text for every row, and optionally the
+column it goes after. Being a step is what makes it undoable, part of the
+download, and part of a saved recipe, with no second mechanism. It ranks last in
+`step_order.RANK`, so a column the user adds can never change what an earlier
+step compares (a whole-row repeat check, say). `ChangeSpec.source_column` became
+optional for it: a column made from nothing has no "before". A blank column logs
+no changed cells; placeholder text logs one per row, traced to the step.
+
+**Blank or one placeholder text only.** No formulas, no pasted values: both were
+offered and turned down for this version.
+
+**Ideas come from two places and are one list** (`app/semantic/`). The built-in
+ones always answer, so the tab is complete with `LLM_PROVIDER=none`. With a
+model configured it is shown the header, what each column holds and the first
+**five** rows (`suggest_columns.v1`), and asked what the file is about and what
+to add. Its ideas are checked one at a time: not already a column, not offered
+twice, no jargon or markdown, and **no figure that wasn't in what it was shown**,
+in the name, the reason, the placeholder or the summary sentence. Built-in ideas
+fill whatever space is left, up to five. The model is asked once per file; the
+list is filtered against the table on every request.
+
+**The built-in ideas read column names, and that is a deliberate exception.**
+The file summary refuses to guess a subject from headers. Here there is no other
+evidence: "this lists organisations" isn't visible in the values. So the words
+are general ones (company, vendor, city, price), the same kind of hint
+`profile/name_hints.py` uses, and value evidence is used where it exists
+(contact columns, currency patterns). A wrong guess costs one unhelpful
+suggestion; it never touches data. Three ideas fit any table, so a file that
+gives nothing away still gets three.
+
+**A model can't add a column through "suggested fixes".** `ai/fixes.py` rejects
+`add_column`: a fix repairs what's there, and new columns are the user's call.
+
+**Nothing is fetched.** An idea can say where its values could come from one day
+("a stock price service"); the screen says that isn't connected and the column
+starts empty. Connectors are in `ideas.md`.
+
+**Known limit:** the shared jargon check matches inside words, so a model's idea
+called "Forecast" is dropped for containing "cast". It falls back to a built-in
+idea rather than showing anything wrong.
+
+---
+
+## Connectors: columns looked up from outside services (after M10, owner-requested)
+
+A "Connectors" item beside Home opens a side panel. Three connectors: postal
+code → latitude/longitude (Zippopotam.us), company name → stock symbol (the
+SEC's public list), stock symbol → latest price (Finnhub). All three are
+`none` by default, so the app still sends nothing anywhere out of the box.
+
+**Two exceptions to CLAUDE.md, both owner-approved.**
+- *Principle 3 ("AI sees metadata, not data") is about models; connectors do
+  send real cell values.* Only the different values of the one chosen column,
+  only after a consent prompt that names the service and what is sent, once per
+  connector and file. Company names are the exception to the exception: nothing
+  from the file is sent, because the SEC list is downloaded whole and matched
+  here.
+- *"Nothing outlives the server process" no longer holds for looked-up
+  answers.* `connectors/cache.py` is one SQLite file holding (provider,
+  normalised value, answer, fetched-at) and nothing that says whose file a value
+  came from. A test pins its columns. `./run.sh` and the Docker image point it
+  at a file under the home folder; anywhere else it is in memory.
+
+**A lookup is two new steps, and compiling them never touches the network.**
+`enrich_column` joins the table to a *snapshot* of answers stored in the
+session's database (`lookups.enrichments`), by the same spelling-blind key the
+values were looked up under. The same recipe and snapshot always give the same
+rows. Looking up again makes a new snapshot and swaps the step's id for it, so
+it is an ordinary edit: undo brings yesterday's prices back. `resolve_match` is
+the user's pick for one ambiguous name. A saved recipe keeps what to look up
+and drops the snapshot, on the way out and on the way in, so a recipe replayed
+on a new file fetches nothing until the user agrees there.
+
+**The answers table has its own schema.** It first went in `work`, and two
+existing tests ("nothing was built for a refused file") failed, rightly: `work`
+means "derived from the raw file".
+
+**Looked-up columns stay out of the before/after.** `volatile_columns` tracks
+them and anything made from them; they are never profiled for new questions,
+and the recipe key ignores which snapshot a step points at, so a refresh
+doesn't re-ask the story or move an answer. The one way a looked-up value could
+reach an answer is a step that sets rows aside based on it; that is detected
+("leaks") and the key then follows the snapshot.
+
+**Detection reads values, with names as a tie-break** (`connectors/detect.py`):
+- Postal codes: 90% of values fit a country's format, and for all-digit formats
+  the values repeat or start with zero (ids don't). Four-digit codes need the
+  name to agree, because years look the same.
+- Companies: a fifth of values end like a company (Inc, Ltd, LLC…), or a third
+  are on the SEC list once we hold it.
+- Stock symbols: 90% are one to five capitals *and* half are on the list.
+  Without the list, the name has to agree: "CA, NY, TX" has the same shape.
+
+**Country is a required choice on the Enrich card**, not a card in Review: five
+digits fit six countries, nothing is sent until one is picked, none is
+preselected. Ambiguous company names *are* ask-tier cards in Review, one per
+name, each choice a `resolve_match` step, with "Leave it empty" always offered
+and nothing recommended.
+
+**A failed cell is empty and says why.** Found, not found, several matches,
+rate limited, timed out, service unavailable, not looked up yet. Only "found"
+and "not found" are cached; a busy service is asked again next time.
+
+**One run is bounded three ways and runs inside the request.** At most
+`CONNECTOR_MAX_VALUES_PER_RUN` values are sent (cached answers don't count),
+each service has its own per-minute budget, and a run stops after
+`CONNECTOR_RUN_SECONDS`; whatever is left is "not looked up yet" with a button
+to carry on. The plan said "background job with progress"; with the run
+bounded this tightly a plain request is simpler and loses nothing but a
+progress bar. The session lock is not held while services are asked.
+
+**Prices: one fetch per symbol per trading day**, fresh if fetched since the
+latest weekday 09:30 New York. No holiday calendar: on a closed day Finnhub
+returns the last close with its own timestamp, and that timestamp is what
+"Price as of" shows. Stale prices are marked; refreshing takes a click.
+
+**Known limits.**
+- A postal-code column of five digits can already have been read as numbers by
+  the "numbers as text" fix. Lookups read such a column by how its values are
+  written, but leading zeros are gone by then. The fix shouldn't fire on postal
+  codes at all; logged in `ideas.md`.
+- Company matching is exact after spelling is normalised. "Google" does not
+  find Alphabet. No fuzzy guess, by design.
+- The Finnhub and SEC parsers are tested against the documented reply shapes,
+  not live calls. Zippopotam's was checked against the live service.
+
+**Each service is switched on per file, by the user** (added on request). A
+service the server has set up still starts off for every new file; the user
+turns it on in the Connectors panel once a file is open. Before a file is open
+the panel only lists what is available. Switching on sends nothing, and the
+consent prompt still comes before each connector's first lookup. Switching off
+keeps columns already looked up and stops further lookups. Three states, kept
+apart on purpose: set up (the server's operator), on for this file (the user),
+agreed to send (the user, per connector, seeing what goes).
+
+---
+
+## AI-filled columns, and one cell per looked-up answer (owner-requested)
+
+**A model may now supply cell values. This is a deliberate exception to two
+principles.** Principle 2 says AI proposes and code executes; here a model's
+answer goes in a cell. Principle 3 says a model sees at most 20 rows; here it
+sees every different value of one chosen column (and up to two beside it). The
+owner asked for it, knowing both. What keeps it honest:
+- **Text only.** A bare number, amount, count or percentage is refused, so
+  "every number comes from the engine" still holds.
+- **"Not sure" is an answer**, and anything that fails a check becomes "not
+  sure": empty cell, reason shown. Never repaired, never guessed.
+- **Label columns have a closed list**, proposed with the suggestion. An answer
+  off the list is refused. One spelling per label.
+- **Preview before fill.** Eight answers are shown first; nothing is added
+  until the user says to fill the rest.
+- **Marked unverified** on the column heading and in the recipe step. The mark
+  is *not* in the downloaded file; see `ideas.md`.
+- **Never in the before/after.** It reuses `enrich_column` (connector
+  `ai_fill`), so `volatile_columns` already keeps it out of every answer, undo
+  works, and a saved recipe keeps what the column means but not the answers.
+- **Asked for like any connector**: off per file until switched on, consent
+  before the first send, cached so the same question isn't paid for twice.
+- **A cell is data, never an instruction.** The prompt says so; more to the
+  point, a reply can only ever become a short text value that passed the checks.
+
+**Which suggestions can be filled** is decided when they are suggested
+(`suggest_columns.v2`): the model names the one column the answer depends on
+and the kind (label, text, website, or none). A plan that doesn't hold together
+(no such column, a label column with one label) is dropped and the suggestion
+stays a plain empty column. Built-in ideas are never fillable.
+
+**Model: Claude Haiku 5.5 by default** (`claude-haiku-5-5`), at low effort.
+Estimated two to three cents per thousand different values from list prices;
+not measured. This also became the default for the existing wording prompts.
+
+**The Claude provider was broken and nobody had noticed.** It sent
+`temperature: 0.2`, which current Claude models reject, and the default model
+id was a generation old. It had only ever been exercised with fakes. Fixed:
+no temperature, low effort, room for the model's own working-out in the output
+limit. Structured-output mode was considered and left out: our reply models
+carry length limits a strict schema may refuse, and that can't be tried
+without a key. Replies are parsed and validated as before.
+
+**One cell per looked-up answer** (replaces the two-column shapes above):
+- Postal codes give one "Geolocation" cell, `34.0901, -118.4065`.
+- Prices are text with a dollar sign, `$261.74`. Finnhub's quote carries no
+  currency; symbols from the SEC list are US listings, so dollars are assumed.
+  A foreign symbol typed into a ticker column would be mislabelled.
+- "Price as of" is gone as a column. The time is kept with each answer and
+  shown on hover on the column heading, with "out of date" when stale. The
+  downloaded file no longer carries it.
+- The answer cache is versioned (`ANSWER_FORMAT`), so answers stored in the old
+  two-value shape are asked for again rather than shown wrongly.
+
+**Jargon in labels is matched on whole words.** The shared check matched inside
+words and threw out "Finance" for containing "nan". Fixed for label lists only;
+the wording check is unchanged (still in `ideas.md`).
+
+---
+
+## Less on screen: a recipe panel that hides, and one card per connector (owner-requested)
+
+**The recipe panel is "Recipe: steps performed" and can be hidden.** Its heading
+is a button. Hidden, it becomes a slim bar above the page (name, step count,
+both downloads) and the page takes the full width. The downloads stay in reach
+on purpose: hiding the steps must not hide the way out. "Why?" on What changed
+points at steps in this panel, so it opens the panel again.
+
+**The Connectors panel is one card per service.** Before, the switches sat in a
+list at the bottom and the Enrich cards at the top, so using one meant scrolling
+between them. Now a card holds the service's symbol and name, its switch, where
+it stands for this file ("Found in 'Postcode' · 412 values", "Nothing to look
+up in this file", "Added 'Geolocation' · 380 found"), and its action. Services
+with something to do in the open file sort first. The consent prompt opens
+inside the card it belongs to.
+
+**Detail moved behind the info button, not removed.** What a service adds, who
+runs it and exactly what is sent used to be printed on every card. They are now
+one hover away on each card and on each consent prompt. The consent prompt
+itself is one sentence naming the column, the count and the service. The owner
+chose the shorter wording; the facts a user needs before agreeing are still
+reachable before they agree.
+
+---
+
+## What broke on eight new files (stress test, owner-requested)
+
+Eight seeded files in `data/eval/`, each built from known-clean data with
+specific problems put in, so there is an answer key (`make_files.py`).
+`evaluate.py` scores the app against it through the same code a browser request
+uses; `--offline` sends nothing anywhere. The offline half is in the test suite
+(`tests/test_eval_files.py`). The files: listed companies; UK customers;
+German orders (semicolons, decimal commas, Windows-1252); a survey in Excel
+with title lines; a 70-column file of look-alikes; six rows with no header;
+51,000 events; and a tidy file.
+
+**First run: 13 of 19 injected problems found, three connector offers on
+columns that were nothing of the kind, and two slow paths. Fixed:**
+
+- **"1.234,56 €" was not a number.** The number patterns allowed a currency
+  sign before a number only. Now after it too (`steps/compile.py`,
+  `profile/patterns.py`, `detectors/numbers_as_text.py`).
+- **"08933" became 8933.** A postal-code column was a "measure" unless 5% of
+  its values started with zero, and was then read as numbers. One leading zero
+  in a column where every value has the same number of digits is now enough to
+  call it codes (`profile/roles.py`).
+- **A phone column typed several ways wasn't a phone column.** 75% formatted
+  and 25% bare digits fell under the 80% bar and became free text, so no phone
+  check ran. Formatted plus bare digits now counts when at least half are
+  formatted.
+- **"0207" was never too short.** "Short" was only measured against a column's
+  usual length, and numbers from two countries have none. Fewer than seven
+  digits is now too short anywhere, with its own wording.
+- **Batch numbers and round quantities were offered as postal codes; "Garden
+  Group" as a company.** All-digit codes with no leading zero and no telling
+  name must now behave like addresses (at least eight different ones, spread
+  across areas, not round). "Group", "Co", "Company" and "Holdings" alone no
+  longer make a company; "Inc", "Ltd", "LLC" and the like do. Cost: three
+  postal codes in an unnamed column are no longer offered. Wrong offers were
+  judged worse than a missed one, since a name ("Zip") still settles it.
+- **Nine seconds to rank 129 cards on 150 rows.** Impact scoring re-asked every
+  question for every card. It now has a ceiling (600 questions, the samples use
+  at most 228), spends it on the cards touching the most rows, and ranks the
+  rest by rows touched.
+- **Date-format search on 51,000 rows** tried every format against every value,
+  several times over. Formats are now chosen on an even 5,000-row sample and
+  counted once over the whole column. Columns under 5,000 rows are unchanged.
+
+**The live run found the biggest one: no fix a model proposed had ever
+survived.** The prompt named the step types but not their arguments, so every
+proposal was thrown away as malformed. `suggest_fixes.v2` lists each step's
+arguments. With it Claude found things the rules can't: the survey's title
+lines sitting among the answers, "No comment." used as a blank, companies
+listed twice with different details. Two follow-ons:
+- A model reads the file as uploaded, so it re-proposed fixes the certain rules
+  had already applied. Proposals are now judged on the table as it stands after
+  those (`ai/fixes.py`); one that changes nothing there is dropped.
+- A model may no longer be asked to fill a column from a number or a date
+  ("Salary band", "Day of week"). That is arithmetic, and the engine's.
+
+**Measured, with the real services (Claude Haiku 5.5, Zippopotam, Finnhub):**
+- AI fill: industry 44 of 45 companies (the miss: Meta as "Media"), website 45
+  of 45, country from postcode 13 of 13, product category from German product
+  names 12 of 12. No "not sure" on these well-known inputs.
+- Prices: 45 of 45 symbols. Postal positions: 10 of 10 US and 8 of 8 UK checked
+  codes within 25 km.
+- Company to ticker was scored against a stand-in list (the SEC list needs a
+  contact string that isn't set): 67 of 68 rows, the miss being a deliberately
+  mangled "Amazoncom Inc", left blank rather than guessed.
+
+**Open, and the owner's to decide:**
+- **Title lines above the header row.** The first row is always the header, so
+  the survey's columns are "column_3" and its cards are unreadable. Skipping
+  leading title lines changes which rows count as data. The test for it is
+  marked as an expected failure.
+- **A hundred cards on a wide file.** 62 sparse columns raise 62 "rows have no
+  …" questions. Nothing groups or caps them.
+- **Zippopotam's German data is wrong for five of eight major cities** (Köln,
+  Hamburg, Dresden, Leipzig, Frankfurt come back with another field where the
+  latitude should be). The range check catches it and the cell says "not
+  found", now remembered as such instead of "try later".
+- **A column mixing two countries' postcodes gets no offer**, because no single
+  country's format fits 90% of it.
+- **AI on the 70-column file took 47 seconds and both the fix and wording
+  prompts gave up.** The page doesn't wait for it and keeps its own wording.
+
+**The open questions above, as the owner settled them:**
+- **Title lines are skipped.** At the very top of a table at least four
+  columns wide, a line filling one or two cells (and no more than half the usual
+  number) is a title, not a header (`ingest/header.py`). The lines are kept on
+  the file summary and shown with the other reading notes, so nothing vanishes
+  silently, and choosing "first row is data" reads the file exactly as it is.
+  The survey file now scores 3 of 3 and the set 19 of 19.
+- **Cards of one kind fold within their section.** In each tier the first three
+  cards of a kind stay in their ranked places and the rest sit behind "Show N
+  more like these" (`IssueList.tsx`). The section's count still shows the total,
+  and a card that something links to is unfolded with the rest of its kind. Done
+  on the page, not the server: every card still exists and is still ranked.
+- **German postal data and mixed-country columns are left as they are.**
+
+**One thing under two names is one thing** (`semantic/concepts.py`). Once a
+connector has added map positions, share prices or stock symbols, an idea for
+the same thing ("Map position", "Latitude and longitude", "Stock price") is no
+longer offered, and asking for one by name adds nothing and says where it
+already is. The same matching stops the idea list offering a model's "Share
+price" beside the built-in "Stock price". Matching is on the words of the name,
+which is all a not-yet-made column has; removing the lookup makes the idea
+available again.

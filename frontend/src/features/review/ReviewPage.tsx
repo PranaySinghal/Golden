@@ -12,6 +12,7 @@ import {
   type StepView,
 } from '../../api/client'
 import { ErrorState, Spinner } from '../../components/states'
+import { CanvasPage } from '../canvas/CanvasPage'
 import { ComparePage } from '../compare/ComparePage'
 import { FileOptionsPanel } from '../upload/FileOptionsPanel'
 import { describeRows } from '../upload/format'
@@ -21,7 +22,7 @@ import { MainProblems } from './MainProblems'
 import { RecipeOutcome } from './RecipeOutcome'
 import { RecipePanel } from './RecipePanel'
 
-type Tab = 'review' | 'changed'
+type Tab = 'review' | 'changed' | 'canvas'
 
 /** Cards a model added, and wording it improved, folded into the rule-based list. */
 function withAiHelp(issues: IssueView[], ai: AiResponse | undefined): IssueView[] {
@@ -56,6 +57,9 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
   const [acting, setActing] = useState<string | null>(null)
   const [actionError, setActionError] = useState<ActionError | null>(null)
   const [highlighted, setHighlighted] = useState<string[]>([])
+  const [recipeOpen, setRecipeOpen] = useState(true)
+  // A card a link points at, which the list must show even if its kind is folded away.
+  const [revealed, setRevealed] = useState<string | null>(null)
   // What came of steps saved from another file and attached to the upload.
   const outcome = dataset.recipe_outcome ?? null
 
@@ -86,6 +90,8 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
     )
     void queryClient.invalidateQueries({ queryKey: issuesKey })
     void queryClient.invalidateQueries({ queryKey: ['preview', dataset.id] })
+    // What can be looked up, and what a lookup filled in, both follow the recipe.
+    void queryClient.invalidateQueries({ queryKey: ['connectors', dataset.id] })
   }
 
   /** A card's failure belongs on that card; a recipe step's has nowhere else to go. */
@@ -121,6 +127,9 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
       queryClient.removeQueries({ queryKey: ['ai', fresh.id] })
       queryClient.removeQueries({ queryKey: ['compare', fresh.id] })
       queryClient.removeQueries({ queryKey: ['preview', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['canvas', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['canvas-ideas', fresh.id] })
+      queryClient.removeQueries({ queryKey: ['connectors', fresh.id] })
       queryClient.setQueryData(['dataset', fresh.id], fresh)
       // These all point at ids in the recipe that no longer exists.
       setTab('review')
@@ -142,6 +151,7 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
   /** Take the reader to a problem's card, from the tab it lives on. */
   function showIssue(issue: IssueView) {
     setTab('review')
+    setRevealed(issue.id)
     // The card may only be drawn once the review tab is showing again.
     window.requestAnimationFrame(() => {
       const card = document.getElementById(issueAnchor(issue.id))
@@ -237,14 +247,25 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
         >
           What changed
         </button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-canvas"
+          aria-selected={tab === 'canvas'}
+          aria-controls="panel-canvas"
+          className={`tabs__tab${tab === 'canvas' ? ' tabs__tab--on' : ''}`}
+          onClick={() => setTab('canvas')}
+        >
+          Canvas
+        </button>
       </div>
 
       <div className="review__layout">
         <div
           className="review__issues"
           role="tabpanel"
-          id={tab === 'review' ? 'panel-review' : 'panel-changed'}
-          aria-labelledby={tab === 'review' ? 'tab-review' : 'tab-changed'}
+          id={`panel-${tab}`}
+          aria-labelledby={`tab-${tab}`}
         >
           {tab === 'review' ? (
             <IssueList
@@ -257,6 +278,17 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
                 runAction(issue.id, 'card', () => api.rejectIssue(dataset.id, issue.id))
               }
               note={aiFailed ? (ai.data?.note ?? null) : null}
+              reveal={revealed}
+            />
+          ) : tab === 'canvas' ? (
+            <CanvasPage
+              datasetId={dataset.id}
+              recipeKey={issues.data.recipe.recipe_key}
+              busy={acting !== null || undo.isPending}
+              onRecipe={applyRecipe}
+              onRemove={(stepId) =>
+                runAction(stepId, 'panel', () => api.removeStep(dataset.id, stepId))
+              }
             />
           ) : (
             <ComparePage
@@ -271,7 +303,11 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
               }}
               questionLabels={ai.data?.question_labels ?? {}}
               aiStory={ai.data?.story ?? null}
-              onHighlight={setHighlighted}
+              onHighlight={(stepIds) => {
+                setHighlighted(stepIds)
+                // "Why?" points at steps in the recipe; show them if they're hidden.
+                if (stepIds.length > 0) setRecipeOpen(true)
+              }}
               onBackToReview={() => setTab('review')}
             />
           )}
@@ -282,6 +318,8 @@ export function ReviewPage({ dataset, onDataset, onStartOver }: ReviewPageProps)
           recipe={issues.data.recipe}
           busy={acting !== null || undo.isPending}
           highlighted={highlighted}
+          open={recipeOpen}
+          onOpenChange={setRecipeOpen}
           onToggle={(step: StepView, enabled: boolean) =>
             runAction(step.id, 'panel', () => api.setStepEnabled(dataset.id, step.id, enabled))
           }

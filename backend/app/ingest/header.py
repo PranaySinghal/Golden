@@ -3,6 +3,11 @@ from app.ingest.models import HeaderMode
 from app.profile.patterns import looks_typed
 
 _TYPED_COLUMN_SHARE = 0.8
+# A title line fills at most this many cells...
+_TITLE_MAX_CELLS = 2
+# ...in a table whose rows usually fill at least this many.
+_MIN_WIDTH_FOR_TITLES = 4
+_MAX_TITLE_ROWS = 10
 
 
 def detect_header(rows: list[list[str | None]]) -> bool:
@@ -36,6 +41,36 @@ def detect_header(rows: list[list[str | None]]) -> bool:
     if header_votes > 0:
         return True
     return data_votes == 0
+
+
+def count_title_rows(rows: list[list[str | None]]) -> int:
+    """How many lines at the top are a title or a note, not part of the table.
+
+    Spreadsheets exported for people often start with "Customer survey" and
+    "Exported 2 November" before the column names. Such a line fills one or two
+    cells where the table's rows fill many. Only the very top is looked at, and
+    only in a table wide enough to tell the difference: in a two-column file a
+    one-cell line is just a row with a blank.
+    """
+
+    def filled(row: list[str | None]) -> int:
+        return sum(1 for value in row if value is not None and value.strip() != "")
+
+    counts = sorted(filled(row) for row in rows)
+    if not counts:
+        return 0
+    usual = counts[len(counts) // 2]
+    if usual < _MIN_WIDTH_FOR_TITLES:
+        return 0
+    titles = 0
+    # Always leave a header candidate and a data row below what's skipped.
+    while (
+        titles < min(_MAX_TITLE_ROWS, len(rows) - 2)
+        and filled(rows[titles]) <= _TITLE_MAX_CELLS
+        and filled(rows[titles]) * 2 <= usual
+    ):
+        titles += 1
+    return titles
 
 
 def resolve_header(mode: HeaderMode, rows: list[list[str | None]]) -> bool:

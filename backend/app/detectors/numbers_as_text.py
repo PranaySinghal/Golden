@@ -14,9 +14,9 @@ from app.steps.models import CastNumberStep
 from app.steps.schema import trimmed
 
 # "1.200,50" or "3,5": a comma followed by one or two digits at the end is a decimal comma.
-DECIMAL_COMMA = r"[-+(]?[$€£¥₹]?[0-9.]*[0-9],[0-9]{1,2}%?\)?"
+DECIMAL_COMMA = r"[-+(]?[$€£¥₹]?\s?[0-9.]*[0-9],[0-9]{1,2}\s?[$€£¥₹]?\s?%?\)?"
 # "1,200.50": a comma before a later point means the point is the decimal mark.
-DECIMAL_POINT = r"[-+(]?[$€£¥₹]?[0-9,]*[0-9]\.[0-9]+%?\)?"
+DECIMAL_POINT = r"[-+(]?[$€£¥₹]?\s?[0-9,]*[0-9]\.[0-9]+\s?[$€£¥₹]?\s?%?\)?"
 MAX_EXAMPLES = 5
 # Columns the profile calls labels can still be numbers written with decimal
 # commas ("3,50"), which the profile's number pattern doesn't read.

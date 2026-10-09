@@ -1,0 +1,241 @@
+Bestell-Nr;Datum;Kunde;Produkt;Menge;Einzelpreis;PLZ;Stadt
+B-00001;29.09.2024;Evans GmbH;Bücherregal Eiche;3;1.503,42 €;60311;Frankfurt
+B-00002;18.05.2024;Diaz GmbH;Schreibtisch höhenverstellbar;12;1.631,63 €;01067;Dresden
+B-00003;14.06.2024;Okafor GmbH;Laptop 14 Zoll;7;241,03 €;60311;Frankfurt
+B-00004;10.08.2024;Okafor GmbH;Bücherregal Eiche;5;797,75 €;20095;Hamburg
+B-00005;29.01.2024;Yilmaz GmbH;Druckerpapier A4;9;524,17 €;80331;München
+B-00006;21.09.2024;Novak GmbH;Regenjacke Herren;4;1.133,42 €;50667;Köln
+B-00007;13.01.2024;Okafor GmbH;Laptop 14 Zoll;9;16,78 €;04109;Leipzig
+B-00008;15.06.2024;Diaz GmbH;Monitor 27 Zoll;11;226,01 €;20095;Hamburg
+B-00009;10.01.2024;Evans GmbH;USB-C Ladegerät;6;389,34 €;04109;Leipzig
+B-00010;28.09.2024;Diaz GmbH;Kugelschreiber 10er Pack;12;44,81 €;50667;Köln
+B-00011;17.04.2024;Diaz GmbH;Bücherregal Eiche;6;1.198,12 €;10115;Berlin
+B-00012;26.10.2024;Lee GmbH;Bücherregal Eiche;9;90,07 €;60311;Frankfurt
+B-00013;13.05.2024;Novak GmbH;Aktenordner;4;364,15 €;50667;Köln
+B-00014;11.04.2024;Chen GmbH;USB-C Ladegerät;7;797,74 €;01067;Dresden
+B-00015;22.01.2024;Chen GmbH;Laptop 14 Zoll;11;1.309,00 €;04109;Leipzig
+B-00016;23.04.2024;Okafor GmbH;Bücherregal Eiche;7;1.490,58 €;70173;Stuttgart
+B-00017;04.01.2024;Diaz GmbH;Laptop 14 Zoll;8;1.435,11 €;70173;Stuttgart
+B-00018;02.05.2024;Novak GmbH;Kugelschreiber 10er Pack;11;233,61 €;01067;Dresden
+B-00019;12.02.2024;Novak GmbH;Laptop 14 Zoll;10;415,33 €;20095;Hamburg
+B-00020;02.09.2024;Walsh GmbH;Bücherregal Eiche;3;134,91 €;70173;Stuttgart
+B-00021;07.01.2024;Reyes GmbH;Bürostuhl ergonomisch;11;1.203,63 €;20095;Hamburg
+B-00022;20.05.2024;Walsh GmbH;Bücherregal Eiche;10;1.516,79 €;70173;Stuttgart
+B-00023;12.02.2024;Singh GmbH;Bürostuhl ergonomisch;12;317,59 €;20095;Hamburg
+B-00024;06.01.2024;Okafor GmbH;Wollpullover Damen;10;1.482,42 €;70173;Stuttgart
+B-00025;06.08.2024;Novak GmbH;Regenjacke Herren;10;1.063,70 €;10115;Berlin
+B-00026;14.01.2024;Diaz GmbH;Laptop 14 Zoll;12;602,44 €;01067;Dresden
+B-00027;17.04.2024;Evans GmbH;Wollpullover Damen;8;881,53 €;50667;Köln
+B-00028;21.02.2024;Yilmaz GmbH;Regenjacke Herren;3;425,75 €;20095;Hamburg
+B-00029;24.07.2024;Novak GmbH;Regenjacke Herren;11;1.092,70 €;10115;Berlin
+B-00030;29.05.2024;Walsh GmbH;Druckerpapier A4;9;227,07 €;70173;Stuttgart
+B-00031;18.04.2024;Chen GmbH;Regenjacke Herren;9;1.757,97 €;80331;München
+B-00032;10.09.2024;Lee GmbH;Aktenordner;12;1.483,55 €;60311;Frankfurt
+B-00033;12.06.2024;Singh GmbH;USB-C Ladegerät;1;1.458,82 €;04109;Leipzig
+B-00034;20.01.2024;Chen GmbH;Regenjacke Herren;4;868,88 €;01067;Dresden
+B-00035;16.09.2024;Walsh GmbH;Druckerpapier A4;11;788,55 €;50667;Köln
+B-00036;05.02.2024;Novak GmbH;USB-C Ladegerät;2;79,47 €;10115;Berlin
+B-00037;28.06.2024;Okafor GmbH;Wollpullover Damen;9;222,12 €;04109;Leipzig
+B-00038;17.05.2024;Evans GmbH;Druckerpapier A4;3;599,45 €;20095;Hamburg
+B-00039;27.03.2024;Lee GmbH;Bürostuhl ergonomisch;4;864,59 €;10115;Berlin
+B-00040;13.01.2024;Okafor GmbH;Wollpullover Damen;12;607,98 €;70173;Stuttgart
+B-00041;03.09.2024;Yilmaz GmbH;Wollpullover Damen;12;969,95 €;01067;Dresden
+B-00042;24.08.2024;Yilmaz GmbH;Bürostuhl ergonomisch;11;1.610,92 €;20095;Hamburg
+B-00043;03.08.2024;Evans GmbH;Bürostuhl ergonomisch;4;1.187,43 €;60311;Frankfurt
+B-00044;20.05.2024;Novak GmbH;Aktenordner;8;224,30 €;04109;Leipzig
+B-00045;18.07.2024;Chen GmbH;Laptop 14 Zoll;2;780,34 €;80331;München
+B-00046;18.04.2024;Chen GmbH;Kabellose Maus;4;308,02 €;20095;Hamburg
+B-00047;25.09.2024;Chen GmbH;Monitor 27 Zoll;10;579,45 €;80331;München
+B-00048;02.09.2024;Walsh GmbH;Laptop 14 Zoll;10;1.187,58 €;20095;Hamburg
+B-00049;24.05.2024;Singh GmbH;Monitor 27 Zoll;8;537,20 €;50667;Köln
+B-00050;27.05.2024;Singh GmbH;Druckerpapier A4;1;881,67 €;60311;Frankfurt
+B-00051;26.01.2024;Chen GmbH;Schreibtisch höhenverstellbar;1;517,06 €;10115;Berlin
+B-00052;30.07.2024;Yilmaz GmbH;Schreibtisch höhenverstellbar;6;411,12 €;10115;Berlin
+B-00053;31.07.2024;Walsh GmbH;Aktenordner;11;514,21 €;04109;Leipzig
+B-00054;21.08.2024;Diaz GmbH;Kabellose Maus;9;1.749,22 €;80331;München
+B-00055;28.08.2024;Chen GmbH;Bürostuhl ergonomisch;8;1.238,77 €;01067;Dresden
+B-00056;13.04.2024;Yilmaz GmbH;Druckerpapier A4;10;625,48 €;70173;Stuttgart
+B-00057;06.01.2024;Walsh GmbH;Bücherregal Eiche;1;630,90 €;70173;Stuttgart
+B-00058;22.08.2024;Diaz GmbH;Bürostuhl ergonomisch;7;439,52 €;04109;Leipzig
+B-00059;13.05.2024;Novak GmbH;Aktenordner;11;510,67 €;04109;Leipzig
+B-00060;12.02.2024;Novak GmbH;Druckerpapier A4;7;720,67 €;01067;Dresden
+B-00061;03.09.2024;Reyes GmbH;USB-C Ladegerät;7;1.746,00 €;80331;München
+B-00062;08.10.2024;Singh GmbH;Laptop 14 Zoll;9;215,30 €;01067;Dresden
+B-00063;02.09.2024;Evans GmbH;Kugelschreiber 10er Pack;7;276,29 €;01067;Dresden
+B-00064;15.10.2024;Novak GmbH;Schreibtisch höhenverstellbar;12;1.419,44 €;70173;Stuttgart
+B-00065;01.04.2024;Yilmaz GmbH;Laptop 14 Zoll;9;903,07 €;04109;Leipzig
+B-00066;16.08.2024;Lee GmbH;Laptop 14 Zoll;11;591,54 €;01067;Dresden
+B-00067;23.06.2024;Lee GmbH;Bürostuhl ergonomisch;4;646,80 €;01067;Dresden
+B-00068;18.08.2024;Diaz GmbH;Schreibtisch höhenverstellbar;11;410,06 €;04109;Leipzig
+B-00069;10.05.2024;Novak GmbH;Wollpullover Damen;2;188,72 €;60311;Frankfurt
+B-00070;24.09.2024;Singh GmbH;Kabellose Maus;3;1.137,46 €;10115;Berlin
+B-00071;21.02.2024;Chen GmbH;Aktenordner;8;318,06 €;01067;Dresden
+B-00072;04.09.2024;Reyes GmbH;Aktenordner;7;1.170,33 €;01067;Dresden
+B-00073;17.05.2024;Walsh GmbH;Schreibtisch höhenverstellbar;12;1.703,67 €;70173;Stuttgart
+B-00074;30.06.2024;Walsh GmbH;Bücherregal Eiche;5;1.319,17 €;50667;Köln
+B-00075;12.04.2024;Chen GmbH;Kabellose Maus;1;1.034,92 €;04109;Leipzig
+B-00076;07.10.2024;Okafor GmbH;Regenjacke Herren;8;1.372,24 €;04109;Leipzig
+B-00077;28.03.2024;Lee GmbH;Monitor 27 Zoll;9;795,64 €;60311;Frankfurt
+B-00078;27.10.2024;Yilmaz GmbH;Wollpullover Damen;1;1.430,29 €;80331;München
+B-00079;23.07.2024;Novak GmbH;Laptop 14 Zoll;2;710,01 €;70173;Stuttgart
+B-00080;12.07.2024;Novak GmbH;Schreibtisch höhenverstellbar;8;884,84 €;10115;Berlin
+B-00081;03.02.2024;Chen GmbH;Laptop 14 Zoll;5;1.146,61 €;60311;Frankfurt
+B-00082;22.05.2024;Reyes GmbH;Druckerpapier A4;6;1.242,72 €;20095;Hamburg
+B-00083;10.08.2024;Okafor GmbH;Regenjacke Herren;7;927,86 €;20095;Hamburg
+B-00084;06.05.2024;Singh GmbH;Bücherregal Eiche;6;584,20 €;20095;Hamburg
+B-00085;24.09.2024;Diaz GmbH;Aktenordner;2;980,31 €;50667;Köln
+B-00086;28.08.2024;Okafor GmbH;Kabellose Maus;1;1.697,40 €;04109;Leipzig
+B-00087;07.02.2024;Reyes GmbH;USB-C Ladegerät;4;822,83 €;60311;Frankfurt
+B-00088;01.04.2024;Diaz GmbH;Regenjacke Herren;6;1.688,10 €;80331;München
+B-00089;28.08.2024;Reyes GmbH;Kabellose Maus;2;587,72 €;10115;Berlin
+B-00090;06.03.2024;Novak GmbH;Regenjacke Herren;8;999,63 €;60311;Frankfurt
+B-00091;07.06.2024;Singh GmbH;Regenjacke Herren;1;1.716,27 €;60311;Frankfurt
+B-00092;14.07.2024;Evans GmbH;Bücherregal Eiche;7;1.755,43 €;20095;Hamburg
+B-00093;06.10.2024;Okafor GmbH;USB-C Ladegerät;6;17,47 €;60311;Frankfurt
+B-00094;27.05.2024;Novak GmbH;Kugelschreiber 10er Pack;5;1.042,33 €;80331;München
+B-00095;25.04.2024;Chen GmbH;Monitor 27 Zoll;2;312,26 €;01067;Dresden
+B-00096;13.04.2024;Lee GmbH;Kugelschreiber 10er Pack;3;1.171,77 €;01067;Dresden
+B-00097;23.05.2024;Reyes GmbH;USB-C Ladegerät;6;702,50 €;70173;Stuttgart
+B-00098;15.06.2024;Novak GmbH;Bücherregal Eiche;6;885,78 €;10115;Berlin
+B-00099;27.10.2024;Singh GmbH;Aktenordner;2;412,76 €;70173;Stuttgart
+B-00100;27.02.2024;Diaz GmbH;USB-C Ladegerät;2;559,79 €;04109;Leipzig
+B-00101;11.02.2024;Chen GmbH;Bücherregal Eiche;8;1.100,80 €;50667;Köln
+B-00102;19.06.2024;Walsh GmbH;Bücherregal Eiche;10;1.477,05 €;04109;Leipzig
+B-00103;06.01.2024;Walsh GmbH;Kugelschreiber 10er Pack;3;1.341,53 €;60311;Frankfurt
+B-00104;06.10.2024;Evans GmbH;Kabellose Maus;3;273,98 €;80331;München
+B-00105;26.03.2024;Reyes GmbH;USB-C Ladegerät;1;355,33 €;01067;Dresden
+B-00106;12.09.2024;Chen GmbH;Druckerpapier A4;3;124,28 €;80331;München
+B-00107;22.10.2024;Lee GmbH;Bücherregal Eiche;9;848,84 €;10115;Berlin
+B-00108;14.10.2024;Lee GmbH;Druckerpapier A4;9;238,21 €;60311;Frankfurt
+B-00109;26.10.2024;Lee GmbH;USB-C Ladegerät;6;1.113,92 €;60311;Frankfurt
+B-00110;17.05.2024;Yilmaz GmbH;Aktenordner;9;170,99 €;04109;Leipzig
+B-00111;26.01.2024;Chen GmbH;Kabellose Maus;3;1.392,43 €;04109;Leipzig
+B-00112;05.02.2024;Reyes GmbH;Laptop 14 Zoll;12;855,00 €;10115;Berlin
+B-00113;13.04.2024;Evans GmbH;Aktenordner;9;806,68 €;04109;Leipzig
+B-00114;09.01.2024;Chen GmbH;Druckerpapier A4;5;1.087,63 €;80331;München
+B-00115;15.01.2024;Walsh GmbH;Kabellose Maus;10;1.171,45 €;80331;München
+B-00116;16.03.2024;Chen GmbH;USB-C Ladegerät;1;328,17 €;10115;Berlin
+B-00117;06.04.2024;Singh GmbH;Wollpullover Damen;4;1.527,78 €;04109;Leipzig
+B-00118;11.09.2024;Novak GmbH;Bücherregal Eiche;5;701,57 €;04109;Leipzig
+B-00119;09.04.2024;Okafor GmbH;Laptop 14 Zoll;3;1.027,25 €;50667;Köln
+B-00120;27.08.2024;Walsh GmbH;Monitor 27 Zoll;1;1.479,04 €;80331;München
+B-00121;13.10.2024;Yilmaz GmbH;Aktenordner;1;1.263,83 €;50667;Köln
+B-00122;07.02.2024;Novak GmbH;Schreibtisch höhenverstellbar;1;1.013,82 €;60311;Frankfurt
+B-00123;02.08.2024;Reyes GmbH;Regenjacke Herren;6;154,26 €;04109;Leipzig
+B-00124;05.02.2024;Walsh GmbH;Bücherregal Eiche;8;450,55 €;80331;München
+B-00125;24.06.2024;Novak GmbH;Aktenordner;10;1.773,68 €;20095;Hamburg
+B-00126;01.10.2024;Evans GmbH;Kugelschreiber 10er Pack;12;1.716,31 €;50667;Köln
+B-00127;13.02.2024;Evans GmbH;USB-C Ladegerät;12;931,99 €;01067;Dresden
+B-00128;05.09.2024;Singh GmbH;Druckerpapier A4;8;1.174,28 €;80331;München
+B-00129;05.08.2024;Evans GmbH;Bücherregal Eiche;6;1.400,47 €;10115;Berlin
+B-00130;29.04.2024;Chen GmbH;Aktenordner;6;1.594,73 €;20095;Hamburg
+B-00131;08.02.2024;Chen GmbH;Bücherregal Eiche;3;1.078,77 €;10115;Berlin
+B-00132;29.05.2024;Novak GmbH;Bücherregal Eiche;5;1.340,60 €;80331;München
+B-00133;08.03.2024;Reyes GmbH;Schreibtisch höhenverstellbar;10;225,85 €;50667;Köln
+B-00134;16.04.2024;Diaz GmbH;Kugelschreiber 10er Pack;7;1.625,54 €;70173;Stuttgart
+B-00135;25.10.2024;Novak GmbH;Monitor 27 Zoll;8;1.111,99 €;01067;Dresden
+B-00136;02.09.2024;Lee GmbH;Bücherregal Eiche;1;1.666,01 €;20095;Hamburg
+B-00137;25.02.2024;Evans GmbH;Aktenordner;12;1.683,72 €;70173;Stuttgart
+B-00138;06.03.2024;Walsh GmbH;Wollpullover Damen;9;1.150,10 €;04109;Leipzig
+B-00139;03.10.2024;Okafor GmbH;Monitor 27 Zoll;9;736,54 €;04109;Leipzig
+B-00140;05.02.2024;Okafor GmbH;Wollpullover Damen;6;130,90 €;80331;München
+B-00141;23.06.2024;Lee GmbH;Druckerpapier A4;9;250,62 €;70173;Stuttgart
+B-00142;28.09.2024;Novak GmbH;Monitor 27 Zoll;12;1.273,80 €;01067;Dresden
+B-00143;18.03.2024;Diaz GmbH;Monitor 27 Zoll;10;292,95 €;60311;Frankfurt
+B-00144;11.08.2024;Reyes GmbH;USB-C Ladegerät;8;1.511,17 €;04109;Leipzig
+B-00145;18.09.2024;Yilmaz GmbH;Laptop 14 Zoll;8;436,16 €;01067;Dresden
+B-00146;02.04.2024;Walsh GmbH;Kugelschreiber 10er Pack;11;1.547,54 €;70173;Stuttgart
+B-00147;17.01.2024;Okafor GmbH;Bürostuhl ergonomisch;11;1.438,78 €;70173;Stuttgart
+B-00148;14.10.2024;Okafor GmbH;Bürostuhl ergonomisch;12;366,34 €;20095;Hamburg
+B-00149;01.05.2024;Walsh GmbH;USB-C Ladegerät;3;663,88 €;10115;Berlin
+B-00150;06.07.2024;Lee GmbH;Bücherregal Eiche;5;1.592,67 €;20095;Hamburg
+B-00151;04.03.2024;Lee GmbH;Kugelschreiber 10er Pack;7;1.286,02 €;80331;München
+B-00152;17.03.2024;Novak GmbH;USB-C Ladegerät;6;1.673,04 €;50667;Köln
+B-00153;06.05.2024;Chen GmbH;Wollpullover Damen;7;1.566,39 €;20095;Hamburg
+B-00154;14.03.2024;Singh GmbH;Bücherregal Eiche;8;377,62 €;80331;München
+B-00155;10.04.2024;Reyes GmbH;Kugelschreiber 10er Pack;9;160,58 €;50667;Köln
+B-00156;25.06.2024;Singh GmbH;Regenjacke Herren;7;38,25 €;04109;Leipzig
+B-00157;04.08.2024;Chen GmbH;Laptop 14 Zoll;3;1.498,36 €;10115;Berlin
+B-00158;03.02.2024;Okafor GmbH;Laptop 14 Zoll;1;252,67 €;10115;Berlin
+B-00159;15.05.2024;Yilmaz GmbH;Bürostuhl ergonomisch;3;1.398,64 €;50667;Köln
+B-00160;03.07.2024;Reyes GmbH;Kugelschreiber 10er Pack;3;705,33 €;80331;München
+B-00161;14.08.2024;Reyes GmbH;Bücherregal Eiche;8;1.298,31 €;01067;Dresden
+B-00162;29.05.2024;Chen GmbH;Aktenordner;5;14,45 €;70173;Stuttgart
+B-00163;19.04.2024;Reyes GmbH;USB-C Ladegerät;11;454,63 €;60311;Frankfurt
+B-00164;03.02.2024;Yilmaz GmbH;Regenjacke Herren;5;328,50 €;70173;Stuttgart
+B-00165;21.08.2024;Diaz GmbH;Wollpullover Damen;9;1.333,81 €;80331;München
+B-00166;26.07.2024;Yilmaz GmbH;Regenjacke Herren;4;691,90 €;80331;München
+B-00167;03.06.2024;Novak GmbH;Bücherregal Eiche;10;1.259,82 €;70173;Stuttgart
+B-00168;08.04.2024;Chen GmbH;Regenjacke Herren;1;296,62 €;60311;Frankfurt
+B-00169;14.06.2024;Novak GmbH;Kugelschreiber 10er Pack;12;402,40 €;10115;Berlin
+B-00170;27.02.2024;Singh GmbH;Druckerpapier A4;2;1.388,49 €;60311;Frankfurt
+B-00171;08.09.2024;Novak GmbH;Aktenordner;5;1.209,83 €;10115;Berlin
+B-00172;01.03.2024;Chen GmbH;Regenjacke Herren;4;1.646,06 €;04109;Leipzig
+B-00173;09.10.2024;Walsh GmbH;Schreibtisch höhenverstellbar;6;1.322,46 €;80331;München
+B-00174;19.06.2024;Diaz GmbH;Kugelschreiber 10er Pack;3;1.231,97 €;80331;München
+B-00175;08.05.2024;Novak GmbH;Regenjacke Herren;9;1.604,96 €;80331;München
+B-00176;17.08.2024;Walsh GmbH;Druckerpapier A4;6;1.514,05 €;10115;Berlin
+B-00177;19.09.2024;Novak GmbH;Regenjacke Herren;6;712,22 €;01067;Dresden
+B-00178;08.02.2024;Walsh GmbH;Kabellose Maus;11;1.787,00 €;20095;Hamburg
+B-00179;03.09.2024;Novak GmbH;Kugelschreiber 10er Pack;2;511,80 €;50667;Köln
+B-00180;28.09.2024;Walsh GmbH;USB-C Ladegerät;10;717,42 €;70173;Stuttgart
+B-00181;12.10.2024;Chen GmbH;Kugelschreiber 10er Pack;5;535,33 €;80331;München
+B-00182;14.01.2024;Okafor GmbH;Monitor 27 Zoll;8;480,98 €;20095;Hamburg
+B-00183;28.09.2024;Diaz GmbH;Laptop 14 Zoll;1;1.285,85 €;10115;Berlin
+B-00184;27.05.2024;Singh GmbH;Bürostuhl ergonomisch;4;1.631,82 €;60311;Frankfurt
+B-00185;15.02.2024;Yilmaz GmbH;Aktenordner;9;1.523,92 €;50667;Köln
+B-00186;04.08.2024;Okafor GmbH;Bücherregal Eiche;8;888,39 €;20095;Hamburg
+B-00187;08.07.2024;Reyes GmbH;Laptop 14 Zoll;1;690,03 €;50667;Köln
+B-00188;01.06.2024;Evans GmbH;Monitor 27 Zoll;1;784,81 €;50667;Köln
+B-00189;12.03.2024;Novak GmbH;USB-C Ladegerät;5;256,88 €;01067;Dresden
+B-00190;24.08.2024;Chen GmbH;Kugelschreiber 10er Pack;6;341,87 €;80331;München
+B-00191;10.04.2024;Evans GmbH;Regenjacke Herren;3;1.660,61 €;50667;Köln
+B-00192;03.09.2024;Lee GmbH;Regenjacke Herren;6;608,08 €;50667;Köln
+B-00193;15.10.2024;Yilmaz GmbH;Bücherregal Eiche;7;386,67 €;80331;München
+B-00194;02.08.2024;Novak GmbH;Bücherregal Eiche;4;925,57 €;50667;Köln
+B-00195;27.01.2024;Lee GmbH;Monitor 27 Zoll;3;205,73 €;80331;München
+B-00196;29.03.2024;Novak GmbH;Bürostuhl ergonomisch;1;479,09 €;80331;München
+B-00197;19.07.2024;Novak GmbH;Wollpullover Damen;8;848,14 €;20095;Hamburg
+B-00198;04.04.2024;Lee GmbH;Regenjacke Herren;5;945,83 €;80331;München
+B-00199;11.06.2024;Diaz GmbH;Wollpullover Damen;7;1.770,68 €;20095;Hamburg
+B-00200;31.07.2024;Novak GmbH;Aktenordner;7;340,06 €;10115;Berlin
+B-00201;19.10.2024;Novak GmbH;Regenjacke Herren;2;1.343,38 €;20095;Hamburg
+B-00202;02.01.2024;Novak GmbH;Kugelschreiber 10er Pack;5;1.438,06 €;80331;München
+B-00203;06.05.2024;Singh GmbH;Druckerpapier A4;7;1.530,57 €;60311;Frankfurt
+B-00204;12.06.2024;Okafor GmbH;Bücherregal Eiche;4;1.268,86 €;60311;Frankfurt
+B-00205;02.04.2024;Chen GmbH;Laptop 14 Zoll;7;1.318,52 €;20095;Hamburg
+B-00206;28.08.2024;Singh GmbH;Druckerpapier A4;10;287,29 €;10115;Berlin
+B-00207;19.10.2024;Okafor GmbH;Monitor 27 Zoll;10;1.308,81 €;50667;Köln
+B-00208;03.04.2024;Yilmaz GmbH;Bürostuhl ergonomisch;11;1.749,03 €;20095;Hamburg
+B-00209;02.10.2024;Reyes GmbH;Schreibtisch höhenverstellbar;6;1.777,36 €;80331;München
+B-00210;06.02.2024;Walsh GmbH;Monitor 27 Zoll;4;560,83 €;80331;München
+B-00211;17.08.2024;Okafor GmbH;Kabellose Maus;12;1.499,13 €;60311;Frankfurt
+B-00212;24.01.2024;Novak GmbH;Regenjacke Herren;12;202,42 €;20095;Hamburg
+B-00213;27.09.2024;Reyes GmbH;Monitor 27 Zoll;11;1.354,28 €;04109;Leipzig
+B-00214;22.10.2024;Okafor GmbH;Aktenordner;12;1.282,01 €;70173;Stuttgart
+B-00215;08.04.2024;Yilmaz GmbH;Druckerpapier A4;7;1.622,74 €;20095;Hamburg
+B-00216;26.10.2024;Evans GmbH;Bücherregal Eiche;10;664,55 €;50667;Köln
+B-00217;12.04.2024;Diaz GmbH;Aktenordner;7;551,90 €;01067;Dresden
+B-00218;08.03.2024;Singh GmbH;Laptop 14 Zoll;4;831,76 €;70173;Stuttgart
+B-00219;09.07.2024;Lee GmbH;Bücherregal Eiche;11;611,96 €;70173;Stuttgart
+B-00220;09.03.2024;Reyes GmbH;Schreibtisch höhenverstellbar;4;345,01 €;10115;Berlin
+B-00221;05.06.2024;Reyes GmbH;Laptop 14 Zoll;7;423,79 €;01067;Dresden
+B-00222;09.08.2024;Walsh GmbH;Druckerpapier A4;9;1.308,53 €;70173;Stuttgart
+B-00223;29.04.2024;Chen GmbH;Wollpullover Damen;5;1.663,29 €;50667;Köln
+B-00224;17.03.2024;Evans GmbH;Wollpullover Damen;3;558,22 €;50667;Köln
+B-00225;18.05.2024;Lee GmbH;USB-C Ladegerät;5;1.643,64 €;60311;Frankfurt
+B-00226;05.10.2024;Lee GmbH;Wollpullover Damen;3;113,20 €;80331;München
+B-00227;24.04.2024;Evans GmbH;Regenjacke Herren;3;1.288,20 €;01067;Dresden
+B-00228;16.04.2024;Singh GmbH;Druckerpapier A4;11;119,25 €;80331;München
+B-00229;15.05.2024;Diaz GmbH;Regenjacke Herren;7;711,49 €;50667;Köln
+B-00230;13.07.2024;Novak GmbH;Wollpullover Damen;11;364,55 €;50667;Köln
+B-00231;31.01.2024;Reyes GmbH;Wollpullover Damen;11;704,46 €;70173;Stuttgart
+B-00232;04.03.2024;Reyes GmbH;Bücherregal Eiche;11;141,72 €;10115;Berlin
+B-00233;10.02.2024;Reyes GmbH;Bücherregal Eiche;2;684,50 €;04109;Leipzig
+B-00234;29.02.2024;Evans GmbH;Bücherregal Eiche;6;1.583,97 €;60311;Frankfurt
+B-00235;19.01.2024;Singh GmbH;Schreibtisch höhenverstellbar;11;445,94 €;70173;Stuttgart
+B-00236;07.01.2024;Walsh GmbH;Aktenordner;9;298,43 €;50667;Köln
+B-00237;05.04.2024;Walsh GmbH;Aktenordner;7;1.418,22 €;01067;Dresden
+B-00238;25.10.2024;Chen GmbH;USB-C Ladegerät;12;1.310,92 €;70173;Stuttgart
+B-00239;28.08.2024;Lee GmbH;Kabellose Maus;1;1.109,56 €;10115;Berlin
+B-00240;25.02.2024;Novak GmbH;Aktenordner;1;849,43 €;01067;Dresden

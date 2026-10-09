@@ -260,6 +260,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/datasets/{dataset_id}/canvas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Canvas */
+        get: operations["getCanvas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/canvas/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Canvas Column */
+        post: operations["addCanvasColumn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/canvas/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Canvas Suggestions */
+        get: operations["getCanvasSuggestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/connectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Connectors */
+        get: operations["getConnectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/connectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dataset Connectors */
+        get: operations["getDatasetConnectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/connectors/{connector}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Connector Active */
+        put: operations["setConnectorActive"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/connectors/lookups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run Lookup */
+        post: operations["runConnectorLookup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/datasets/{dataset_id}/connectors/ai-fill/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Ai Fill
+         * @description A few example answers for a column a model would fill in. Changes nothing.
+         */
+        post: operations["previewAiFill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -268,6 +407,30 @@ export interface components {
         AcceptRequest: {
             /** Choice Id */
             choice_id?: string | null;
+        };
+        /**
+         * AddColumnStep
+         * @description A new column the user asked for: blank, or the same text in every row.
+         */
+        AddColumnStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "add_column";
+            /** Name */
+            name: string;
+            /** Value */
+            value?: string | null;
+            /** Insert After */
+            insert_after?: string | null;
         };
         /** AiResponse */
         AiResponse: {
@@ -354,6 +517,33 @@ export interface components {
              */
             recipe?: string | null;
         };
+        /** CanvasColumn */
+        CanvasColumn: {
+            /** Name */
+            name: string;
+            kind: components["schemas"]["ValueKind"];
+            /** Step Id */
+            step_id?: string | null;
+            /** Label */
+            label?: string | null;
+        };
+        /** CanvasResponse */
+        CanvasResponse: {
+            /** Columns */
+            columns?: components["schemas"]["CanvasColumn"][];
+            /** Rows */
+            rows?: (string | null)[][];
+            /** Reasons */
+            reasons?: {
+                [key: string]: (string | null)[];
+            };
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count: number;
+            recipe: components["schemas"]["RecipeResponse"];
+        };
         /** CastNumberStep */
         CastNumberStep: {
             /** Id */
@@ -400,7 +590,7 @@ export interface components {
             /** Description */
             description: string;
             /** Steps */
-            steps?: (components["schemas"]["TrimStep"] | components["schemas"]["RemoveCharactersStep"] | components["schemas"]["NormalizeCaseStep"] | components["schemas"]["NormalizePhoneStep"] | components["schemas"]["MapValuesStep"] | components["schemas"]["NullPlaceholdersStep"] | components["schemas"]["CastNumberStep"] | components["schemas"]["ParseDateStep"] | components["schemas"]["SplitColumnStep"] | components["schemas"]["DedupeStep"] | components["schemas"]["SetAsideRowsStep"] | components["schemas"]["ClearValuesStep"] | components["schemas"]["FillMissingStep"])[];
+            steps?: (components["schemas"]["TrimStep"] | components["schemas"]["RemoveCharactersStep"] | components["schemas"]["NormalizeCaseStep"] | components["schemas"]["NormalizePhoneStep"] | components["schemas"]["MapValuesStep"] | components["schemas"]["NullPlaceholdersStep"] | components["schemas"]["CastNumberStep"] | components["schemas"]["ParseDateStep"] | components["schemas"]["SplitColumnStep"] | components["schemas"]["AddColumnStep"] | components["schemas"]["EnrichColumnStep"] | components["schemas"]["ResolveMatchStep"] | components["schemas"]["DedupeStep"] | components["schemas"]["SetAsideRowsStep"] | components["schemas"]["ClearValuesStep"] | components["schemas"]["FillMissingStep"])[];
             /**
              * Recommended
              * @default false
@@ -488,6 +678,24 @@ export interface components {
              */
             sample_values: string[];
         };
+        /** ColumnSuggestion */
+        ColumnSuggestion: {
+            /** Name */
+            name: string;
+            /** Reason */
+            reason: string;
+            /** Placeholder */
+            placeholder?: string | null;
+            /**
+             * Source
+             * @default rules
+             * @enum {string}
+             */
+            source: "rules" | "ai";
+            /** Live Source */
+            live_source?: string | null;
+            fill?: components["schemas"]["FillPlan"] | null;
+        };
         /** ComparisonResponse */
         ComparisonResponse: {
             /** Cards */
@@ -511,6 +719,53 @@ export interface components {
             recomputed: number;
             story?: components["schemas"]["Story"] | null;
         };
+        /** ConnectorSwitch */
+        ConnectorSwitch: {
+            /** Active */
+            active: boolean;
+        };
+        /** ConnectorView */
+        ConnectorView: {
+            /**
+             * Id
+             * @enum {string}
+             */
+            id: "postal_geocode" | "company_ticker" | "stock_price" | "ai_fill";
+            /** Title */
+            title: string;
+            /** Adds */
+            adds: string;
+            /** Sends */
+            sends: string;
+            /** Service */
+            service: string;
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Active
+             * @default false
+             */
+            active: boolean;
+        };
+        /** CountryOption */
+        CountryOption: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+        };
+        /** DatasetConnectors */
+        DatasetConnectors: {
+            /** Connectors */
+            connectors: components["schemas"]["ConnectorView"][];
+            /** Offers */
+            offers?: components["schemas"]["OfferView"][];
+            /** Enrichments */
+            enrichments?: components["schemas"]["EnrichmentView"][];
+            /** Consented */
+            consented?: ("postal_geocode" | "company_ticker" | "stock_price" | "ai_fill")[];
+            recipe: components["schemas"]["RecipeResponse"];
+        };
         /** DatasetSummary */
         DatasetSummary: {
             /** Id */
@@ -533,6 +788,8 @@ export interface components {
             description: string;
             /** Empty Rows Skipped */
             empty_rows_skipped: number;
+            /** Title Rows Skipped */
+            title_rows_skipped?: string[];
             /** Columns */
             columns: components["schemas"]["ColumnProfile"][];
             recipe_outcome?: components["schemas"]["RecipeOutcomeView"] | null;
@@ -588,7 +845,7 @@ export interface components {
          * DetectorName
          * @enum {string}
          */
-        DetectorName: "placeholders" | "numbers_as_text" | "dates" | "category_variants" | "extra_spaces" | "combined_columns" | "duplicates" | "identifier_repeats" | "out_of_range" | "contact_formats" | "missing_values" | "ai_suggestion";
+        DetectorName: "placeholders" | "numbers_as_text" | "dates" | "category_variants" | "extra_spaces" | "combined_columns" | "duplicates" | "identifier_repeats" | "out_of_range" | "contact_formats" | "missing_values" | "ai_suggestion" | "connector_match";
         /**
          * DigitsFewerThanCondition
          * @description Filled values with fewer digits than `count`, e.g. phone numbers that are too short.
@@ -603,6 +860,87 @@ export interface components {
             column: string;
             /** Count */
             count: number;
+        };
+        /**
+         * EnrichColumnStep
+         * @description New columns looked up from an outside service, one answer per different value.
+         *
+         *     The step never fetches anything. A lookup run stores its answers under a
+         *     `snapshot` id, and the step joins the table to that snapshot, so the same
+         *     recipe always gives the same rows. Looking up again makes a new snapshot.
+         */
+        EnrichColumnStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "enrich_column";
+            /**
+             * Connector
+             * @enum {string}
+             */
+            connector: "postal_geocode" | "company_ticker" | "stock_price" | "ai_fill";
+            /** Column */
+            column: string;
+            /** Into */
+            into: string[];
+            /** Country */
+            country?: string | null;
+            /** Snapshot */
+            snapshot?: string | null;
+            /** Instruction */
+            instruction?: string | null;
+            /** Kind */
+            kind?: ("label" | "text" | "website") | null;
+            /** Choices */
+            choices?: string[];
+            /** Context */
+            context?: string[];
+        };
+        /** EnrichmentView */
+        EnrichmentView: {
+            /** Step Id */
+            step_id: string;
+            /**
+             * Connector
+             * @enum {string}
+             */
+            connector: "postal_geocode" | "company_ticker" | "stock_price" | "ai_fill";
+            /** Column */
+            column: string;
+            /** Into */
+            into: string[];
+            /** Looked Up */
+            looked_up: boolean;
+            /** Counts */
+            counts?: {
+                [key: string]: number;
+            };
+            /** Examples */
+            examples?: {
+                [key: string]: string[];
+            };
+            /**
+             * Remaining
+             * @default 0
+             */
+            remaining: number;
+            /** As Of */
+            as_of?: string | null;
+            /**
+             * Out Of Date
+             * @default false
+             */
+            out_of_date: boolean;
+            /** Enabled */
+            enabled: boolean;
         };
         /** EqualsCondition */
         EqualsCondition: {
@@ -652,6 +990,64 @@ export interface components {
             strategy: "value" | "mean" | "median" | "most_common" | "previous";
             /** Value */
             value?: string | number | null;
+        };
+        /** FillPlan */
+        FillPlan: {
+            /** Based On */
+            based_on: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "label" | "text" | "website";
+            /** Choices */
+            choices?: string[];
+        };
+        /** FillPreview */
+        FillPreview: {
+            /** Rows */
+            rows: components["schemas"]["FillPreviewRow"][];
+            /** Total Values */
+            total_values: number;
+        };
+        /** FillPreviewRequest */
+        FillPreviewRequest: {
+            fill: components["schemas"]["FillRequest"];
+            /**
+             * Consent
+             * @default false
+             */
+            consent: boolean;
+        };
+        /** FillPreviewRow */
+        FillPreviewRow: {
+            /** Value */
+            value: string;
+            /** Answer */
+            answer?: string | null;
+            /** Reason */
+            reason?: string | null;
+        };
+        /**
+         * FillRequest
+         * @description A new column for a model to fill in: what it's called, what it means, what it's based on.
+         */
+        FillRequest: {
+            /** Name */
+            name: string;
+            /** Based On */
+            based_on: string;
+            /** Instruction */
+            instruction: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "label" | "text" | "website";
+            /** Choices */
+            choices?: string[];
+            /** Context */
+            context?: string[];
         };
         /** GroupChangeView */
         GroupChangeView: {
@@ -734,6 +1130,23 @@ export interface components {
             /** Step Ids */
             step_ids?: string[];
         };
+        /** LookupRequest */
+        LookupRequest: {
+            /** Connector */
+            connector?: ("postal_geocode" | "company_ticker" | "stock_price" | "ai_fill") | null;
+            /** Column */
+            column?: string | null;
+            /** Country */
+            country?: string | null;
+            /** Step Id */
+            step_id?: string | null;
+            /**
+             * Consent
+             * @default false
+             */
+            consent: boolean;
+            fill?: components["schemas"]["FillRequest"] | null;
+        };
         /** MapValuesStep */
         MapValuesStep: {
             /** Id */
@@ -773,6 +1186,15 @@ export interface components {
             label: string;
             /** Into */
             into: string;
+        };
+        /** NewColumn */
+        NewColumn: {
+            /** Name */
+            name: string;
+            /** Value */
+            value?: string | null;
+            /** Insert After */
+            insert_after?: string | null;
         };
         /** NormalizeCaseStep */
         NormalizeCaseStep: {
@@ -851,6 +1273,24 @@ export interface components {
             columns: string[];
             /** Placeholders */
             placeholders: string[];
+        };
+        /** OfferView */
+        OfferView: {
+            /**
+             * Connector
+             * @enum {string}
+             */
+            connector: "postal_geocode" | "company_ticker" | "stock_price" | "ai_fill";
+            /** Column */
+            column: string;
+            /** Title */
+            title: string;
+            /** Distinct Values */
+            distinct_values: number;
+            /** Countries */
+            countries?: components["schemas"]["CountryOption"][];
+            /** Enabled */
+            enabled: boolean;
         };
         /** OneOfCondition */
         OneOfCondition: {
@@ -1050,6 +1490,32 @@ export interface components {
             where: "leading" | "trailing" | "anywhere";
         };
         /**
+         * ResolveMatchStep
+         * @description The user's pick where a lookup found several answers for one value.
+         */
+        ResolveMatchStep: {
+            /** Id */
+            id?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "resolve_match";
+            /** Column */
+            column: string;
+            /** Value */
+            value: string;
+            /** Into */
+            into: string;
+            /** Chosen */
+            chosen: string;
+        };
+        /**
          * RewordedCopy
          * @description The title and explanation a card should show, once a rewrite was accepted.
          */
@@ -1208,6 +1674,19 @@ export interface components {
         StorySentence: {
             /** Parts */
             parts?: components["schemas"]["StoryPart"][];
+        };
+        /** Suggestions */
+        Suggestions: {
+            /**
+             * Status
+             * @default off
+             * @enum {string}
+             */
+            status: "off" | "ready" | "failed";
+            /** About */
+            about?: string | null;
+            /** Suggestions */
+            suggestions?: components["schemas"]["ColumnSuggestion"][];
         };
         /**
          * Tier
@@ -1799,6 +2278,271 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCanvas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CanvasResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    addCanvasColumn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewColumn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CanvasResponse"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCanvasSuggestions: {
+        parameters: {
+            query?: {
+                smart?: boolean;
+            };
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Suggestions"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getConnectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectorView"][];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDatasetConnectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetConnectors"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    setConnectorActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+                connector: "postal_geocode" | "company_ticker" | "stock_price" | "ai_fill";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectorSwitch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetConnectors"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    runConnectorLookup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetConnectors"];
+                };
+            };
+            /** @description A problem the user can fix */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    previewAiFill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FillPreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FillPreview"];
                 };
             };
             /** @description A problem the user can fix */

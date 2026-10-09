@@ -25,6 +25,18 @@ NewColumnName = Annotated[
 Columns = Annotated[list[ColumnName], Field(min_length=1, max_length=500)]
 KeepRowIds = Annotated[list[int], Field(max_length=MAX_ROW_IDS)]
 TextMatch = Literal["exact", "ignore_case_and_spaces"]
+ConnectorName = Literal["postal_geocode", "company_ticker", "stock_price", "ai_fill"]
+# What an AI-filled column holds: one of a fixed list, free text, or a web address.
+FillKind = Literal["label", "text", "website"]
+MAX_FILL_CHOICES = 20
+# How many columns each connector adds. Each adds one: a map position is one
+# "latitude, longitude" cell, and a price's time is shown beside it, not in a column.
+CONNECTOR_OUTPUTS: dict[str, int] = {
+    "postal_geocode": 1,
+    "company_ticker": 1,
+    "stock_price": 1,
+    "ai_fill": 1,
+}
 
 
 def new_step_id() -> str:
@@ -188,6 +200,76 @@ class SplitColumnStep(_StepBase):
     keep_original: bool = True
 
 
+class AddColumnStep(_StepBase):
+    """A new column the user asked for: blank, or the same text in every row."""
+
+    type: Literal["add_column"] = "add_column"
+    name: NewColumnName
+    # None leaves the column blank, ready to be filled in later.
+    value: Annotated[str, StringConstraints(max_length=1000)] | None = None
+    # None puts the column last.
+    insert_after: ColumnName | None = None
+
+
+class EnrichColumnStep(_StepBase):
+    """New columns looked up from an outside service, one answer per different value.
+
+    The step never fetches anything. A lookup run stores its answers under a
+    `snapshot` id, and the step joins the table to that snapshot, so the same
+    recipe always gives the same rows. Looking up again makes a new snapshot.
+    """
+
+    type: Literal["enrich_column"] = "enrich_column"
+    connector: ConnectorName
+    column: ColumnName
+    into: Annotated[list[NewColumnName], Field(min_length=1, max_length=2)]
+    # Postal codes only mean something inside a country. ISO 3166-1 alpha-2.
+    country: Annotated[str, StringConstraints(min_length=2, max_length=2, to_upper=True)] | None = (
+        None
+    )
+    # None means nothing has been looked up yet, so the new columns are empty.
+    snapshot: StepId | None = None
+    # --- AI fill only: what the new column means, so a model can fill it in ---
+    instruction: (
+        Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+        | None
+    ) = None
+    kind: FillKind | None = None
+    # For a label column, the only answers allowed. Keeps one spelling per label.
+    choices: Annotated[
+        list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=60)]],
+        Field(max_length=MAX_FILL_CHOICES),
+    ] = Field(default_factory=list)
+    # Up to two columns shown to the model beside the value, to tell rows apart.
+    context: Annotated[list[ColumnName], Field(max_length=2)] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _shape_fits_connector(self) -> Self:
+        wanted = CONNECTOR_OUTPUTS[self.connector]
+        if len(self.into) != wanted:
+            raise ValueError(f"{self.connector} adds {wanted} column(s), got {len(self.into)}")
+        if (self.connector == "postal_geocode") != (self.country is not None):
+            raise ValueError("a country goes with postal codes, and only with them")
+        if self.connector == "ai_fill":
+            if self.instruction is None or self.kind is None:
+                raise ValueError("an AI-filled column needs to say what it means")
+            if (self.kind == "label") != (len(self.choices) >= 2):
+                raise ValueError("a label column needs a list of labels, and only a label column")
+        elif self.instruction or self.kind or self.choices or self.context:
+            raise ValueError("only an AI-filled column carries a meaning")
+        return self
+
+
+class ResolveMatchStep(_StepBase):
+    """The user's pick where a lookup found several answers for one value."""
+
+    type: Literal["resolve_match"] = "resolve_match"
+    column: ColumnName
+    value: Annotated[str, StringConstraints(min_length=1, max_length=1000)]
+    into: ColumnName
+    chosen: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+
+
 class DedupeStep(_StepBase):
     type: Literal["dedupe"] = "dedupe"
     # None compares every column.
@@ -237,6 +319,9 @@ STEP_LABELS: dict[str, str] = {
     "cast_number": "Read as numbers",
     "parse_date": "Read as dates",
     "split_column": "Split a column",
+    "add_column": "Add a column",
+    "enrich_column": "Look up new columns",
+    "resolve_match": "Pick a match",
     "dedupe": "Set aside repeated rows",
     "set_aside_rows": "Set aside rows",
     "clear_values": "Clear values",
@@ -253,6 +338,9 @@ Step = Annotated[
     | CastNumberStep
     | ParseDateStep
     | SplitColumnStep
+    | AddColumnStep
+    | EnrichColumnStep
+    | ResolveMatchStep
     | DedupeStep
     | SetAsideRowsStep
     | ClearValuesStep
@@ -287,3 +375,20 @@ class RecipeFile(_Model):
     source: RecipeSource
     requires_columns: list[str]
     recipe: Recipe
+
+
+def without_snapshots(recipe: Recipe) -> Recipe:
+    """The recipe with no looked-up answers attached.
+
+    A snapshot belongs to the file and the moment it was looked up for. Saved to
+    a file or run on another one, a step keeps what to look up but must be told
+    to go and do it again.
+    """
+    return Recipe(
+        steps=[
+            step.model_copy(update={"snapshot": None})
+            if isinstance(step, EnrichColumnStep)
+            else step
+            for step in recipe.steps
+        ]
+    )

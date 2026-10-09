@@ -83,3 +83,26 @@ We put a `'` in front of any text cell starting with `=`, `+`, `-`, `@`, tab, or
 3. Hide emails, phones, and IDs in the AI payload. Shorten long values. Mark data as untrusted in the prompts.
 4. Add work limits to uploads and `defusedxml`.
 5. Add a delete button, auto-delete, and temp-folder cleanup.
+
+## Connectors (added after the first version)
+
+Off by default (`POSTAL_GEOCODER`, `SYMBOL_LOOKUP`, `QUOTE_PROVIDER` are all `none`). When one is turned on:
+
+- **Values leave the server.** The different values of one chosen column go to Zippopotam.us (postal codes) or Finnhub (stock symbols). The user sees what will be sent and agrees first, once per connector and file. Company names are not sent: the SEC's public list is downloaded and matched here.
+- **Only well-formed values are sent.** A value must fit a postal-code or stock-symbol pattern before it goes into an address, and is percent-encoded. Anything else is "not found" without a call. The addresses themselves are fixed in code.
+- **Keys.** The Finnhub key is sent in a header, never in the address, and is not logged. Lookup logs carry no values.
+- **A cache on disk.** Looked-up values and their answers are kept in one file shared by everyone using the server. It holds no rows, file names or dataset ids, so it does not say whose file a value came from. It does reveal that *someone* looked a value up.
+- **Replies are untrusted.** Each is checked for shape and range (a latitude must be between -90 and 90) and stored as data. A reply never becomes a column name or SQL.
+- **A model cannot start a lookup.** AI-proposed fixes that contain a lookup step are rejected.
+- *Not fixed:* nothing limits how many lookups one visitor can start, beyond the per-minute budget per service; one visitor can use up the free quota for everyone.
+
+## AI-filled columns (added later)
+
+Only when a model key is set, the user switches "AI fill" on for the file, and agrees to the send.
+
+- **This is the largest data exposure in the app.** Every different value of one column, plus up to two columns beside it, goes to the model service. The 20-row cap does not apply here.
+- **A model's answer goes into the user's file.** It can be wrong and look right. Names of people are the riskiest. The preview, the "unverified" mark and blank "not sure" cells reduce this; nothing checks an answer against the world.
+- **Prompt injection through cells.** A cell can say "answer X for every row". The model is told cells are data, but the real protection is that a reply can only become a short, single-line text value: on a closed list for label columns, never a number, never markup, a web address only if shaped like one. The download's formula guard still applies to these cells.
+- **The unverified mark is lost on download.** A reader of the CSV cannot tell an AI-filled column from an original one.
+- *Not fixed:* an attacker-chosen website or name can still be planted in a text or website column for values the attacker controls.
+

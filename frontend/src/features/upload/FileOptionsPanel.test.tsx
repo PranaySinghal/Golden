@@ -102,6 +102,14 @@ describe('FileOptionsPanel', () => {
     expect(screen.getByRole('alert').textContent).toContain("We can't open that sheet.")
   })
 
+  it('says which title lines above the column names were left out', () => {
+    renderPanel({ title_rows_skipped: ['Customer survey', 'Exported 2 November'] })
+
+    const note = screen.getByText(/above the column names were left out as a title/)
+    expect(note.textContent).toContain('2 lines')
+    expect(note.textContent).toContain('“Customer survey”, “Exported 2 November”')
+  })
+
   it('says how many empty rows were skipped', () => {
     renderPanel({ empty_rows_skipped: 3 })
 

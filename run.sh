@@ -26,6 +26,9 @@ echo "==> Installing the server's dependencies"
 echo "==> Building the page"
 (cd frontend && npm ci --no-audit --no-fund --loglevel=error && npm run build --silent)
 
+# Looked-up answers are kept here so a restart doesn't ask the same services again.
+export CONNECTOR_CACHE_PATH="${CONNECTOR_CACHE_PATH:-$HOME/.tidylab/connector-cache.sqlite}"
+
 port="${PORT:-8000}"
 echo "==> Tidy Lab is starting on http://localhost:${port}  (Ctrl+C to stop)"
 cd backend

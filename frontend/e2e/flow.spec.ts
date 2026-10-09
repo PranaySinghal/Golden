@@ -38,7 +38,7 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
 
   // --- review ------------------------------------------------------------------
   await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
-  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const panel = page.getByRole('complementary', { name: 'Recipe: steps performed' })
   await expect(panel.getByText('Read "Join_Date" as dates')).toBeVisible()
 
   // accept a suggestion
@@ -74,6 +74,18 @@ test('a messy file becomes a tidy one, and says what that did to the answers', a
   await averageSalary.getByRole('button', { name: 'Why?' }).click()
   await expect(averageSalary.getByText('Caused by:')).toBeVisible()
 
+  // --- connectors: listed, and off until someone sets them up -----------------------
+  await page.getByRole('button', { name: 'Connectors' }).click()
+  const connectors = page.getByRole('dialog', { name: 'Connectors' })
+  // One card per service, each saying where it stands for this file.
+  await expect(connectors.getByRole('listitem', { name: 'Map positions' })).toBeVisible()
+  await expect(connectors.getByText('Not set up')).toHaveCount(4)
+  // Whatever this file holds, nothing can be sent while every service is off.
+  await expect(connectors.getByRole('switch')).toHaveCount(0)
+  await expect(connectors.getByRole('button', { name: 'Enrich' }).and(page.locator(':enabled'))).toHaveCount(0)
+  await connectors.getByRole('button', { name: 'Close' }).click()
+  await expect(connectors).toHaveCount(0)
+
   // --- download ----------------------------------------------------------------
   const saving = page.waitForEvent('download')
   await panel.getByRole('button', { name: 'Download cleaned file' }).click()
@@ -106,7 +118,7 @@ test('a differently shaped file goes through the same flow', async ({ page }) =>
   await expect(page.locator('.card--lit')).toHaveCount(1)
 
   // --- accept the first suggestion ------------------------------------------------
-  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const panel = page.getByRole('complementary', { name: 'Recipe: steps performed' })
   const stepsBefore = await panel.getByRole('listitem').count()
   await page.getByRole('button', { name: 'Accept', exact: true }).first().click()
   await expect(panel.getByRole('listitem')).toHaveCount(stepsBefore + 1)
@@ -117,11 +129,23 @@ test('a differently shaped file goes through the same flow', async ({ page }) =>
     page.locator('article.answer').first().or(page.getByText('came out the same either way')),
   ).toBeVisible()
 
+  // --- canvas: add a column from the ideas offered for this file ---------------------
+  await page.getByRole('tab', { name: 'Canvas' }).click()
+  const ideas = page.getByLabel('Ideas for this file')
+  const idea = (await ideas.locator('option').nth(1).textContent()) ?? ''
+  expect(idea).not.toBe('')
+  await ideas.selectOption(idea)
+  await expect(page.getByLabel('Column name')).toHaveValue(idea)
+  await page.getByRole('button', { name: 'Add column' }).click()
+  await expect(page.getByRole('button', { name: `Remove the column ${idea}` })).toBeVisible()
+  await expect(panel.getByText(`called "${idea}"`)).toBeVisible()
+
   // --- download ----------------------------------------------------------------
   const saving = page.waitForEvent('download')
   await panel.getByRole('button', { name: 'Download cleaned file' }).click()
   const file = await saving
   expect(file.suggestedFilename()).toBe('store_orders (tidied).csv')
+  expect(readFileSync(await file.path(), 'utf8').split('\n')[0]).toContain(idea)
   const cleaned = readFileSync(await file.path(), 'utf8').trim().split('\n')
   const raw = readFileSync(ORDERS, 'utf8').trim().split('\n')
   expect(cleaned.length).toBeGreaterThan(1)
@@ -140,7 +164,7 @@ test('steps saved from one file clean the next one', async ({ page }) => {
     .filter({ hasText: 'holds two things in one column' })
     .first()
   await suggestion.getByRole('button', { name: 'Accept' }).click()
-  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const panel = page.getByRole('complementary', { name: 'Recipe: steps performed' })
   await expect(panel.getByText(/Split "Department_Region"/)).toBeVisible()
 
   const saving = page.waitForEvent('download')
@@ -167,7 +191,7 @@ test('steps that do not fit are refused without costing the upload', async ({ pa
 
   await page.getByLabel('Choose a file to upload').setInputFiles(SAMPLE)
   await expect(page.getByRole('heading', { name: /Already fixed/ })).toBeVisible()
-  const panel = page.getByRole('complementary', { name: "What we're doing" })
+  const panel = page.getByRole('complementary', { name: 'Recipe: steps performed' })
   const saving = page.waitForEvent('download')
   await panel.getByRole('button', { name: 'Download the steps' }).click()
   const steps = await (await saving).path()

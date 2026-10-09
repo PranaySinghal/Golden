@@ -4,9 +4,12 @@ interface SiteNavProps {
   /** The landing page offers its sections; the analysis page only offers the way back. */
   variant: 'landing' | 'analysis'
   onHome: () => void
+  /** Opens and closes the connectors panel, which sits beside either page. */
+  onConnectors: () => void
+  connectorsOpen: boolean
 }
 
-export function SiteNav({ variant, onHome }: SiteNavProps) {
+export function SiteNav({ variant, onHome, onConnectors, connectorsOpen }: SiteNavProps) {
   const onLanding = variant === 'landing'
   return (
     <header className="site-nav">
@@ -23,6 +26,15 @@ export function SiteNav({ variant, onHome }: SiteNavProps) {
             aria-current={onLanding ? 'page' : undefined}
           >
             Home
+          </button>
+          <button
+            type="button"
+            className={`site-nav__link${connectorsOpen ? ' site-nav__link--on' : ''}`}
+            onClick={onConnectors}
+            aria-expanded={connectorsOpen}
+            aria-controls="connectors-panel"
+          >
+            Connectors
           </button>
           {onLanding && (
             <>

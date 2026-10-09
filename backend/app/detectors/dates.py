@@ -4,7 +4,7 @@ import datetime as dt
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from app.db import RAW_REF, quote_ident
+from app.db import RAW_REF, ROW_ID_COLUMN, quote_ident
 from app.detectors import copy
 from app.detectors.base import DetectorContext, IssueBuilder, date_issue_id
 from app.detectors.models import AskQuestion, DetectorName, Issue, Tier
@@ -16,6 +16,8 @@ from app.steps.schema import trimmed
 # Formats are picked until they read this share of filled values.
 COVERAGE_TARGET = 0.95
 MAX_FORMATS = 5
+# Columns longer than this have their date formats chosen on a sample this size.
+COVER_SAMPLE_ROWS = 5000
 # Above this share of unreadable values, a date fix needs review.
 UNREADABLE_FOR_REVIEW = 0.05
 # With conflicting evidence, one side must outnumber the other this much to be recommended.
@@ -94,11 +96,29 @@ def gather(ctx: DetectorContext) -> list[Evidence]:
 
 
 def _cover(ctx: DetectorContext, t: str, candidates: list[str]) -> tuple[list[str], int]:
-    """Greedily pick formats that together read the most values."""
+    """Greedily pick formats that together read the most values.
+
+    Trying every format against every value is the slow part, so on a long
+    column the formats are chosen on an even sample of it, and how many values
+    they read is then counted once over the whole column.
+    """
+    total = ctx.query(f"SELECT count(*) FROM {RAW_REF} WHERE {t} IS NOT NULL")[0][0]
+    every = max(1, total // COVER_SAMPLE_ROWS)
+    source = (
+        RAW_REF
+        if every == 1
+        # Every n-th row, so each way of writing a date is seen wherever it sits in the file.
+        else f"(SELECT * FROM {RAW_REF} WHERE {quote_ident(ROW_ID_COLUMN)} % {every} = 0)"
+    )
+    sampled = (
+        total
+        if every == 1
+        else ctx.query(f"SELECT count(*) FROM {source} WHERE {t} IS NOT NULL")[0][0]
+    )
+
     chosen: list[str] = []
     read = 0
-    total = ctx.query(f"SELECT count(*) FROM {RAW_REF} WHERE {t} IS NOT NULL")[0][0]
-    while len(chosen) < MAX_FORMATS and read < COVERAGE_TARGET * total:
+    while len(chosen) < MAX_FORMATS and read < COVERAGE_TARGET * sampled:
         remaining = [f for f in candidates if f not in chosen]
         if not remaining:
             break
@@ -113,7 +133,7 @@ def _cover(ctx: DetectorContext, t: str, candidates: list[str]) -> tuple[list[st
                 f"count_if(try_strptime({t}, $f{i}) IS NOT NULL AND {unread})"
                 for i in range(len(remaining))
             )
-            + f" FROM {RAW_REF} WHERE {t} IS NOT NULL",
+            + f" FROM {source} WHERE {t} IS NOT NULL",
             params,
         )[0]
         best = max(range(len(remaining)), key=lambda i: (gains[i], -i))
@@ -121,7 +141,14 @@ def _cover(ctx: DetectorContext, t: str, candidates: list[str]) -> tuple[list[st
             break
         chosen.append(remaining[best])
         read += int(gains[best])
-    return chosen, read
+    if every == 1 or not chosen:
+        return chosen, read
+    readable = " OR ".join(f"try_strptime({t}, $c{i}) IS NOT NULL" for i in range(len(chosen)))
+    counted = ctx.query(
+        f"SELECT count_if({readable}) FROM {RAW_REF} WHERE {t} IS NOT NULL",
+        {f"c{i}": fmt for i, fmt in enumerate(chosen)},
+    )[0][0]
+    return chosen, int(counted)
 
 
 def _parse(b: IssueBuilder, item: Evidence, formats: list[str]) -> ParseDateStep:

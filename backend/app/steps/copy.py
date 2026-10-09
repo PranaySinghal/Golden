@@ -7,11 +7,13 @@ Employee_ID", not "dedupe on Employee_ID". Pure: a step in, a sentence out.
 from collections.abc import Sequence
 
 from app.steps.models import (
+    AddColumnStep,
     BlankCondition,
     CastNumberStep,
     ClearValuesStep,
     DedupeStep,
     DigitsFewerThanCondition,
+    EnrichColumnStep,
     EqualsCondition,
     FillMissingStep,
     MapValuesStep,
@@ -23,6 +25,7 @@ from app.steps.models import (
     OutsideRangeCondition,
     ParseDateStep,
     RemoveCharactersStep,
+    ResolveMatchStep,
     RowCondition,
     RowIdsCondition,
     SetAsideRowsStep,
@@ -43,6 +46,12 @@ MATCH_WORDS = {
     "phone": "a phone number",
     "number": "a number",
     "date": "a date",
+}
+ENRICH_WORDS = {
+    "postal_geocode": "Look up map positions",
+    "company_ticker": "Look up stock symbols",
+    "stock_price": "Look up share prices",
+    "ai_fill": "Fill in with AI",
 }
 WHERE_WORDS = {"leading": "the start", "trailing": "the end", "anywhere": "anywhere"}
 
@@ -71,6 +80,12 @@ def columns_of(step: Step) -> list[str]:
             return list(step.columns)
         case DedupeStep():
             return list(step.columns or [])
+        case AddColumnStep():
+            return [step.name]
+        case EnrichColumnStep():
+            return [step.column, *step.into]
+        case ResolveMatchStep():
+            return [step.column, step.into]
         case SetAsideRowsStep():
             column = getattr(step.condition, "column", None)
             return [column] if column else []
@@ -102,6 +117,16 @@ def describe(step: Step) -> str:
         case SplitColumnStep():
             kept = "" if step.keep_original else ", and drop the original"
             return f'Split "{step.column}" into {quoted(step.into)}{kept}'
+        case AddColumnStep():
+            if step.value is None or not step.value.strip():
+                return f'Add an empty column called "{step.name}"'
+            return f'Add a column called "{step.name}" filled with "{step.value}"'
+        case EnrichColumnStep():
+            if step.connector == "ai_fill":
+                return f'Fill {quoted(step.into)} with AI, from "{step.column}" (unverified)'
+            return f'{ENRICH_WORDS[step.connector]} for "{step.column}" as {quoted(step.into)}'
+        case ResolveMatchStep():
+            return f'Use "{step.chosen}" in "{step.into}" where "{step.column}" is "{step.value}"'
         case DedupeStep():
             return _dedupe(step)
         case SetAsideRowsStep():

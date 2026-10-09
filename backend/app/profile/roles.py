@@ -23,6 +23,8 @@ CODE_MAX_WHITESPACE = 0.05
 NUMERIC_ID_INTEGER_SHARE = 0.95
 NUMERIC_ID_MIN_UNIQUENESS = 0.95
 LEADING_ZERO_SHARE = 0.05
+# In a phone column written several ways, at least this share shows its formatting.
+MIXED_PHONE_FORMATTED_SHARE = 0.5
 # Whole numbers count as a sequence when they span at most this many times
 # their count, e.g. 1..1020 for 1,020 rows.
 SEQUENCE_SPAN_FACTOR = 1.5
@@ -129,10 +131,15 @@ def _decide(stats: ColumnStats) -> tuple[SemanticRole, float, RoleReason, bool]:
         return SemanticRole.DATE, share(stats.date_any), RoleReason.DATES, False
     if share(stats.email) >= STRONG_MATCH:
         return SemanticRole.CONTACT, share(stats.email), RoleReason.EMAILS, False
-    if share(stats.phone_formatted) >= STRONG_MATCH:
+    # A phone column typed by many hands mixes "(416) 555-0199" with bare
+    # "4165550199". Mostly-formatted plus bare digits is still a phone column.
+    phones = share(stats.phone_formatted) + share(stats.phone_digits)
+    if share(stats.phone_formatted) >= STRONG_MATCH or (
+        phones >= STRONG_MATCH and share(stats.phone_formatted) >= MIXED_PHONE_FORMATTED_SHARE
+    ):
         return (
             SemanticRole.CONTACT,
-            share(stats.phone_formatted),
+            max(share(stats.phone_formatted), min(phones, HINTED_CONFIDENCE)),
             RoleReason.PHONES_FORMATTED,
             False,
         )
@@ -163,7 +170,7 @@ def _decide(stats: ColumnStats) -> tuple[SemanticRole, float, RoleReason, bool]:
         )
 
     if share(stats.integer) >= NUMERIC_ID_INTEGER_SHARE and unique >= NUMERIC_ID_MIN_UNIQUENESS:
-        if share(stats.leading_zeros) >= LEADING_ZERO_SHARE:
+        if _codes_with_zeros(stats):
             return SemanticRole.IDENTIFIER, 0.9, RoleReason.NUMBER_CODES, False
         if _is_sequence(stats):
             return SemanticRole.IDENTIFIER, 0.9, RoleReason.SEQUENCE, False
@@ -177,7 +184,7 @@ def _decide(stats: ColumnStats) -> tuple[SemanticRole, float, RoleReason, bool]:
             return SemanticRole.IDENTIFIER, confidence, RoleReason.LONG_FIXED_WIDTH, hinted
 
     if share(stats.lenient_number) >= STRONG_MATCH:
-        if share(stats.leading_zeros) >= LEADING_ZERO_SHARE:
+        if _codes_with_zeros(stats):
             # Zip codes and account codes: numbers used as labels, never added up.
             return SemanticRole.CATEGORY, share(stats.integer), RoleReason.NUMBER_LABELS, False
         return SemanticRole.MEASURE, share(stats.lenient_number), RoleReason.NUMBERS, False
@@ -193,6 +200,24 @@ def _decide(stats: ColumnStats) -> tuple[SemanticRole, float, RoleReason, bool]:
         )
 
     return SemanticRole.TEXT, TEXT_CONFIDENCE, RoleReason.FREE_TEXT, False
+
+
+def _codes_with_zeros(stats: ColumnStats) -> bool:
+    """Numbers used as labels: some start with zero, which no quantity does.
+
+    Either a fair share of them do, or even one does in a column where every
+    value has the same number of digits. "08933" among five-digit codes is a
+    postal code; read as a number it would become 8933 and stop being one.
+    """
+    if stats.leading_zeros == 0:
+        return False
+    if stats.leading_zeros / stats.non_blank >= LEADING_ZERO_SHARE:
+        return True
+    return (
+        stats.integer_width is not None
+        and stats.integer > 0
+        and stats.integer_width_count / stats.integer >= FIXED_WIDTH_SHARE
+    )
 
 
 def _is_sequence(stats: ColumnStats) -> bool:

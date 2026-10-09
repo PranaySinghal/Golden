@@ -68,7 +68,9 @@ def enhance(
 
     suggested = ask(
         service,
-        load_prompt("suggest_fixes"),
+        # v2 lists each step's arguments. v1 named the steps only, and every fix a
+        # model proposed was thrown away for getting the arguments wrong.
+        load_prompt("suggest_fixes", "v2"),
         payloads.fixes_payload(conn, profile, issues, settings.llm_sample_rows),
         SuggestFixesReply,
         timeout,
@@ -126,7 +128,8 @@ def tell_story(
         return None
     told = ask(
         provider or build_provider(settings),
-        load_prompt("story"),
+        # v2 spells out "one sentence per list item"; v1 got them all in one.
+        load_prompt("story", "v2"),
         story_facts(diffs),
         StoryReply,
         settings.llm_timeout_ms,

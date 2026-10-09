@@ -46,14 +46,18 @@ VALID = json.dumps({"items": [{"id": "q1", "label": "How many people are on the 
 
 
 def test_anthropic_sends_the_model_the_prompt_and_the_payload() -> None:
-    provider = AnthropicProvider("secret-key", "claude-sonnet-5")
+    provider = AnthropicProvider("secret-key", "claude-haiku-5-5")
 
     url, headers, body = provider.request("be helpful", '{"a":1}')
 
     assert url.endswith("/v1/messages")
     assert headers["x-api-key"] == "secret-key"
     assert headers["anthropic-version"]
-    assert body["model"] == "claude-sonnet-5"
+    assert body["model"] == "claude-haiku-5-5"
+    # Current Claude models refuse a request that sets a temperature.
+    assert "temperature" not in body
+    assert body["output_config"] == {"effort": "low"}
+    assert body["max_tokens"] >= 4000
     assert body["system"] == "be helpful"
     assert body["messages"] == [{"role": "user", "content": '{"a":1}'}]
 
@@ -148,10 +152,15 @@ def test_prompts_live_in_files_with_versions() -> None:
     files = sorted(path.name for path in PROMPTS_DIR.glob("*.md"))
 
     assert files == [
+        "fill_column.v1.md",
         "reword_issues.v1.md",
         "reword_questions.v1.md",
         "story.v1.md",
+        "story.v2.md",
+        "suggest_columns.v1.md",
+        "suggest_columns.v2.md",
         "suggest_fixes.v1.md",
+        "suggest_fixes.v2.md",
     ]
     assert PROMPT.id == "reword_questions.v1"
     assert "JSON" in PROMPT.system

@@ -31,3 +31,24 @@ Out-of-scope ideas for "if I had more time". Not planned work.
 - **Say when AI help is on its way, and when it failed.** No hint while `/ai` loads; a network error is swallowed. AI-added cards also sit at the end of their tier instead of being ranked by impact with the rest.
 - **Step-level tests for `normalize_phone`**, and explicit "nothing to change" tests for every step type (only `trim` and `cast_number` have them).
 - **Log when attribution's budget runs out** (`compare/attribution.py`), so a comparison missing "why" on its smaller answers can be told apart from one with nothing to explain.
+- **Connectors that fill a canvas column.** Live share prices, map positions from an address, company details. Needs a provider interface like `app/ai/provider.py`, keys in backend env vars, and an answer to the privacy question: a lookup sends real cell values out, which "AI sees metadata, not data" doesn't cover. The canvas already labels which ideas could be filled this way.
+- **More than one placeholder per canvas column.** A simple formula from other columns, or pasting values into the grid. Both were left out of the first canvas.
+- **Rename or move a canvas column in place.** Today it's remove and add again.
+- **Match jargon on whole words.** `ai/wording.py` rejects "Forecast" for containing "cast". Affects model wording everywhere, so it wants its own change and tests.
+- **Don't read postal codes as numbers.** The numbers-as-text detector offers to turn a column of five-digit codes into numbers, which drops leading zeros. The connectors' postal detection (`connectors/detect.py`) already knows the shape; the detector could ask it.
+- **Progress while a lookup runs,** and a background job, once runs need to be longer than a request should be.
+- **Close matches for company names** as ask-tier options ("Google" → Alphabet?), never applied on their own.
+- **A "what was sent" view** per file: every value that left the server and to whom.
+- **Clear or expire the connector cache** from the app, and say how big it is.
+- **Per-row country for postal codes,** taken from a country column, for files that mix countries.
+- **Carry "AI-filled, unverified" into the download,** e.g. in the column name or a note row. Today the mark is on screen and in the recipe only.
+- **Correct or reject one AI-filled cell by hand,** and let the user edit a label list before filling.
+- **Sources for factual AI columns** (websites, names) via web search, so an answer comes with a link to check.
+- **Fill a column the user typed themselves with AI,** not only suggested ones: needs a "based on" picker and a place to say what the column means.
+- **Show a cost and call estimate before "Fill all",** and a "what was sent" view after.
+- **Currency for prices.** `$` is assumed. A quote source that reports currency would remove the guess.
+- **Context that actually splits a value.** Two rows with the same company name in different cities get one answer; the context column only helps the model, it doesn't make a second question.
+- **Find the header row under title lines** in Excel exports, and say how many lines were skipped. See the stress-test notes in `decisions.md`.
+- **Group or cap cards on wide files** ("62 columns have blanks" as one card), and send a model only the top cards for rewording.
+- **Run the three model prompts side by side** rather than one after another; a review currently waits 10 to 20 seconds for its AI extras.
+- **A second postal source for countries where the first is wrong**, or a per-country check before offering it.

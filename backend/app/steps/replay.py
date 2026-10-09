@@ -8,7 +8,14 @@ from pydantic import BaseModel, ValidationError
 from app.profile.models import DatasetProfile, SemanticRole
 from app.steps.apply import ApplyResult, StepStatus, apply_recipe, plan_recipe
 from app.steps.errors import RecipeFileError, RecipeIncompatibleError
-from app.steps.models import STEP_LABELS, CastNumberStep, ParseDateStep, Recipe, RecipeFile
+from app.steps.models import (
+    STEP_LABELS,
+    CastNumberStep,
+    ParseDateStep,
+    Recipe,
+    RecipeFile,
+    without_snapshots,
+)
 from app.steps.schema import StageSchema, base_schema
 
 _DEPENDS_PREFIX = "It depends on an earlier step"
@@ -116,9 +123,12 @@ def load_recipe_file(data: bytes) -> RecipeFile:
     if raw.get("version") != 1:
         raise RecipeFileError("This recipe was saved by a different version of TidyLab.")
     try:
-        return RecipeFile.model_validate(raw)
+        recipe_file = RecipeFile.model_validate(raw)
     except ValidationError as exc:
         raise RecipeFileError(f"This recipe file has a problem: {_describe(exc)}") from exc
+    # Answers looked up for another file don't come along: a hand-edited id
+    # must not point this file at someone else's lookup.
+    return recipe_file.model_copy(update={"recipe": without_snapshots(recipe_file.recipe)})
 
 
 def _describe(error: ValidationError) -> str:

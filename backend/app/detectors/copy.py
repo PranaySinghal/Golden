@@ -271,6 +271,19 @@ def short_phones(column: str, n: int, usual: int, examples: Sequence[str]) -> tu
     )
 
 
+def too_short_for_a_phone(
+    column: str, n: int, least: int, examples: Sequence[str]
+) -> tuple[str, str, str]:
+    """For a column whose numbers have no one usual length (several countries, say)."""
+    return (
+        f'{count(n)} "{column}" {plural(n, "number is", "numbers are")} too short to be a '
+        "phone number",
+        f"A phone number has at least {count(least)} digits. Values like "
+        f"{quoted(examples[:2])} have fewer, so digits may be missing.",
+        f'What should happen to the short numbers in "{column}"?',
+    )
+
+
 def inconsistent_phone_format(
     column: str, n: int, examples: Sequence[tuple[str, str]]
 ) -> tuple[str, str]:

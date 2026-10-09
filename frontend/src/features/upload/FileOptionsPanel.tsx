@@ -20,6 +20,7 @@ export function FileOptionsPanel({
 }: FileOptionsPanelProps) {
   const showSheets = dataset.format === 'xlsx' && dataset.available_sheets.length > 1
   const skipped = dataset.empty_rows_skipped
+  const titles = dataset.title_rows_skipped ?? []
 
   // Reading the file again starts the whole session over on the server, so ask
   // first once there is something to lose.
@@ -82,6 +83,15 @@ export function FileOptionsPanel({
       {skipped > 0 && (
         <p className="muted small">
           {formatCount(skipped)} empty {skipped === 1 ? 'row was' : 'rows were'} skipped.
+        </p>
+      )}
+
+      {titles.length > 0 && (
+        <p className="muted small">
+          {titles.length === 1 ? 'One line' : `${formatCount(titles.length)} lines`} above the
+          column names {titles.length === 1 ? 'was' : 'were'} left out as a title:{' '}
+          {titles.map((line) => `“${line}”`).join(', ')}. Untick “First row has column names” to
+          read the file exactly as it is.
         </p>
       )}
 

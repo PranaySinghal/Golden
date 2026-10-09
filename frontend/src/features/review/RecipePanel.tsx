@@ -8,6 +8,9 @@ interface RecipePanelProps {
   recipe: RecipeResponse
   busy: boolean
   highlighted: string[]
+  /** Whether the steps are showing. Hidden, only the heading and the downloads stay. */
+  open: boolean
+  onOpenChange: (open: boolean) => void
   onToggle: (step: StepView, enabled: boolean) => void
   onRemove: (step: StepView) => void
   onUndo: () => void
@@ -20,6 +23,8 @@ export function RecipePanel({
   recipe,
   busy,
   highlighted,
+  open,
+  onOpenChange,
   onToggle,
   onRemove,
   onUndo,
@@ -39,14 +44,32 @@ export function RecipePanel({
   }
 
   return (
-    <aside className="panel" aria-labelledby="recipe-title" aria-busy={busy}>
+    <aside
+      className={`panel${open ? '' : ' panel--closed'}`}
+      aria-labelledby="recipe-title"
+      aria-busy={busy}
+    >
       <div className="panel__head">
         <h3 id="recipe-title" className="panel__title">
-          What we&apos;re doing
+          <button
+            type="button"
+            className="panel__opener"
+            aria-expanded={open}
+            aria-controls="recipe-steps"
+            onClick={() => onOpenChange(!open)}
+          >
+            <span aria-hidden="true">{open ? '▾' : '▸'}</span>
+            Recipe: steps performed
+          </button>
         </h3>
-        <p className="muted small">{rowsKept(recipe.row_count, recipe.set_aside_count)}</p>
+        <p className="muted small">
+          {open
+            ? rowsKept(recipe.row_count, recipe.set_aside_count)
+            : `${steps.length} ${steps.length === 1 ? 'step' : 'steps'}`}
+        </p>
       </div>
 
+      <div id="recipe-steps" hidden={!open}>
       {steps.length === 0 ? (
         <p className="muted small">
           Nothing yet. Accept a suggestion and it will show up here, in the order it runs.
@@ -99,6 +122,7 @@ export function RecipePanel({
       >
         Undo last change
       </button>
+      </div>
 
       <div className="panel__downloads">
         <button
@@ -117,10 +141,12 @@ export function RecipePanel({
         >
           {downloading === 'recipe' ? 'Preparing…' : 'Download the steps'}
         </button>
-        <p className="muted small">
-          The cleaned file opens in a spreadsheet. Attach the steps when you upload next
-          month&apos;s file to clean it the same way.
-        </p>
+        {open && (
+          <p className="muted small">
+            The cleaned file opens in a spreadsheet. Attach the steps when you upload next
+            month&apos;s file to clean it the same way.
+          </p>
+        )}
         {downloadError && (
           <p className="card__error" role="alert">
             {downloadError}

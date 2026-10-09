@@ -9,7 +9,7 @@ import duckdb
 from app.db import ROW_ID_COLUMN, quote_ident, quote_literal, work_ref
 from app.profile.patterns import PLAIN_NUMBER, full_match
 from app.steps.apply import CLEANED_TABLE, ApplyResult
-from app.steps.models import Recipe, RecipeFile, RecipeSource
+from app.steps.models import Recipe, RecipeFile, RecipeSource, without_snapshots
 from app.steps.replay import required_columns
 from app.steps.schema import StageSchema, ValueKind, text_of
 
@@ -64,7 +64,7 @@ def build_recipe_file(
         created_at=now or datetime.now(UTC),
         source=RecipeSource(filename=source_filename, columns=base.names()),
         requires_columns=required_columns(recipe, base),
-        recipe=recipe,
+        recipe=without_snapshots(recipe),
     )
 
 

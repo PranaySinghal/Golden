@@ -18,6 +18,7 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     STATIC_DIR=/app/static \
     LLM_PROVIDER=none \
+    CONNECTOR_CACHE_PATH=/home/tidylab/.tidylab/connector-cache.sqlite \
     PORT=8000
 
 WORKDIR /app/backend

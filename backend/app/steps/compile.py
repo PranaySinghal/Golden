@@ -11,15 +11,17 @@ import datetime as dt
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from app.db import ROW_ID_COLUMN, quote_ident
+from app.db import ENRICHMENTS_REF, ROW_ID_COLUMN, quote_ident
 from app.profile import patterns
 from app.steps.errors import StepValidationError
 from app.steps.models import (
+    AddColumnStep,
     BlankCondition,
     CastNumberStep,
     ClearValuesStep,
     DedupeStep,
     DigitsFewerThanCondition,
+    EnrichColumnStep,
     EqualsCondition,
     FillMissingStep,
     MapValuesStep,
@@ -31,6 +33,7 @@ from app.steps.models import (
     OutsideRangeCondition,
     ParseDateStep,
     RemoveCharactersStep,
+    ResolveMatchStep,
     RowCondition,
     RowIdsCondition,
     SetAsideRowsStep,
@@ -73,7 +76,8 @@ class ChangeMode(StrEnum):
 @dataclass(frozen=True)
 class ChangeSpec:
     output_column: str
-    source_column: str
+    # None when the column was made from nothing, so there is no "before".
+    source_column: str | None
     source_kind: ValueKind
     output_kind: ValueKind
     mode: ChangeMode
@@ -89,6 +93,9 @@ class CompiledStep:
     changes: tuple[ChangeSpec, ...] = ()
     reads: tuple[str, ...] = ()
     creates: tuple[str, ...] = ()
+    # Its values came from outside and can differ from one day to the next, so
+    # nothing built on them may feed the before/after answers.
+    volatile: bool = False
 
 
 class _Builder:
@@ -126,6 +133,12 @@ def compile_step(step: Step, schema: StageSchema, *, index: int, source: str) ->
             return _parse_date(step, schema, b, source)
         case SplitColumnStep():
             return _split_column(step, schema, b, source)
+        case AddColumnStep():
+            return _add_column(step, schema, b, source)
+        case EnrichColumnStep():
+            return _enrich_column(step, schema, b, source)
+        case ResolveMatchStep():
+            return _resolve_match(step, schema, b, source)
         case DedupeStep():
             return _dedupe(step, schema, b, source)
         case SetAsideRowsStep():
@@ -333,7 +346,8 @@ def number_pattern(decimal_separator: str, allow_suffix: bool) -> str:
     suffix = r"\s?[kKmM]?" if allow_suffix else ""
     return (
         rf"\(?[-+]?[$€£¥₹]?\s?[-+]?({whole}{fraction}|{leading})"
-        rf"([eE][-+]?[0-9]+)?{suffix}\s?%?\)?"
+        # The sign can follow the number too, as it does across Europe: "12,50 €".
+        rf"([eE][-+]?[0-9]+)?{suffix}\s?[$€£¥₹]?\s?%?\)?"
     )
 
 
@@ -460,6 +474,135 @@ def _split_column(
         ),
         reads=(step.column,),
         creates=tuple(step.into),
+    )
+
+
+def _add_column(step: AddColumnStep, schema: StageSchema, b: _Builder, source: str) -> CompiledStep:
+    if step.name.casefold() == ROW_ID_COLUMN.casefold():
+        raise StepValidationError(f'"{step.name}" is a reserved column name.', step.id)
+    if schema.name_taken(step.name):
+        raise StepValidationError(
+            f'There\'s already a column called "{step.name}". Pick a different name.', step.id
+        )
+    if step.insert_after is not None:
+        _require(schema, step.insert_after, step)
+
+    # Text made only of spaces would read as blank everywhere else, so store it as blank.
+    value = step.value if step.value and step.value.strip() else None
+    expr = f"CAST({b.bind('value', value)} AS VARCHAR)"
+    new = StageColumn(step.name, ValueKind.TEXT)
+
+    if step.insert_after is None:
+        select = f"{_select_list(schema)}, {expr} AS {quote_ident(step.name)}"
+        output = (*schema.columns, new)
+    else:
+        select = _select_list(schema, insert_after={step.insert_after: [(step.name, expr)]})
+        placed: list[StageColumn] = []
+        for column in schema.columns:
+            placed.append(column)
+            if column.name == step.insert_after:
+                placed.append(new)
+        output = tuple(placed)
+
+    return CompiledStep(
+        step_id=step.id,
+        kept=Fragment(f"SELECT {select} FROM {source}", b.params),
+        output=StageSchema(output),
+        changes=(ChangeSpec(step.name, None, ValueKind.TEXT, ValueKind.TEXT, ChangeMode.CREATED),),
+        reads=() if step.insert_after is None else (step.insert_after,),
+        creates=(step.name,),
+    )
+
+
+# What each connector's looked-up answers are stored as, in order.
+_ENRICH_KINDS: dict[str, tuple[ValueKind, ...]] = {
+    # A position is "latitude, longitude" and a price carries its currency
+    # symbol, so both are text as far as the table is concerned.
+    "postal_geocode": (ValueKind.TEXT,),
+    "company_ticker": (ValueKind.TEXT,),
+    "stock_price": (ValueKind.TEXT,),
+    "ai_fill": (ValueKind.TEXT,),
+}
+
+
+def _enrich_column(
+    step: EnrichColumnStep, schema: StageSchema, b: _Builder, source: str
+) -> CompiledStep:
+    # A column of postal codes may already have been read as numbers; its
+    # values are looked up by how they're written either way.
+    looked_up = _require(schema, step.column, step, {ValueKind.TEXT, ValueKind.NUMBER}, "looked up")
+    for beside in step.context:
+        _require(schema, beside, step)
+    seen: set[str] = set()
+    for name in step.into:
+        folded = name.casefold()
+        if folded == ROW_ID_COLUMN.casefold():
+            raise StepValidationError(f'"{name}" is a reserved column name.', step.id)
+        if folded in seen:
+            raise StepValidationError(f'The new column "{name}" is named twice.', step.id)
+        if schema.name_taken(name):
+            raise StepValidationError(
+                f'There\'s already a column called "{name}". Pick a different name.', step.id
+            )
+        seen.add(folded)
+
+    # One answer per different value, found by the same spelling-blind key the
+    # lookup stored it under. The answers table holds at most one row per key
+    # and snapshot, so this can never add or drop a row. With no snapshot the
+    # parameter is NULL, nothing matches, and the new columns are empty.
+    snapshot = b.bind("snapshot", step.snapshot)
+    key = match_key(text_of(f"src.{quote_ident(step.column)}", looked_up.kind))
+    kinds = _ENRICH_KINDS[step.connector]
+    new_columns = []
+    for position, (name, kind) in enumerate(zip(step.into, kinds, strict=True), start=1):
+        found = (
+            f"(SELECT any_value(e.value{position}) FROM {ENRICHMENTS_REF} AS e "
+            f"WHERE e.snapshot = {snapshot} AND e.key = {key})"
+        )
+        expr = f"TRY_CAST({found} AS DOUBLE)" if kind is ValueKind.NUMBER else found
+        new_columns.append((name, expr))
+
+    select = _select_list(schema, insert_after={step.column: new_columns})
+    output: list[StageColumn] = []
+    for column in schema.columns:
+        output.append(column)
+        if column.name == step.column:
+            output.extend(
+                StageColumn(name, kind) for name, kind in zip(step.into, kinds, strict=True)
+            )
+
+    return CompiledStep(
+        step_id=step.id,
+        kept=Fragment(f"SELECT {select} FROM {source} AS src", b.params),
+        output=StageSchema(tuple(output)),
+        changes=tuple(
+            ChangeSpec(name, None, ValueKind.TEXT, kind, ChangeMode.CREATED)
+            for name, kind in zip(step.into, kinds, strict=True)
+        ),
+        reads=(step.column, *step.context),
+        creates=tuple(step.into),
+        volatile=True,
+    )
+
+
+def _resolve_match(
+    step: ResolveMatchStep, schema: StageSchema, b: _Builder, source: str
+) -> CompiledStep:
+    _require(schema, step.column, step, {ValueKind.TEXT}, "matched")
+    _require(schema, step.into, step, {ValueKind.TEXT}, "given a picked match")
+    wanted = b.bind("value", normalize_text(step.value))
+    chosen = b.bind("chosen", step.chosen)
+    into = quote_ident(step.into)
+    expr = (
+        f"CASE WHEN {match_key(quote_ident(step.column))} = {wanted} "
+        f"THEN CAST({chosen} AS VARCHAR) ELSE {into} END"
+    )
+    return CompiledStep(
+        step_id=step.id,
+        kept=Fragment(f"SELECT {_select_list(schema, {step.into: expr})} FROM {source}", b.params),
+        output=schema,
+        changes=_same_kind_changes(schema, [step.into]),
+        reads=(step.column, step.into),
     )
 
 
